@@ -1,5 +1,9 @@
 <?php
 session_start();
+// FORCE REFRESH - ANTI CACHE
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -2196,4 +2200,5 @@ $pdo = $database->getConnection();
 </body>
 
 </html>            </div></main></div>
+
 
