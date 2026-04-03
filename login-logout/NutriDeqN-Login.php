@@ -6,6 +6,10 @@ require_once '../database.php';
 // Process login if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     session_start();
+    // FORCE NO-CACHE - SECURITY FIX
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);
+    header("Pragma: no-cache");
 
     $email = trim($_POST['email']);
     $input_password = $_POST['password'];
