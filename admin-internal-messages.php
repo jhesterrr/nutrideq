@@ -18,7 +18,6 @@ $user_name = $_SESSION['user_name'];
 $user_role = $_SESSION['user_role'];
 $is_admin = true;
 
-// Sidebar Initials Logic
 function getInitials($name) {
     if (!$name) return '?';
     $p = explode(' ', $name); $i = '';
@@ -28,9 +27,7 @@ function getInitials($name) {
 $user_initials = getInitials($user_name);
 $nav_links = getNavigationLinks($user_role, 'admin-internal-messages.php');
 
-$database = new Database();
-$pdo = $database->getConnection();
-
+$database = new Database(); $pdo = $database->getConnection();
 $status_filter = $_GET['status'] ?? 'all';
 
 // Handle Actions
@@ -40,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete'])) { $pdo->prepare("DELETE FROM internal_thread_messages WHERE thread_id = ?")->execute([$tid]); $pdo->prepare("DELETE FROM internal_threads WHERE id = ?")->execute([$tid]); header("Location: admin-internal-messages.php"); exit(); }
 }
 
-// Fetch Threads (Master Visibility)
 $where = $status_filter !== 'all' ? "status = ?" : "1=1";
 $params = $status_filter !== 'all' ? [$status_filter] : [];
 $stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE $where ORDER BY last_message_at DESC");
@@ -70,36 +66,46 @@ if ($selected_thread_id) {
     <title>Admin Masters | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/base.css?v=104">
-    <link rel="stylesheet" href="css/sidebar.css?v=104">
+    <link rel="stylesheet" href="css/base.css?v=105">
+    <link rel="stylesheet" href="css/sidebar.css?v=105">
+    <link rel="stylesheet" href="css/logout-modal.css?v=105">
     <style>
-        /* ATOMIC ADMIN ARMOR - RESISTANCE V104 */
-        body { margin:0; background:#f0f2f5 !important; overflow:hidden; font-family:'Poppins',sans-serif; }
-        .main-layout { display:grid; grid-template-columns: 260px 1fr; height:100vh; width:100%; position:fixed; left:0; top:0; }
-        .main-content { grid-column:2; height:100vh; overflow-y:auto; padding:24px !important; box-sizing:border-box !important; position:relative; }
+        /* IMMORTAL BOUNCY ARMOR - ADMIN MASTER V105 */
+        body { margin: 0; background: #f0f2f5 !important; overflow: hidden; font-family:'Poppins',sans-serif; }
+        .main-layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; width: 100%; position:fixed; left:0; top:0; }
+        .main-content { grid-column: 2; height: 100vh; overflow-y: auto; padding: 24px !important; box-sizing: border-box !important; position:relative; }
         
-        .messaging-wrapper { display:flex !important; opacity:1 !important; visibility:visible !important; gap:20px; height:calc(100vh - 48px); width:100% !important; margin:0; }
-        .msg-sidebar { width:340px; background:white; border-radius:20px; display:flex; flex-direction:column; box-shadow:0 4px 20px rgba(0,0,0,0.05); border:1px solid #ddd; }
-        .msg-container { flex:1; background:white; border-radius:20px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 4px 25px rgba(0,0,0,0.05); border:1px solid #ddd; }
+        .messaging-wrapper { display: flex !important; gap: 20px; height: calc(100vh - 48px); width: 100% !important; margin: 0; }
+        .msg-sidebar, .msg-container { background: white; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        .msg-sidebar { width: 340px; flex-shrink:0; }
+        .msg-container { flex: 1; overflow: hidden; position:relative; }
 
-        .contact-list { flex:1; overflow-y:auto; padding:10px; }
-        .contact-item { padding:15px; border-radius:15px; display:flex; align-items:center; gap:15px; cursor:pointer; border-bottom:1px solid #f9f9f9; transition:0.2s; }
-        .contact-item:hover { background: #f5f7fa; }
+        /* BOUNCY LIQUID TRANSITIONS */
+        .contact-item { padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1.25), background 0.3s ease; }
+        .contact-item:hover { background: #f5f7fa; transform: translateX(10px); }
         .contact-item.active { background: #e6f4ea; border-left: 5px solid #2e8b57; }
 
-        .chat-messages { flex:1; padding:25px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; background:#fff; }
-        .message-wrapper { display:flex; width:100%; }
-        .message-wrapper.sent { flex-direction:row-reverse; }
-        .message-bubble { padding:12px 18px; border-radius:18px; max-width:75%; font-size:0.95rem; }
-        .message-wrapper.sent .message-bubble { background:#2E8B57; color:white !important; }
-        .message-wrapper.received .message-bubble { background:#f1f1f1; color:#1a1a1a !important; }
+        .chat-messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background:#fff; }
+        .message-wrapper { display: flex; width: 100%; animation: liquidIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .message-wrapper.sent { flex-direction: row-reverse; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .message-wrapper.sent .message-bubble { background:#2E8B57; color:white !important; border-bottom-right-radius: 4px; }
+        .message-wrapper.received .message-bubble { background:#f1f1f1; color:#1a1a1a !important; border-bottom-left-radius: 4px; }
 
-        .sidebar { background:white; border-right:1px solid #ddd; padding:20px; display:flex; flex-direction:column; }
-        .nav-links { list-style:none; padding:0; margin:20px 0; flex:1; }
-        .nav-links a { display:flex; align-items:center; gap:12px; padding:12px 15px; border-radius:12px; text-decoration:none; color:#444; font-weight:500; transition:0.2s; }
-        .nav-links a.active { background:#2e8b57; color:white; }
+        @keyframes liquidIn { from { opacity: 0; transform: scale(0.9) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .btn-resolved { background:#2e8b57; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; }
+        .sidebar { background: white; border-right: 1px solid #ddd; padding: 20px; display: flex; flex-direction: column; }
+        .nav-links a { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; text-decoration: none; color: #444; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1.25); }
+        .nav-links a:hover { transform: scale(1.08); color: #2e8b57; }
+        .nav-links a.active { background: #2e8b57; color: white; }
+
+        /* LOGOUT UI */
+        .logout-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .logout-modal.active { display: flex; }
+        .logout-modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; animation: liquidIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #666; transition: 0.2s; }
+        .icon-btn:hover { color: #2e8b57; transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -123,16 +129,16 @@ if ($selected_thread_id) {
                     <div style="color:#999;">Administrator</div>
                 </div>
             </div>
-            <a href="login-logout/logout.php" style="margin-top:15px; color:#ff6b6b; text-decoration:none; display:flex; align-items:center; gap:10px; font-weight:600;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="javascript:void(0)" id="logoutTrigger" style="margin-top:15px; color:#ff6b6b; text-decoration:none; display:flex; align-items:center; gap:10px; font-weight:600;"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
 
         <main class="main-content">
             <div class="messaging-wrapper">
                 <div class="msg-sidebar">
                     <div style="padding:20px; border-bottom:1px solid #eee;">
-                        <h3 style="margin:0 0 15px 0;">Case Overseer</h3>
+                        <h3 style="margin:0 0 15px 0;">Clinical Control</h3>
                         <form method="GET">
-                            <select name="status" onchange="this.form.submit()" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; outline:none; font-family:inherit; color:#1a1a1a;">
+                            <select name="status" onchange="this.form.submit()" style="width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; color:#1a1a1a;">
                                 <option value="all" <?= $status_filter=='all'?'selected':'' ?>>All Consultations</option>
                                 <option value="open" <?= $status_filter=='open'?'selected':'' ?>>Active Cases</option>
                                 <option value="resolved" <?= $status_filter=='resolved'?'selected':'' ?>>Resolved</option>
@@ -143,10 +149,7 @@ if ($selected_thread_id) {
                         <?php foreach ($threads as $thread): ?>
                             <div class="contact-item <?= ($selected_thread_id == $thread['id'])?'active':'' ?>" onclick="window.location.href='?thread_id=<?= $thread['id'] ?>&status=<?= $status_filter ?>'">
                                 <div style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2e8b57;">#</div>
-                                <div>
-                                    <div style="font-weight:700; color:#1a1a1a; font-size:0.9rem;"><?= htmlspecialchars($thread['title']) ?></div>
-                                    <div style="font-size:0.75rem; color:#888;"><?= ucfirst($thread['status']) ?></div>
-                                </div>
+                                <div><div style="font-weight:700; color:#1a1a1a; font-size:0.9rem;"><?= htmlspecialchars($thread['title']) ?></div><div style="font-size:0.75rem; color:#888;"><?= ucfirst($thread['status']) ?></div></div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -157,7 +160,7 @@ if ($selected_thread_id) {
                         <div style="padding:15px 25px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                             <h4 style="margin:0;"><?= htmlspecialchars($selected_thread['title']) ?></h4>
                             <?php if($selected_thread['status'] == 'open'): ?>
-                                <form method="POST"><input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>"><input type="hidden" name="update_status" value="1"><button type="submit" name="status" value="resolved" class="btn-resolved"><i class="fas fa-check"></i> Close Case</button></form>
+                            <form method="POST"><input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>"><input type="hidden" name="update_status" value="1"><button type="submit" name="status" value="resolved" style="background:#2e8b57; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;"><i class="fas fa-check"></i> Close Case</button></form>
                             <?php endif; ?>
                         </div>
                         <div class="chat-messages" id="chatMessages">
@@ -176,8 +179,10 @@ if ($selected_thread_id) {
                             <?php if($selected_thread['status'] == 'open'): ?>
                             <form id="messageForm">
                                 <div style="background:#f8f9fa; border:1px solid #ddd; border-radius:30px; display:flex; align-items:center; padding:5px 15px;">
-                                    <textarea class="chat-input" id="messageInput" placeholder="Send an administrative response..." rows="1" style="flex:1; border:none; background:transparent; padding:10px; outline:none; resize:none; font-family:inherit; color:#1a1a1a;"></textarea>
-                                    <button type="submit" style="background:#2e8b57; color:white; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+                                    <button type="button" class="icon-btn" id="attachBtn"><i class="fas fa-paperclip"></i></button>
+                                    <input type="file" id="fileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg">
+                                    <textarea class="chat-input" id="messageInput" placeholder="Send an administrative reply..." rows="1"></textarea>
+                                    <button type="submit" class="icon-btn" style="color:#2e8b57;"><i class="fas fa-paper-plane"></i></button>
                                 </div>
                             </form>
                             <?php else: ?>
@@ -185,17 +190,23 @@ if ($selected_thread_id) {
                             <?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.5;">
-                            <i class="fas fa-shield-alt fa-3x" style="margin-bottom:15px; color:#2e8b57;"></i>
-                            <h3>Admin Command Hub</h3>
-                        </div>
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.5;"><i class="fas fa-shield-alt fa-3x" style="margin-bottom:15px; color:#2e8b57;"></i><h3>Admin Command Hub</h3></div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <script src="scripts/internal-chat-controller.js?v=104"></script>
+            <div id="logoutModal" class="logout-modal"><div class="logout-modal-content">
+                <i class="fas fa-sign-out-alt fa-3x" style="color:#ff6b6b; margin-bottom:20px;"></i><h3>Are you sure?</h3><p style="color:#666;">You are about to log out from your session.</p>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:25px;">
+                    <button onclick="document.getElementById('logoutModal').classList.remove('active')" style="padding:10px 20px; border-radius:12px; border:1px solid #ddd; background:none; cursor:pointer;">Cancel</button>
+                    <button onclick="window.location.href='login-logout/logout.php'" style="padding:10px 20px; border-radius:12px; border:none; background:#ff6b6b; color:white; font-weight:600; cursor:pointer;">Yes, Logout</button>
+                </div>
+            </div></div>
+
+            <script src="scripts/internal-chat-controller.js?v=105"></script>
             <script>
                 const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';
+                document.getElementById('logoutTrigger').onclick = () => document.getElementById('logoutModal').classList.add('active');
                 document.addEventListener('DOMContentLoaded', () => {
                     <?php if ($selected_thread_id): ?>
                     new ChatController(<?= $user_id ?>, 'admin', <?= $selected_thread_id ?>);

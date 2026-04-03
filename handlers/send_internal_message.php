@@ -21,11 +21,10 @@ if (!in_array($user_role, ['staff', 'admin'])) {
     exit;
 }
 
-$thread_id = isset($_POST['thread_id']) ? intval($_POST['thread_id']) : 0;
-$message = isset($_POST['message']) ? trim($_POST['message']) : '';
+$has_attachment = (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK);
 
-if ($thread_id <= 0 || empty($message)) {
-    echo json_encode(['success' => false, 'error' => 'Invalid input']);
+if ($thread_id <= 0 || (empty($message) && !$has_attachment)) {
+    echo json_encode(['success' => false, 'error' => 'Invalid input - message or attachment required']);
     exit;
 }
 
