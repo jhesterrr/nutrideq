@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Internal Messaging Hub - IMMORTAL VERSION
+ * Admin Internal Messaging Hub - CLARITY V103
  * Elite Standard for Administrative Control
  */
 ob_start();
@@ -65,14 +65,17 @@ if ($selected_thread_id) {
     <link rel="stylesheet" href="css/base.css?v=103">
     <link rel="stylesheet" href="css/sidebar.css?v=103">
     <style>
-        /* IMMORTAL MASTER UI */
+        /* IMMORTAL MASTER UI - CLARITY V103 */
         body { background-color: #f0f2f5 !important; margin: 0; font-family: 'Poppins', sans-serif; }
         .main-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; width:100%; }
         .main-content { grid-column: 2; padding: 24px !important; display: block !important; visibility: visible !important; min-width: 0; }
         
+        /* HIDE TOP-LEFT NOISE */
+        .mobile-header { display: none !important; }
+
         .messaging-wrapper { 
             display: flex !important; opacity: 1 !important; visibility: visible !important; gap: 20px; 
-            height: calc(100vh - 100px); width: 100% !important; animation: none !important; margin:0 auto; max-width:1400px;
+            height: calc(100vh - 120px); width: 100% !important; animation: none !important; margin:0 auto; max-width:1400px;
         }
         .msg-sidebar { 
             width: 320px; background: white; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; 
@@ -94,12 +97,13 @@ if ($selected_thread_id) {
         .message-wrapper { display: flex; max-width: 80%; width: fit-content; }
         .message-wrapper.sent { align-self: flex-end; flex-direction: row-reverse; }
         .message-bubble { padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .message-wrapper.sent .message-bubble { background: #2E8B57; color: white; border-bottom-right-radius: 4px; }
-        .message-wrapper.received .message-bubble { background: #f1f1f1; color: #333; border-bottom-left-radius: 4px; }
+        .message-wrapper.sent .message-bubble { background: #2E8B57; color: white !important; border-bottom-right-radius: 4px; }
+        .message-wrapper.received .message-bubble { background: #f1f1f1; color: #1a1a1a !important; border-bottom-left-radius: 4px; }
+        .message-text { color: inherit !important; }
 
         .chat-input-area { padding: 20px; border-top: 1px solid #f0f0f0; background: white; }
         .input-pill { background: #f8f9fa; border: 1px solid #eee; border-radius: 30px; display: flex; align-items: center; padding: 10px 15px; }
-        .chat-input { flex: 1; border: none; background: transparent; padding: 0 15px; outline: none; font-size: 0.95rem; resize: none; min-height: 24px; font-family: inherit; }
+        .chat-input { flex: 1; border: none; background: transparent; padding: 0 15px; outline: none; font-size: 0.95rem; resize: none; min-height: 24px; font-family: inherit; color: #1a1a1a !important; }
         .send-btn { background: #2e8b57; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .send-btn:hover { background: #1e6b42; transform: scale(1.1); }
 
@@ -110,76 +114,78 @@ if ($selected_thread_id) {
     <div class="main-layout">
         <?php include 'includes/sidebar.php'; ?>
         <main class="main-content">
-            <div class="messaging-wrapper">
-                <div class="msg-sidebar">
-                    <div class="msg-sidebar-header">
-                        <h2>Master Hub</h2>
-                        <form method="GET">
-                            <select name="status" onchange="this.form.submit()" style="width:100%; padding:8px; border-radius:10px; border:1px solid #eee;">
-                                <option value="all" <?= $status_filter=='all'?'selected':'' ?>>All Conversations</option>
-                                <option value="open" <?= $status_filter=='open'?'selected':'' ?>>Open Cases</option>
-                                <option value="resolved" <?= $status_filter=='resolved'?'selected':'' ?>>Resolved</option>
-                            </select>
-                        </form>
-                    </div>
-                    <div class="contact-list">
-                        <?php foreach ($threads as $thread): ?>
-                            <div class="contact-item <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>" onclick="window.location.href='?thread_id=<?= $thread['id'] ?>&status=<?= $status_filter ?>'">
-                                <div class="contact-avatar">#</div>
-                                <div class="contact-info">
-                                    <div style="font-weight:600; font-size:0.9rem; color:#333;"><?= htmlspecialchars($thread['title']) ?></div>
-                                    <div style="font-size:0.75rem; color:#999;"><?= ucfirst($thread['status']) ?></div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <div class="msg-container">
-                    <?php if ($selected_thread): ?>
-                        <div class="chat-header">
-                            <div style="font-weight:700; color:#333;"><?= htmlspecialchars($selected_thread['title']) ?></div>
-                            <div class="chat-actions">
-                                <?php if ($selected_thread['status'] == 'open'): ?>
-                                <form method="POST" style="display:inline-block;">
-                                    <input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>">
-                                    <input type="hidden" name="update_status" value="1">
-                                    <button type="submit" name="status" value="resolved" class="btn-primary"><i class="fas fa-check"></i> Resolve</button>
-                                </form>
-                                <?php endif; ?>
-                            </div>
+            <div class="page-container">
+                <div class="messaging-wrapper">
+                    <div class="msg-sidebar">
+                        <div class="msg-sidebar-header">
+                            <h2 style="color:#1a1a1a;">Master Hub</h2>
+                            <form method="GET">
+                                <select name="status" onchange="this.form.submit()" style="width:100%; padding:8px; border-radius:10px; border:1px solid #eee; color:#1a1a1a;">
+                                    <option value="all" <?= $status_filter=='all'?'selected':'' ?>>All Conversations</option>
+                                    <option value="open" <?= $status_filter=='open'?'selected':'' ?>>Open Cases</option>
+                                    <option value="resolved" <?= $status_filter=='resolved'?'selected':'' ?>>Resolved</option>
+                                </select>
+                            </form>
                         </div>
-                        <div class="chat-messages" id="chatMessages">
-                            <?php foreach ($thread_messages as $msg): 
-                                $isMe = ($msg['sender_id'] == $admin_id); ?>
-                                <div class="message-wrapper <?= $isMe ? 'sent' : 'received' ?>">
-                                    <div class="message-bubble">
-                                        <?php if(!$isMe): ?><div style="font-size:0.75rem; color:#2e8b57; font-weight:700; margin-bottom:4px;"><?= htmlspecialchars($msg['sender_name']) ?></div><?php endif; ?>
-                                        <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
-                                        <div style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:5px;"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
+                        <div class="contact-list">
+                            <?php foreach ($threads as $thread): ?>
+                                <div class="contact-item <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>" onclick="window.location.href='?thread_id=<?= $thread['id'] ?>&status=<?= $status_filter ?>'">
+                                    <div class="contact-avatar">#</div>
+                                    <div class="contact-info">
+                                        <div style="font-weight:600; font-size:0.9rem; color:#1a1a1a;"><?= htmlspecialchars($thread['title']) ?></div>
+                                        <div style="font-size:0.75rem; color:#666;"><?= ucfirst($thread['status']) ?></div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                        <div class="chat-input-area">
-                            <?php if ($selected_thread['status'] == 'open'): ?>
-                            <form id="messageForm">
-                                <div class="input-pill">
-                                    <textarea class="chat-input" id="messageInput" placeholder="Send an administrative reply..." rows="1"></textarea>
-                                    <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+
+                    <div class="msg-container">
+                        <?php if ($selected_thread): ?>
+                            <div class="chat-header">
+                                <div style="font-weight:700; color:#1a1a1a;"><?= htmlspecialchars($selected_thread['title']) ?></div>
+                                <div class="chat-actions">
+                                    <?php if ($selected_thread['status'] == 'open'): ?>
+                                    <form method="POST" style="display:inline-block;">
+                                        <input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>">
+                                        <input type="hidden" name="update_status" value="1">
+                                        <button type="submit" name="status" value="resolved" class="btn-primary"><i class="fas fa-check"></i> Resolve</button>
+                                    </form>
+                                    <?php endif; ?>
                                 </div>
-                            </form>
-                            <?php else: ?>
-                            <div style="text-align:center; padding:15px; color:#999;">Case is <?= $selected_thread['status'] ?>. Re-open to reply.</div>
-                            <?php endif; ?>
-                        </div>
-                    <?php else: ?>
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.5;">
-                            <i class="fas fa-shield-alt fa-3x" style="margin-bottom:15px; color:#2e8b57;"></i>
-                            <h3>Admin Command Hub</h3>
-                            <p>Pick a staff case to oversee.</p>
-                        </div>
-                    <?php endif; ?>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <?php foreach ($thread_messages as $msg): 
+                                    $isMe = ($msg['sender_id'] == $admin_id); ?>
+                                    <div class="message-wrapper <?= $isMe ? 'sent' : 'received' ?>" id="msg-<?= $msg['id'] ?>">
+                                        <div class="message-bubble" style="background:<?= $isMe ? '#2E8B57' : '#f1f1f1' ?>; color:<?= $isMe ? 'white' : '#1a1a1a' ?> !important;">
+                                            <?php if(!$isMe): ?><div style="font-size:0.75rem; color:#2e8b57; font-weight:700; margin-bottom:4px;"><?= htmlspecialchars($msg['sender_name']) ?></div><?php endif; ?>
+                                            <div class="message-text" style="color:inherit !important;"><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                            <div style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:5px; color:<?= $isMe ? 'rgba(255,255,255,0.7)' : '#666' ?>;"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="chat-input-area">
+                                <?php if ($selected_thread['status'] == 'open'): ?>
+                                <form id="messageForm">
+                                    <div class="input-pill">
+                                        <textarea class="chat-input" id="messageInput" placeholder="Send an administrative reply..." rows="1"></textarea>
+                                        <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                                    </div>
+                                </form>
+                                <?php else: ?>
+                                <div style="text-align:center; padding:15px; color:#666;">Case is <?= $selected_thread['status'] ?>. Re-open to reply.</div>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.5;">
+                                <i class="fas fa-shield-alt fa-3x" style="margin-bottom:15px; color:#2e8b57;"></i>
+                                <h3 style="color:#1a1a1a;">Admin Command Hub</h3>
+                                <p style="color:#666;">Pick a staff case to oversee.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 

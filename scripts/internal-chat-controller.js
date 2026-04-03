@@ -1,5 +1,5 @@
 /**
- * InternalChatController
+ * InternalChatController - CLARITY V103
  * Elite Standard for Staff-Admin communications
  */
 class ChatController {
@@ -8,7 +8,6 @@ class ChatController {
         this.userRole = userRole;
         this.currentThreadId = threadId;
         this.pollingInterval = null;
-
         this.init();
     }
 
@@ -18,8 +17,6 @@ class ChatController {
             this.fetchMessages();
             this.startPolling();
         }
-
-        // Global Lightbox
         this.initLightbox();
     }
 
@@ -31,18 +28,13 @@ class ChatController {
 
         if (this.inputArea) {
             this.inputArea.onkeypress = (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this.sendMessage();
-                }
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendMessage(); }
             };
         }
 
         if (this.attachBtn && this.fileInput) {
             this.attachBtn.onclick = () => this.fileInput.click();
-            this.fileInput.onchange = () => {
-                if (this.fileInput.files.length > 0) this.sendMessage();
-            };
+            this.fileInput.onchange = () => { if (this.fileInput.files.length > 0) this.sendMessage(); };
         }
     }
 
@@ -56,9 +48,7 @@ class ChatController {
         try {
             const res = await fetch(`${BASE_URL}handlers/get_internal_messages.php?thread_id=${this.currentThreadId}`);
             const data = await res.json();
-            if (data.success) {
-                this.renderMessages(data.messages);
-            }
+            if (data.success) { this.renderMessages(data.messages); }
         } catch (e) {}
     }
 
@@ -70,20 +60,20 @@ class ChatController {
         messages.forEach(msg => {
             if (!document.getElementById(`msg-${msg.id}`)) {
                 const isMe = msg.type === 'sent';
-                let content = `<div class="message-text">${this.escapeHtml(msg.message)}</div>`;
+                let content = `<div class="message-text" style="color:${isMe ? 'white' : '#1a1a1a'} !important;">${this.escapeHtml(msg.message)}</div>`;
 
                 if (msg.message_type === 'image' && msg.attachment_path) {
                     content = `<div class="message-text"><img src="${msg.attachment_path}" class="chat-img-zoomable" alt="Attachment" style="max-width:100%; border-radius:12px; cursor:zoom-in;"></div>`;
                 } else if (msg.message_type === 'file' && msg.attachment_path) {
-                    content = `<div class="message-text clinical-file-msg"><a href="${msg.attachment_path}" target="_blank" style="color:var(--primary-green); font-weight:600;"><i class="fas fa-file-pdf"></i> ${msg.file_name}</a></div>`;
+                    content = `<div class="message-text clinical-file-msg"><a href="${msg.attachment_path}" target="_blank" style="color:${isMe ? 'white' : '#2e8b57'}; font-weight:600;"><i class="fas fa-file-pdf"></i> View clinical report</a></div>`;
                 }
 
                 const html = `
-                    <div class="message-wrapper ${isMe ? 'sent' : 'received'}" id="msg-${msg.id}">
-                        <div class="message-bubble" style="background:${isMe ? 'var(--primary-green)' : 'var(--bg-surface)'}; color:${isMe ? 'white' : 'inherit'};">
-                            <div style="font-size:0.7rem; color:${isMe ? 'rgba(255,255,255,0.8)' : 'var(--primary-green)'}; margin-bottom:2px; font-weight:600;">${msg.sender_name}</div>
+                    <div class="message-wrapper ${isMe ? 'sent' : 'received'}" id="msg-${msg.id}" style="margin-bottom:15px; width:100%; display:flex; flex-direction:${isMe ? 'row-reverse' : 'row'};">
+                        <div class="message-bubble" style="background:${isMe ? '#2E8B57' : '#f1f1f1'}; color:${isMe ? 'white' : '#1a1a1a'} !important; padding:12px 18px; border-radius:18px; max-width:80%; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+                            <div style="font-size:0.75rem; color:${isMe ? 'rgba(255,255,255,0.8)' : '#2e8b57'}; margin-bottom:4px; font-weight:700;">${msg.sender_name}</div>
                             ${content}
-                            <div class="msg-time" style="color:${isMe ? 'rgba(255,255,255,0.7)' : 'inherit'};">${msg.pretty_time}</div>
+                            <div class="msg-time" style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:5px; color:${isMe ? 'rgba(255,255,255,0.7)' : '#666'};">${msg.pretty_time}</div>
                         </div>
                     </div>
                 `;
@@ -92,10 +82,7 @@ class ChatController {
             }
         });
 
-        if (added) {
-            this.scrollToBottom();
-            this.bindUI(); // Crucial! Re-bind listeners when content and input area exist
-        }
+        if (added) { this.scrollToBottom(); this.bindUI(); }
     }
 
     async sendMessage() {
@@ -115,20 +102,17 @@ class ChatController {
         try {
             const res = await fetch(`${BASE_URL}handlers/send_internal_message.php`, { method: 'POST', body: formData });
             const data = await res.json();
-            if (data.success) {
-                this.renderMessages([data.message]);
-            }
+            if (data.success) { this.renderMessages([data.message]); }
         } catch (e) { alert("Communication Error."); }
     }
 
-    scrollToBottom() {
-        if (this.chatMessages) this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-    }
+    scrollToBottom() { if (this.chatMessages) this.chatMessages.scrollTop = this.chatMessages.scrollHeight; }
 
     escapeHtml(t) {
         const d = document.createElement('div');
         d.textContent = t;
-        return d.innerHTML.replace(/\n/g, '<br>');
+        const out = d.innerHTML.replace(/\n/g, '<br>');
+        return out;
     }
 
     initLightbox() {
@@ -141,7 +125,6 @@ class ChatController {
             document.body.appendChild(lb);
             lb.onclick = () => { lb.style.display = 'none'; document.getElementById('lightboxContentInternal').style.transform = 'scale(0.9)'; };
         }
-
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('chat-img-zoomable')) {
                 const lb = document.getElementById('lightboxOverlay');
@@ -151,14 +134,5 @@ class ChatController {
                 setTimeout(() => { lbImg.style.transform = 'scale(1)'; }, 10);
             }
         });
-    }
-
-    changeThread(threadId, threadTitle) {
-        if (this.currentThreadId === threadId) return;
-        this.currentThreadId = threadId;
-        if (this.chatMessages) this.chatMessages.innerHTML = '<div style="text-align:center; padding:50px;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
-        this.fetchMessages();
-        this.startPolling();
-        setTimeout(() => this.bindUI(), 500); // Re-bind once UI is injected
     }
 }
