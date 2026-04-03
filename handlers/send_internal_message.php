@@ -14,6 +14,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'regular';
 
+$thread_id = intval($_POST['thread_id'] ?? 0);
+$message = trim($_POST['message'] ?? '');
+
 // Only staff and admin can send internal messages
 if (!in_array($user_role, ['staff', 'admin'])) {
     http_response_code(403);
