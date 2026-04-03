@@ -2191,7 +2191,7 @@ $pdo = $database->getConnection();
             <script>
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('service-worker.js')
+                        navigator.serviceWorker.register('service-worker.js?v=2')
                             .then(reg => console.log('NutriDeq Native App Enabled', reg.scope))
                             .catch(err => console.error('Native App Connection Failed', err));
                     });
