@@ -1189,11 +1189,8 @@ $pdo = $database->getConnection();
             <div class="performance-overview" style="grid-template-columns: 1fr;">
                 <!-- Macro Snapshot (SVG Rings) - FIXED FOR MOBILE -->
                 <div class="macro-snap-card">
-                    <div class="section-header" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="section-header" style="margin-bottom: 25px; display: flex; justify-content: center; align-items: center;">
                         <h2 style="margin:0;"><i class="fas fa-bullseye"></i> Nutritional Snap <i class="fas fa-info-circle" title="Your progress toward your daily macro goals. Ring fills up as you log food."></i></h2>
-                        <button class="btn btn-primary" onclick="generateClinicalReport('.page-container', 'NutriDeq-Weekly-Overview.pdf')" style="padding: 6px 12px; font-size: 0.8rem;">
-                            <i class="fas fa-file-pdf"></i> Download Report
-                        </button>
                     </div>
                     <div class="macro-rings-container">
                         <!-- Protein Ring -->
