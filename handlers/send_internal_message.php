@@ -34,9 +34,14 @@ try {
     $pdo = $database->getConnection();
 
     // Verify access
-    $stmt = $pdo->prepare("\n        SELECT t.* \n        FROM internal_threads t \n        WHERE t.id = ? AND (JSON_CONTAINS(t.participants, ?, '$') OR t.created_by = ?)\n    ");
-    $user_json = json_encode($user_id);
-    $stmt->execute([$thread_id, $user_json, $user_id]);
+    if ($user_role === 'admin') {
+        $stmt = $pdo->prepare("SELECT t.* FROM internal_threads t WHERE t.id = ?");
+        $stmt->execute([$thread_id]);
+    } else {
+        $stmt = $pdo->prepare("SELECT t.* FROM internal_threads t WHERE t.id = ? AND (JSON_CONTAINS(t.participants, ?, '$') OR t.created_by = ?)");
+        $user_json = json_encode($user_id);
+        $stmt->execute([$thread_id, $user_json, $user_id]);
+    }
     $thread = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$thread) {
