@@ -37,7 +37,7 @@ try {
 
     // Get messages
     $stmt = $pdo->prepare("
-        SELECT m.*, 
+        SELECT m.id, m.thread_id, m.sender_id, m.sender_role, m.message, m.attachment_path, m.message_type, m.read_by, m.created_at,
                u.name as sender_name,
                u.role as sender_role
         FROM internal_thread_messages m

@@ -49,16 +49,41 @@ try {
         exit;
     }
 
-    // Insert message
+    // 1. Handle Attachment Upload
+    $attachment_path = null;
+    $msg_type = 'text';
+
+    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['attachment'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowed = ['pdf', 'png', 'jpg', 'jpeg'];
+
+        if (in_array($ext, $allowed)) {
+            $upload_dir = '../uploads/reports/';
+            if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+            
+            $filename = uniqid('int_report_', true) . '.' . $ext;
+            $target = $upload_dir . $filename;
+
+            if (move_uploaded_file($file['tmp_name'], $target)) {
+                $attachment_path = 'uploads/reports/' . $filename;
+                $msg_type = ($ext === 'pdf') ? 'file' : 'image';
+            }
+        }
+    }
+
+    // 2. Insert message
     $stmt = $pdo->prepare("
-        INSERT INTO internal_thread_messages (thread_id, sender_id, sender_role, message, read_by, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
+        INSERT INTO internal_thread_messages (thread_id, sender_id, sender_role, message, attachment_path, message_type, read_by, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     ");
     $stmt->execute([
         $thread_id, 
         $user_id, 
         $user_role, 
         $message, 
+        $attachment_path,
+        $msg_type,
         json_encode([$user_id])
     ]);
     
@@ -86,6 +111,9 @@ try {
         'sender_id' => $msg['sender_id'],
         'sender_role' => $msg['sender_role'],
         'sender_name' => $msg['sender_name'],
+        'attachment_path' => $msg['attachment_path'],
+        'message_type' => $msg['message_type'],
+        'file_name' => 'Support-Internal-Report.pdf',
         'type' => 'sent',
         'created_at' => $msg['created_at'],
         'pretty_time' => date('g:i A', strtotime($msg['created_at'])),
