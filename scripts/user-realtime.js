@@ -9,6 +9,22 @@
         console.log('User Real-time Engine Started');
         updateDashboardData();
         setInterval(updateDashboardData, POLL_INTERVAL);
+        initModal();
+    }
+
+    function initModal() {
+        const modal = document.getElementById('macroModal');
+        const btn = document.getElementById('macroInfoBtn');
+        const close = document.getElementById('closeMacroModal');
+        const gotIt = document.getElementById('gotItBtn');
+
+        if (!btn || !modal) return;
+
+        btn.onclick = () => { modal.style.display = 'flex'; };
+        const hide = () => { modal.style.display = 'none'; };
+        if (close) close.onclick = hide;
+        if (gotIt) gotIt.onclick = hide;
+        window.onclick = (e) => { if (e.target == modal) hide(); };
     }
 
     function updateDashboardData() {

@@ -1190,8 +1190,41 @@ $pdo = $database->getConnection();
                 <!-- Macro Snapshot (SVG Rings) - FIXED FOR MOBILE -->
                 <div class="macro-snap-card">
                     <div class="section-header" style="margin-bottom: 25px; display: flex; justify-content: center; align-items: center;">
-                        <h2 style="margin:0;"><i class="fas fa-bullseye"></i> Nutritional Snap <i class="fas fa-info-circle" title="Your progress toward your daily macro goals. Ring fills up as you log food."></i></h2>
+                        <h2 style="margin:0;"><i class="fas fa-bullseye"></i> Nutritional Snap <i class="fas fa-info-circle" id="macroInfoBtn" style="cursor: pointer; color: var(--primary); margin-left: 8px;" title="Click for a quick guide!"></i></h2>
                     </div>
+
+                    <!-- Macro Guide Modal (Glassmorphism) -->
+                    <div id="macroModal" class="premium-modal" style="display:none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+                        <div class="modal-content" style="background: white; border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                            <span id="closeMacroModal" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; cursor: pointer; color: #ccc;">&times;</span>
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <div style="width: 60px; height: 60px; background: rgba(46, 204, 113, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                                    <i class="fas fa-lightbulb" style="font-size: 1.8rem; color: var(--primary);"></i>
+                                </div>
+                                <h3 style="margin: 0; color: var(--dark); font-size: 1.4rem;">Nutritional Guide</h3>
+                                <p style="color: var(--gray); font-size: 0.9rem;">Understanding your daily targets</p>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 15px;">
+                                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                                    <div style="color: #4facfe;"><i class="fas fa-fish"></i></div>
+                                    <div><strong>Protein:</strong> Builds muscle and repairs tissue. Key for feeling full.</div>
+                                </div>
+                                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                                    <div style="color: #43e97b;"><i class="fas fa-bread-slice"></i></div>
+                                    <div><strong>Carbs:</strong> Your body's primary energy source for your brain and muscles.</div>
+                                </div>
+                                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                                    <div style="color: #f5576c;"><i class="fas fa-egg"></i></div>
+                                    <div><strong>Fats:</strong> Essential for hormone health and absorbing vitamins.</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); font-size: 0.85rem; line-height: 1.4; color: var(--dark);">
+                                    <strong>Pro Tip:</strong> Your dietitian has set these targets specifically for you. As you log food in your diary, the rings will automatically fill up!
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="gotItBtn" style="width: 100%; margin-top: 25px; padding: 12px;">Got it, thanks!</button>
+                        </div>
+                    </div>
+                    <style>@keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }</style>
                     <div class="macro-rings-container">
                         <!-- Protein Ring -->
                         <div class="macro-ring-group">
