@@ -63,21 +63,21 @@ if ($selected_thread_id) {
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Masters | NutriDeq</title>
+    <title>Admin Oversight | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/base.css?v=109">
     <link rel="stylesheet" href="css/sidebar.css?v=109">
     <link rel="stylesheet" href="css/logout-modal.css?v=109">
     <style>
-        /* INTERACTIVE ATOMIC V109 - ADMIN */
+        /* INTERACTIVE ATOMIC V109 - ADMIN MASTER */
         body { margin: 0; background: #f0f2f5 !important; overflow: hidden; font-family:'Poppins',sans-serif; height: 100vh; width: 100vw; }
         .main-layout { display: flex; height: 100vh; width: 100vw; position:fixed; left:0; top:0; }
         
         .mobile-nav-header { display: none; background: white; padding: 10px 20px; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd; z-index:10006; position: fixed; top: 0; left: 0; width: 100%; box-sizing: border-box; height: 60px; }
         .mobile-hamburger { font-size: 1.5rem; color: #2e8b57; cursor: pointer; padding: 5px; }
 
-        .main-content { flex: 1; height: 100vh; overflow: hidden; padding: 24px !important; box-sizing: border-box !important; position:relative; display:flex; flex-direction:column; }
+        .main-content { flex: 1; height: 100vh; overflow: hidden; padding: 24px !important; box-sizing: border-box !important; position:relative; display:flex; flex-direction: column; }
         .messaging-wrapper { display: flex !important; gap: 20px; flex: 1; min-height: 0; margin: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
         .msg-sidebar, .msg-container { background: white; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #ddd; overflow: hidden; }
@@ -87,7 +87,7 @@ if ($selected_thread_id) {
         .chat-messages { flex: 1; padding: 25px; overflow-y: auto !important; display: flex; flex-direction: column; gap: 12px; background:#fff; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .contact-list { overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
 
-        /* THE INPUT PILL - ADMIN ELASTIC */
+        /* THE ELASTIC INPUT */
         .chat-input-area { padding: 15px 25px; border-top: 1px solid #f0f0f0; background: white; }
         .input-pill { background: #f8f9fa; border: 1px solid #ddd; border-radius: 24px; display: flex; align-items: flex-end; padding: 8px 15px; width: 100%; box-sizing: border-box; }
         .chat-input { flex: 1; border: none !important; background: transparent !important; padding: 5px 12px !important; outline: none !important; font-size: 0.95rem; resize: none !important; color: #1a1a1a !important; line-height: 1.4; max-height: 120px; }
@@ -99,7 +99,7 @@ if ($selected_thread_id) {
         .nav-links a { display: flex; align-items: center; padding: 12px 15px; border-radius: 8px; color: #4b5563; text-decoration: none; font-weight: 500; font-size: 14px; pointer-events: auto !important; }
         .nav-links a:hover, .nav-links a.active { color: #2e8b57; background: rgba(46, 139, 87, 0.08); }
 
-        /* MOBILE BREAKPOINTS */
+        /* MOBILE BREAKPOINTS ADMIN */
         @media (max-width: 1024px) {
             .sidebar { position: fixed; left: 0; transform: translateX(-100%); box-shadow: 15px 0 40px rgba(0,0,0,0.15); }
             .sidebar.active { transform: translateX(0); }
@@ -198,13 +198,13 @@ if ($selected_thread_id) {
                             <form id="messageForm"><div class="input-pill">
                                 <button type="button" class="icon-btn" id="attachBtn"><i class="fas fa-paperclip"></i></button>
                                 <input type="file" id="fileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg">
-                                <textarea class="chat-input" id="messageInput" placeholder="Write administrative response..." rows="1"></textarea>
+                                <textarea class="chat-input" id="messageInput" placeholder="Reply..." rows="1"></textarea>
                                 <button type="submit" class="icon-btn" style="color:#2e8b57;"><i class="fas fa-paper-plane"></i></button>
                             </div></form>
                             <?php else: ?><div style="text-align:center; padding:10px; color:#999; font-style:italic;">Thread resolved.</div><?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4; text-align:center; padding:20px;"><i class="fas fa-shield-alt fa-4x" style="margin-bottom:15px; color:#2e8b57;"></i><h3 style="font-family:'Playfair Display',serif;">Admin Command Hub</h3><p>Select an inquiry to oversee staff response.</p></div>
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.4; text-align:center; padding:20px;"><i class="fas fa-shield-alt fa-4x" style="margin-bottom:15px; color:#2e8b57;"></i><h3 style="font-family:'Playfair Display',serif;">Admin Master Command</h3><p>Select a consultation case to view details.</p></div>
                     <?php endif; ?>
                 </div>
             </div>
