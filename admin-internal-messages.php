@@ -1,10 +1,15 @@
 <?php
 /**
- * Admin Internal Messaging Hub
+ * Admin Internal Messaging Hub - IMMORTAL VERSION
  * Elite Standard for Administrative Control
  */
 ob_start();
 session_start();
+// MASTER ANTI-CACHE
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -13,50 +18,24 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
 $admin_id = $_SESSION['user_id'];
 $admin_name = $_SESSION['user_name'];
 $user_role = $_SESSION['user_role'];
-
 require_once 'navigation.php';
-$nav_links_array = getNavigationLinks($user_role, 'admin-internal-messages.php');
-
-function getInitials($name) {
-    if (!$name) return '?';
-    $p = explode(' ', $name);
-    $i = '';
-    foreach ($p as $x) if ($x !== '') $i .= strtoupper($x[0]);
-    return substr($i, 0, 2);
-}
-
 require_once 'database.php';
-$database = new Database();
-$pdo = $database->getConnection();
+$nav_links_array = getNavigationLinks($user_role, 'admin-internal-messages.php');
+$database = new Database(); $pdo = $database->getConnection();
 
-$filter_status = $_GET['status'] ?? 'all';
-$search_term = $_GET['search'] ?? '';
+$status_filter = $_GET['status'] ?? 'all';
 
-// Handle Actions (Resolve, Re-open, Delete)
+// Handle Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $thread_id = $_POST['thread_id'] ?? null;
-    if (isset($_POST['update_thread_status'])) {
-        $new_status = $_POST['status'] ?? 'open';
-        $pdo->prepare("UPDATE internal_threads SET status = ?, updated_at = NOW() WHERE id = ?")->execute([$new_status, $thread_id]);
-        header("Location: admin-internal-messages.php?thread_id=$thread_id&status=$filter_status");
-        exit();
-    }
-    if (isset($_POST['delete_thread'])) {
-        $pdo->prepare("DELETE FROM internal_thread_messages WHERE thread_id = ?")->execute([$thread_id]);
-        $pdo->prepare("DELETE FROM internal_threads WHERE id = ?")->execute([$thread_id]);
-        header("Location: admin-internal-messages.php");
-        exit();
-    }
+    $tid = $_POST['thread_id'] ?? null;
+    if (isset($_POST['update_status'])) { $pdo->prepare("UPDATE internal_threads SET status = ?, updated_at = NOW() WHERE id = ?")->execute([$_POST['status'] ?? 'open', $tid]); header("Location: admin-internal-messages.php?thread_id=$tid&status=$status_filter"); exit(); }
+    if (isset($_POST['delete'])) { $pdo->prepare("DELETE FROM internal_thread_messages WHERE thread_id = ?")->execute([$tid]); $pdo->prepare("DELETE FROM internal_threads WHERE id = ?")->execute([$tid]); header("Location: admin-internal-messages.php"); exit(); }
 }
 
-// Fetch Threads (Master Visibility for Admins)
-$where_conditions = ["1=1"];
-$params = [];
-if ($filter_status !== 'all') { $where_conditions[] = "status = ?"; $params[] = $filter_status; }
-if (!empty($search_term)) { $where_conditions[] = "title LIKE ?"; $params[] = "%$search_term%"; }
-$where_sql = implode(' AND ', $where_conditions);
-
-$stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE $where_sql ORDER BY last_message_at DESC");
+// Fetch Threads (Master Visibility)
+$where = $status_filter !== 'all' ? "status = ?" : "1=1";
+$params = $status_filter !== 'all' ? [$status_filter] : [];
+$stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE $where ORDER BY last_message_at DESC");
 $stmt->execute($params);
 $threads = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -64,11 +43,9 @@ $selected_thread_id = isset($_GET['thread_id']) ? intval($_GET['thread_id']) : n
 $selected_thread = null;
 $thread_messages = [];
 if ($selected_thread_id) {
-    // Admin visibility is 1=1
     $stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE id = ?");
     $stmt->execute([$selected_thread_id]);
     $selected_thread = $stmt->fetch(PDO::FETCH_ASSOC);
-
     if ($selected_thread) {
         $stmt = $pdo->prepare("SELECT m.*, u.name as sender_name FROM internal_thread_messages m LEFT JOIN users u ON m.sender_id = u.id WHERE m.thread_id = ? ORDER BY m.created_at ASC");
         $stmt->execute([$selected_thread_id]);
@@ -82,45 +59,76 @@ if ($selected_thread_id) {
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internal Messages | NutriDeq Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Internal Masters | NutriDeq Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/base.css?v=101">
-    <link rel="stylesheet" href="css/sidebar.css?v=101">
-    <link rel="stylesheet" href="css/modern-messages.css?v=101">
-    <link rel="stylesheet" href="css/responsive.css?v=101">
+    <link rel="stylesheet" href="css/base.css?v=103">
+    <link rel="stylesheet" href="css/sidebar.css?v=103">
     <style>
-        /* FORCE REBUILD - VISIBILITY FIX */
-        .messaging-wrapper { opacity: 1 !important; visibility: visible !important; animation: none !important; margin: 0 !important; height: calc(100vh - 40px) !important; width: 100% !important; display: flex !important; gap: 24px !important; }
-        .main-content { padding: 0 !important; overflow: hidden !important; background-color: #FAFAFA; height: 100vh; }
-        .hover-bg:hover { background: #f5f7fa; }
+        /* IMMORTAL MASTER UI */
+        body { background-color: #f0f2f5 !important; margin: 0; font-family: 'Poppins', sans-serif; }
+        .main-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; width:100%; }
+        .main-content { grid-column: 2; padding: 24px !important; display: block !important; visibility: visible !important; min-width: 0; }
+        
+        .messaging-wrapper { 
+            display: flex !important; opacity: 1 !important; visibility: visible !important; gap: 20px; 
+            height: calc(100vh - 100px); width: 100% !important; animation: none !important; margin:0 auto; max-width:1400px;
+        }
+        .msg-sidebar { 
+            width: 320px; background: white; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #eee; flex-shrink: 0;
+        }
+        .msg-sidebar-header { padding: 20px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+        .contact-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .contact-item { padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .contact-item:hover { background: #f5f7fa; transform: translateX(5px); }
+        .contact-item.active { background: #e6f4ea; border-left: 4px solid #2e8b57; }
+
+        .msg-container { 
+            flex: 1; min-width: 0; background: white; border-radius: 20px; display: flex; flex-direction: column; 
+            overflow: hidden; box-shadow: 0 4px 25px rgba(0,0,0,0.05); border: 1px solid #eee;
+        }
+        .chat-header { padding: 15px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #fdfdfd; }
+        
+        .message-wrapper { display: flex; max-width: 80%; width: fit-content; }
+        .message-wrapper.sent { align-self: flex-end; flex-direction: row-reverse; }
+        .message-bubble { padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .message-wrapper.sent .message-bubble { background: #2E8B57; color: white; border-bottom-right-radius: 4px; }
+        .message-wrapper.received .message-bubble { background: #f1f1f1; color: #333; border-bottom-left-radius: 4px; }
+
+        .chat-input-area { padding: 20px; border-top: 1px solid #f0f0f0; background: white; }
+        .input-pill { background: #f8f9fa; border: 1px solid #eee; border-radius: 30px; display: flex; align-items: center; padding: 10px 15px; }
+        .chat-input { flex: 1; border: none; background: transparent; padding: 0 15px; outline: none; font-size: 0.95rem; resize: none; min-height: 24px; font-family: inherit; }
+        .send-btn { background: #2e8b57; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .send-btn:hover { background: #1e6b42; transform: scale(1.1); }
+
+        .btn-primary { background: #2E8B57; color: white; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; }
     </style>
 </head>
 <body>
     <div class="main-layout">
         <?php include 'includes/sidebar.php'; ?>
-        <div class="main-content">
-            <div class="messaging-wrapper <?= $selected_thread_id ? 'view-chat' : 'view-list' ?>">
+        <main class="main-content">
+            <div class="messaging-wrapper">
                 <div class="msg-sidebar">
                     <div class="msg-sidebar-header">
-                        <h2>Internal Masters</h2>
+                        <h2>Master Hub</h2>
                         <form method="GET">
-                            <select name="status" onchange="this.form.submit()" style="padding:4px 8px; border-radius:8px; border:1px solid #ddd; font-size:0.85rem;">
-                                <option value="all" <?= $filter_status=='all'?'selected':'' ?>>All Chats</option>
-                                <option value="open" <?= $filter_status=='open'?'selected':'' ?>>Open</option>
-                                <option value="resolved" <?= $filter_status=='resolved'?'selected':'' ?>>Resolved</option>
+                            <select name="status" onchange="this.form.submit()" style="width:100%; padding:8px; border-radius:10px; border:1px solid #eee;">
+                                <option value="all" <?= $status_filter=='all'?'selected':'' ?>>All Conversations</option>
+                                <option value="open" <?= $status_filter=='open'?'selected':'' ?>>Open Cases</option>
+                                <option value="resolved" <?= $status_filter=='resolved'?'selected':'' ?>>Resolved</option>
                             </select>
-                            <input type="hidden" name="search" value="<?= htmlspecialchars($search_term) ?>">
                         </form>
                     </div>
                     <div class="contact-list">
                         <?php foreach ($threads as $thread): ?>
-                            <div class="contact-item <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>" 
-                                 onclick="window.location.href='?thread_id=<?= $thread['id'] ?>&status=<?= $filter_status ?>'">
-                                <div class="contact-avatar"><i class="fas fa-hashtag"></i></div>
+                            <div class="contact-item <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>" onclick="window.location.href='?thread_id=<?= $thread['id'] ?>&status=<?= $status_filter ?>'">
+                                <div class="contact-avatar">#</div>
                                 <div class="contact-info">
-                                    <div class="contact-name"><?= htmlspecialchars($thread['title']) ?></div>
-                                    <div class="contact-preview"><?= ucfirst($thread['status']) ?></div>
+                                    <div style="font-weight:600; font-size:0.9rem; color:#333;"><?= htmlspecialchars($thread['title']) ?></div>
+                                    <div style="font-size:0.75rem; color:#999;"><?= ucfirst($thread['status']) ?></div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -130,46 +138,25 @@ if ($selected_thread_id) {
                 <div class="msg-container">
                     <?php if ($selected_thread): ?>
                         <div class="chat-header">
-                            <div class="chat-header-user">
-                                <div class="contact-avatar" style="background:var(--accent-light); color:var(--primary-green);">#</div>
-                                <div>
-                                    <div class="header-name"><?= htmlspecialchars($selected_thread['title']) ?></div>
-                                    <div class="header-status">Master Session • <?= ucfirst($selected_thread['status']) ?></div>
-                                </div>
-                            </div>
+                            <div style="font-weight:700; color:#333;"><?= htmlspecialchars($selected_thread['title']) ?></div>
                             <div class="chat-actions">
                                 <?php if ($selected_thread['status'] == 'open'): ?>
                                 <form method="POST" style="display:inline-block;">
                                     <input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>">
-                                    <input type="hidden" name="update_thread_status" value="1">
-                                    <button type="submit" name="status" value="resolved" class="btn btn-primary" style="padding:6px 14px; font-size:0.85rem; border-radius:10px;">
-                                        <i class="fas fa-check-circle"></i> Resolve
-                                    </button>
+                                    <input type="hidden" name="update_status" value="1">
+                                    <button type="submit" name="status" value="resolved" class="btn-primary"><i class="fas fa-check"></i> Resolve</button>
                                 </form>
                                 <?php endif; ?>
-                                <button class="btn btn-outline" id="manageBtn" style="padding:6px 12px; font-size:0.9rem; border-radius:10px;">Manage</button>
-                                <div id="manageMenu" style="display:none; position:absolute; right:20px; top:70px; background:white; border:1px solid #ddd; box-shadow:0 10px 30px rgba(0,0,0,0.1); border-radius:12px; z-index:100; min-width:160px;">
-                                    <form method="POST">
-                                        <input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>">
-                                        <input type="hidden" name="update_thread_status" value="1">
-                                        <button type="submit" name="status" value="open" style="width:100%; padding:10px; border:none; background:none; text-align:left; cursor:pointer;" class="hover-bg">Re-open Thread</button>
-                                        <button type="submit" name="status" value="archived" style="width:100%; padding:10px; border:none; background:none; text-align:left; cursor:pointer;" class="hover-bg">Archive Case</button>
-                                    </form>
-                                    <button onclick="document.getElementById('deleteModal').style.display='flex'" style="width:100%; padding:10px; border:none; background:none; text-align:left; cursor:pointer; color:red;" class="hover-bg">Delete Forever</button>
-                                </div>
                             </div>
                         </div>
                         <div class="chat-messages" id="chatMessages">
                             <?php foreach ($thread_messages as $msg): 
-                                $isMe = ($msg['sender_id'] == $admin_id);
-                                ?>
+                                $isMe = ($msg['sender_id'] == $admin_id); ?>
                                 <div class="message-wrapper <?= $isMe ? 'sent' : 'received' ?>">
                                     <div class="message-bubble">
-                                        <?php if(!$isMe): ?>
-                                            <div style="font-size:0.75rem; color:#2E8B57; font-weight:700; margin-bottom:4px;"><?= htmlspecialchars($msg['sender_name']) ?></div>
-                                        <?php endif; ?>
-                                        <div class="message-text"><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
-                                        <div style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:4px;"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
+                                        <?php if(!$isMe): ?><div style="font-size:0.75rem; color:#2e8b57; font-weight:700; margin-bottom:4px;"><?= htmlspecialchars($msg['sender_name']) ?></div><?php endif; ?>
+                                        <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                        <div style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:5px;"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -177,60 +164,36 @@ if ($selected_thread_id) {
                         <div class="chat-input-area">
                             <?php if ($selected_thread['status'] == 'open'): ?>
                             <form id="messageForm">
-                                <div class="input-pill-container">
-                                    <textarea class="chat-input" id="messageInput" placeholder="Type an internal response..." rows="1"></textarea>
-                                    <div class="input-actions">
-                                        <button type="submit" class="icon-btn send-btn"><i class="fas fa-paper-plane"></i></button>
-                                    </div>
+                                <div class="input-pill">
+                                    <textarea class="chat-input" id="messageInput" placeholder="Send an administrative reply..." rows="1"></textarea>
+                                    <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
                                 </div>
                             </form>
                             <?php else: ?>
-                            <div style="text-align:center; padding:20px; color:var(--text-tertiary);">Thread is <?= $selected_thread['status'] ?>. Re-open to reply.</div>
+                            <div style="text-align:center; padding:15px; color:#999;">Case is <?= $selected_thread['status'] ?>. Re-open to reply.</div>
                             <?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.6;">
-                            <i class="fas fa-shield-alt fa-4x" style="margin-bottom:20px; color:#2E8B57;"></i>
-                            <h3>Master Message Center</h3>
-                            <p>Pick a staff thread to review history and provide guidance.</p>
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.5;">
+                            <i class="fas fa-shield-alt fa-3x" style="margin-bottom:15px; color:#2e8b57;"></i>
+                            <h3>Admin Command Hub</h3>
+                            <p>Pick a staff case to oversee.</p>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <div id="deleteModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2000;">
-                <div style="background:white; padding:30px; border-radius:15px; width:300px; text-align:center;">
-                    <h3>Delete Thread?</h3>
-                    <form method="POST">
-                        <input type="hidden" name="thread_id" value="<?= $selected_thread_id ?>">
-                        <input type="hidden" name="delete_thread" value="1">
-                        <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                            <button type="button" onclick="document.getElementById('deleteModal').style.display='none'" class="btn btn-outline">Cancel</button>
-                            <button type="submit" class="btn" style="background:red; color:white;">Delete</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <script>const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';</script>
-            <script src="scripts/internal-chat-controller.js?v=101"></script>
+            <script src="scripts/internal-chat-controller.js?v=103"></script>
             <script>
+                const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';
                 document.addEventListener('DOMContentLoaded', () => {
                     <?php if ($selected_thread_id): ?>
                     new ChatController(<?= $admin_id ?>, 'admin', <?= $selected_thread_id ?>);
-                    const el = document.getElementById('chatMessages');
-                    if(el) el.scrollTop = el.scrollHeight;
+                    const el = document.getElementById('chatMessages'); if(el) el.scrollTop = el.scrollHeight;
                     <?php endif; ?>
-
-                    const mBtn = document.getElementById('manageBtn');
-                    const mMenu = document.getElementById('manageMenu');
-                    if(mBtn && mMenu) {
-                        mBtn.onclick = (e) => { e.stopPropagation(); mMenu.style.display = mMenu.style.display === 'block' ? 'none' : 'block'; };
-                        document.onclick = () => mMenu.style.display = 'none';
-                    }
                 });
             </script>
-        </div>
+        </main>
     </div>
 </body>
 </html>
