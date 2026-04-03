@@ -17,6 +17,14 @@ $nav_links_array = getNavigationLinks($user_role, 'staff-help.php');
 $database = new Database();
 $pdo = $database->getConnection();
 
+function getInitials($name) {
+    if (!$name) return '?';
+    $p = explode(' ', $name);
+    $i = '';
+    foreach ($p as $x) if ($x !== '') $i .= strtoupper($x[0]);
+    return substr($i, 0, 2);
+}
+
 // Handle Thread Creation (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_thread'])) {
     $thread_title = trim($_POST['thread_title'] ?? '');
@@ -60,10 +68,23 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $selected_thread_id = isset($_GET['thread_id']) ? intval($_GET['thread_id']) : null;
 $selected_thread = null;
+$thread_messages = [];
 if ($selected_thread_id) {
-    $stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE id = ?");
-    $stmt->execute([$selected_thread_id]);
+    // Admin access is universal
+    if ($is_admin) {
+        $stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE id = ?");
+        $stmt->execute([$selected_thread_id]);
+    } else {
+        $stmt = $pdo->prepare("SELECT * FROM internal_threads WHERE id = ? AND (JSON_CONTAINS(participants, ?, '$') OR created_by = ?)");
+        $stmt->execute([$selected_thread_id, json_encode($staff_id), $staff_id]);
+    }
     $selected_thread = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($selected_thread) {
+        $stmt = $pdo->prepare("SELECT m.*, u.name as sender_name FROM internal_thread_messages m LEFT JOIN users u ON m.sender_id = u.id WHERE m.thread_id = ? ORDER BY m.created_at ASC");
+        $stmt->execute([$selected_thread_id]);
+        $thread_messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -80,126 +101,27 @@ if ($selected_thread_id) {
     <link rel="stylesheet" href="css/modern-messages.css?v=101">
     <link rel="stylesheet" href="css/responsive.css?v=101">
     <style>
-        /* ELITE HELP CENTER STYLES */
+        /* FORCE REBUILD - VISIBILITY FIX */
+        .messaging-wrapper { opacity: 1 !important; visibility: visible !important; animation: none !important; margin: 0 !important; height: calc(100vh - 40px) !important; width: 100% !important; display: flex !important; gap: 24px !important; }
+        .main-content { padding: 0 !important; overflow: hidden !important; background-color: #E0E7FF; height: 100vh; }
+        
         .new-thread-btn {
-            background: linear-gradient(135deg, #2E8B57, #3cb371);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.2);
-            width: fit-content;
+            background: linear-gradient(135deg, #2E8B57, #3cb371); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(46, 139, 87, 0.2); width: fit-content;
         }
-        .new-thread-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(46, 139, 87, 0.3);
-            filter: brightness(1.1);
-        }
-        .new-thread-btn i { font-size: 0.9rem; }
+        .new-thread-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 139, 87, 0.3); filter: brightness(1.1); }
 
-        /* GLASSMORPHIC MODAL */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .modal-container {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            transform: translateY(30px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        /* ELITE GLASS MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-container { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); transform: translateY(30px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-overlay.active .modal-container { transform: translateY(0); }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .modal-header h3 { font-size: 1.5rem; font-weight: 700; color: #1a1a1a; margin: 0; }
-        .close-modal { 
-            background: #f5f7fa;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            transition: 0.2s;
-        }
-        .close-modal:hover { background: #fee2e2; color: #ef4444; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #4b5563; }
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-        .form-control:focus { border-color: #2E8B57; outline: none; box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1); }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 4px;
-        }
-        .admin-card {
-            border: 2px solid #f3f4f6;
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
+        .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-height: 150px; overflow-y: auto; padding: 4px; }
+        .admin-card { border: 2px solid #f3f4f6; padding: 10px; border-radius: 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
         .admin-card input { display: none; }
         .admin-card.selected { background: #ecfdf5; border-color: #10b981; color: #064e3b; }
-
-        .start-btn {
-            width: 100%;
-            background: #2E8B57;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-        .start-btn:hover { background: #1e6b42; transform: scale(1.02); }
+        
+        .start-btn { width: 100%; background: #2E8B57; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -209,7 +131,7 @@ if ($selected_thread_id) {
             <div class="messaging-wrapper <?= $selected_thread_id ? 'view-chat' : 'view-list' ?>">
                 <div class="msg-sidebar">
                     <div class="msg-sidebar-header">
-                        <h2>Support Center</h2>
+                        <h2 style="margin-bottom:12px;">Support Hub</h2>
                         <button class="new-thread-btn" onclick="openSupportModal()">
                             <i class="fas fa-plus"></i> New Inquiry
                         </button>
@@ -233,37 +155,55 @@ if ($selected_thread_id) {
                         <div class="chat-header">
                             <div class="chat-header-user">
                                 <div class="contact-avatar" style="background:var(--accent-light); color:var(--primary-green);">#</div>
-                                <div class="header-name"><?= htmlspecialchars($selected_thread['title']) ?></div>
+                                <div>
+                                    <div class="header-name"><?= htmlspecialchars($selected_thread['title']) ?></div>
+                                    <div class="header-status">Live Session • <?= ucfirst($selected_thread['status']) ?></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-messages" id="chatMessages">
+                            <?php foreach ($thread_messages as $msg): 
+                                $isMe = ($msg['sender_id'] == $staff_id);
+                                ?>
+                                <div class="message-wrapper <?= $isMe ? 'sent' : 'received' ?>">
+                                    <div class="message-bubble">
+                                        <?php if(!$isMe): ?>
+                                            <div style="font-size:0.75rem; color:#2E8B57; font-weight:700; margin-bottom:4px;"><?= htmlspecialchars($msg['sender_name']) ?></div>
+                                        <?php endif; ?>
+                                        <div class="message-text"><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                        <div style="font-size:0.65rem; opacity:0.6; text-align:right; margin-top:4px;"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                         <div class="chat-input-area">
                             <form id="messageForm">
-                                <input type="file" id="fileInput" style="display:none;">
                                 <div class="input-pill-container">
                                     <button type="button" class="icon-btn" id="attachBtn"><i class="fas fa-plus"></i></button>
-                                    <textarea class="chat-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                                    <textarea class="chat-input" id="messageInput" placeholder="Type a clinical message..." rows="1"></textarea>
                                     <div class="input-actions">
                                         <button type="submit" class="icon-btn send-btn"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
+                                <input type="file" id="fileInput" style="display:none;">
                             </form>
                         </div>
                     <?php else: ?>
                         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0.6;">
                             <i class="fas fa-stethoscope fa-4x" style="margin-bottom:20px; color:#2E8B57;"></i>
                             <h3>Select a clinical inquiry</h3>
+                            <p>Pick a thread to begin communicating with admins.</p>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- PREMUM MODAL -->
+            <!-- PREMIUM MODAL -->
             <div id="supportModal" class="modal-overlay">
                 <div class="modal-container">
                     <div class="modal-header">
                         <h3>New Clinical Inquiry</h3>
-                        <button class="close-modal" onclick="closeSupportModal()">&times;</button>
+                        <button class="close-modal" onclick="closeSupportModal()" style="font-size:24px; background:none; border:none; cursor:pointer;">&times;</button>
                     </div>
                     <form method="POST">
                         <div class="form-group">
@@ -271,7 +211,7 @@ if ($selected_thread_id) {
                             <input type="text" name="thread_title" class="form-control" placeholder="e.g. Nutritional Analysis Query" required>
                         </div>
                         <div class="form-group">
-                            <label>Designated Admins</label>
+                            <label>Select Clinical Admins</label>
                             <div class="admin-grid">
                                 <?php foreach ($admins as $admin): ?>
                                     <label class="admin-card">
@@ -284,7 +224,7 @@ if ($selected_thread_id) {
                         </div>
                         <div class="form-group">
                             <label>Initial Message</label>
-                            <textarea name="initial_message" class="form-control" rows="3" placeholder="Explain your inquiry in detail..." required></textarea>
+                            <textarea name="initial_message" class="form-control" rows="3" placeholder="Describe your inquiry..." required></textarea>
                         </div>
                         <button type="submit" name="create_thread" class="start-btn">Start Conversation</button>
                     </form>
@@ -310,6 +250,8 @@ if ($selected_thread_id) {
                 document.addEventListener('DOMContentLoaded', () => {
                     <?php if ($selected_thread_id): ?>
                     new ChatController(<?= $staff_id ?>, '<?= $user_role ?>', <?= $selected_thread_id ?>);
+                    const el = document.getElementById('chatMessages');
+                    if(el) el.scrollTop = el.scrollHeight;
                     <?php endif; ?>
                 });
             </script>
