@@ -43,21 +43,79 @@
     gap: 12px;
 }
 
-/* SVG Ring Styling */
+/* SVG Ring Styling (Refined) */
 .macro-svg {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    max-width: 80px; /* Base size */
+    height: auto;
     transform: rotate(-90deg);
+    display: block;
 }
 
 .macro-svg circle {
     fill: none;
-    stroke-width: 8;
+    stroke-width: 7; /* Slightly thinner for elegance */
     stroke-linecap: round;
 }
 
 .macro-svg .bg {
-    stroke: #f0f0f0;
+    stroke: #f1f5f9;
+}
+
+/* Smart Food Item Styles */
+.smart-food-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 15px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.02);
+    transition: all 0.3s var(--spring-ease);
+    animation: fadeInUp 0.5s var(--spring-ease) backwards;
+}
+
+.smart-food-item:hover {
+    transform: translateX(5px);
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-color: var(--primary);
+}
+
+.food-suggest-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.food-suggest-details {
+    flex: 1;
+}
+
+.food-suggest-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dark);
+    margin-bottom: 2px;
+}
+
+.food-suggest-meta {
+    font-size: 0.75rem;
+    color: var(--gray);
+}
+
+.food-suggest-macro {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    color: white;
 }
 
 .macro-svg .bar {

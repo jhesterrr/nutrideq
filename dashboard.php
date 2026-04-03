@@ -97,6 +97,9 @@ $pdo = $database->getConnection();
     <link rel="stylesheet" href="css/mobile-style.css">
     <link rel="stylesheet" href="css/user-premium.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/hydration-premium.css">
+    <link rel="stylesheet" href="css/info-modal.css">
+    <script src="scripts/info-system.js" defer></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#2e8b57">
@@ -271,7 +274,7 @@ $pdo = $database->getConnection();
                     <!-- Staff Engagement Delta Card -->
                     <div class="chart-container" id="staffInfluenceContainer">
                         <div class="chart-header">
-                            <h2>Staff Performance Influence <i class="fas fa-info-circle" title="Measures how often staff interact with users relative to their assigned client load."></i></h2>
+                            <h2>Staff Performance Influence <i class="fas fa-info-circle" onclick="showFeatureInfo('staff_performance')" title="About Staff Analysis" style="cursor: pointer; color: var(--primary);"></i></h2>
                             <span id="deltaSelectedBadge"
                                 style="display: none; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">--</span>
                         </div>
@@ -308,7 +311,7 @@ $pdo = $database->getConnection();
                 <!-- System Efficiency Card -->
                 <div class="chart-container" style="margin-bottom: 30px;">
                     <div class="chart-header">
-                        <h2>Platform Activity Overview <i class="fas fa-info-circle" title="Measures how active users are today relative to the weekly average. Over 100% means the system is performing exceptionally well."></i></h2>
+                        <h2>Platform Activity Overview <i class="fas fa-info-circle" onclick="showFeatureInfo('system_efficiency')" title="About System Efficiency" style="cursor: pointer; color: var(--primary);"></i></h2>
                     </div>
                     <div id="efficiencyMetrics" style="display: flex; align-items: center; gap: 30px; padding: 15px;">
                         <div class="efficiency-gauge" style="position: relative; width: 100px; height: 100px;">
@@ -368,7 +371,7 @@ $pdo = $database->getConnection();
                 <!-- Recent System Activity -->
                 <div class="management-section">
                     <div class="section-header">
-                        <h2>Recent System Activity</h2>
+                        <h2>Recent System Activity <i class="fas fa-info-circle" onclick="showFeatureInfo('recent_activity')" title="About System Feed" style="cursor: pointer; color: var(--primary); font-size: 1rem; margin-left: 5px;"></i></h2>
                         <button class="btn btn-outline" id="refreshSystemActivity">
                             <i class="fas fa-sync"></i> Refresh
                         </button>
@@ -1185,53 +1188,22 @@ $pdo = $database->getConnection();
                         </div>
                     </div>
                 </div>
+            </div>
+            
             <!-- NEW: PERFORMANCE OVERVIEW (WOW FACTOR) -->
-            <div class="performance-overview" style="grid-template-columns: 1fr;">
-                <!-- Macro Snapshot (SVG Rings) - FIXED FOR MOBILE -->
+            <div class="performance-overview">
+                <!-- Macro Snapshot (SVG Rings) -->
                 <div class="macro-snap-card">
-                    <div class="section-header" style="margin-bottom: 25px; display: flex; justify-content: center; align-items: center;">
-                        <h2 style="margin:0;"><i class="fas fa-bullseye"></i> Nutritional Snap <i class="fas fa-info-circle" id="macroInfoBtn" style="cursor: pointer; color: var(--primary); margin-left: 8px;" title="Click for a quick guide!"></i></h2>
+                    <div class="section-header" style="margin-bottom: 20px;">
+                        <h2><i class="fas fa-bullseye"></i> Nutritional Snap <i class="fas fa-info-circle" onclick="showFeatureInfo('nutritional_snap')" title="About Macro Rings" style="cursor: pointer; color: var(--primary); font-size: 0.95rem; margin-left: 5px;"></i></h2>
                     </div>
-
-                    <!-- Macro Guide Modal (Glassmorphism) -->
-                    <div id="macroModal" class="premium-modal" style="display:none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); align-items: center; justify-content: center;">
-                        <div class="modal-content" style="background: white; border-radius: 24px; padding: 30px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                            <span id="closeMacroModal" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; cursor: pointer; color: #ccc;">&times;</span>
-                            <div style="text-align: center; margin-bottom: 20px;">
-                                <div style="width: 60px; height: 60px; background: rgba(46, 204, 113, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                                    <i class="fas fa-lightbulb" style="font-size: 1.8rem; color: var(--primary);"></i>
-                                </div>
-                                <h3 style="margin: 0; color: var(--dark); font-size: 1.4rem;">Nutritional Guide</h3>
-                                <p style="color: var(--gray); font-size: 0.9rem;">Understanding your daily targets</p>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 15px;">
-                                <div style="display: flex; gap: 15px; align-items: flex-start;">
-                                    <div style="color: #4facfe;"><i class="fas fa-fish"></i></div>
-                                    <div><strong>Protein:</strong> Builds muscle and repairs tissue. Key for feeling full.</div>
-                                </div>
-                                <div style="display: flex; gap: 15px; align-items: flex-start;">
-                                    <div style="color: #43e97b;"><i class="fas fa-bread-slice"></i></div>
-                                    <div><strong>Carbs:</strong> Your body's primary energy source for your brain and muscles.</div>
-                                </div>
-                                <div style="display: flex; gap: 15px; align-items: flex-start;">
-                                    <div style="color: #f5576c;"><i class="fas fa-egg"></i></div>
-                                    <div><strong>Fats:</strong> Essential for hormone health and absorbing vitamins.</div>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); font-size: 0.85rem; line-height: 1.4; color: var(--dark);">
-                                    <strong>Pro Tip:</strong> Your dietitian has set these targets specifically for you. As you log food in your diary, the rings will automatically fill up!
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" id="gotItBtn" style="width: 100%; margin-top: 25px; padding: 12px;">Got it, thanks!</button>
-                        </div>
-                    </div>
-                    <style>@keyframes modalPop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }</style>
                     <div class="macro-rings-container">
                         <!-- Protein Ring -->
                         <div class="macro-ring-group">
                             <div class="macro-ring" id="proteinRing">
-                                <svg class="macro-svg" viewBox="0 0 100 100" style="overflow: visible;">
-                                    <circle class="bg" cx="50" cy="50" r="40" stroke-width="8"></circle>
-                                    <circle class="bar" id="p_bar" cx="50" cy="50" r="40" stroke="#4facfe" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="251"></circle>
+                                <svg class="macro-svg" viewBox="0 0 80 80">
+                                    <circle class="bg" cx="40" cy="40" r="34"></circle>
+                                    <circle class="bar" id="p_bar" cx="40" cy="40" r="34" stroke="#4facfe" stroke-dasharray="213.6" stroke-dashoffset="213.6"></circle>
                                 </svg>
                             </div>
                             <div class="macro-label">
@@ -1242,9 +1214,9 @@ $pdo = $database->getConnection();
                         <!-- Carbs Ring -->
                         <div class="macro-ring-group">
                             <div class="macro-ring" id="carbsRing">
-                                <svg class="macro-svg" viewBox="0 0 100 100" style="overflow: visible;">
-                                    <circle class="bg" cx="50" cy="50" r="40" stroke-width="8"></circle>
-                                    <circle class="bar" id="c_bar" cx="50" cy="50" r="40" stroke="#43e97b" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="251"></circle>
+                                <svg class="macro-svg" viewBox="0 0 80 80">
+                                    <circle class="bg" cx="40" cy="40" r="34"></circle>
+                                    <circle class="bar" id="c_bar" cx="40" cy="40" r="34" stroke="#43e97b" stroke-dasharray="213.6" stroke-dashoffset="213.6"></circle>
                                 </svg>
                             </div>
                             <div class="macro-label">
@@ -1255,15 +1227,40 @@ $pdo = $database->getConnection();
                         <!-- Fats Ring -->
                         <div class="macro-ring-group">
                             <div class="macro-ring" id="fatsRing">
-                                <svg class="macro-svg" viewBox="0 0 100 100" style="overflow: visible;">
-                                    <circle class="bg" cx="50" cy="50" r="40" stroke-width="8"></circle>
-                                    <circle class="bar" id="f_bar" cx="50" cy="50" r="40" stroke="#f5576c" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="251"></circle>
+                                <svg class="macro-svg" viewBox="0 0 80 80">
+                                    <circle class="bg" cx="40" cy="40" r="34"></circle>
+                                    <circle class="bar" id="f_bar" cx="40" cy="40" r="34" stroke="#f5576c" stroke-dasharray="213.6" stroke-dashoffset="213.6"></circle>
                                 </svg>
                             </div>
                             <div class="macro-label">
                                 <div class="macro-name">Fats</div>
                                 <div class="macro-val" id="f_val">0 / 0g</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hydration-section" style="margin-top: 20px;">
+                    <!-- Full-Width Hydration Flow Card -->
+                    <div class="hydration-card">
+                        <div class="hydration-wave-container">
+                            <div class="hydration-wave-bg" id="waterWave"></div>
+                        </div>
+                        <div class="section-header" style="z-index: 2; margin-bottom: 20px;">
+                            <h2 style="font-size: 1.25rem;"><i class="fas fa-tint" style="color: #4facfe;"></i> Daily Hydration Flow <i class="fas fa-info-circle" onclick="showFeatureInfo('hydration_flow')" style="cursor: pointer; color: #4facfe; font-size: 0.95rem; margin-left: 5px;" title="About Hydration"></i></h2>
+                            <span style="font-size: 0.85rem; color: var(--gray); font-weight: 500;">Stay Refreshed</span>
+                        </div>
+                        
+                        <div class="hydration-stats">
+                            <div class="hydration-val" id="waterCount">0</div>
+                            <div class="hydration-lbl">Glasses / 8 Daily Goal</div>
+                        </div>
+
+                        <div class="hydration-controls">
+                            <button type="button" class="hydrate-btn" onclick="updateWater('remove')" title="Remove glass"><i class="fas fa-minus"></i></button>
+                            <button type="button" class="hydrate-btn" onclick="updateWater('add')" title="Add glass" style="background: #4facfe; color: white; width: 52px; height: 52px;">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
