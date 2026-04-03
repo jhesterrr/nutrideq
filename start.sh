@@ -3,6 +3,7 @@
 PORT=${PORT:-80}
 
 # Dynamically set the Nginx port before starting
+echo "Starting nginx on port ${PORT}..."
 sed -i "s/listen 80;/listen ${PORT};/g" /etc/nginx/nginx.conf
 
 # Start php-fpm in the background
