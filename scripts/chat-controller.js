@@ -14,6 +14,7 @@ class ChatController {
         this.inputArea = document.getElementById('messageInput') || document.querySelector('.chat-input');
         this.attachBtn = document.getElementById('attachBtn');
         this.fileInput = document.getElementById('fileInput');
+        this.messageForm = document.getElementById('messageForm');
 
         this.init();
     }
@@ -26,11 +27,19 @@ class ChatController {
 
         // Enter to Send
         if (this.inputArea) {
-            this.inputArea.addEventListener('keypress', (e) => {
+            this.inputArea.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     this.sendMessage();
                 }
+            });
+        }
+
+        // Form Submit
+        if (this.messageForm) {
+            this.messageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.sendMessage();
             });
         }
 
