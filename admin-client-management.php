@@ -1065,153 +1065,7 @@ try {
                         <?php endif; ?>
                 </div> <!-- end management-section -->
 
-            <div class="modal" id="addClientModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Add New Client</h2>
-                        <button class="close-btn" onclick="closeModal()">&times;</button>
-                    </div>
-                    <form method="POST" id="addClientForm">
-                        <input type="hidden" name="action" value="add_client">
-                        <div class="form-group"><label for="name">Full Name *</label><input type="text" id="name"
-                                name="name" class="form-control" placeholder="First and last name" required></div>
-                        <div class="form-group"><label for="email">Email *</label><input type="email" id="email"
-                                name="email" class="form-control" placeholder="name@example.com" required></div>
-                        <div class="form-group"><label for="account_password">Account Password (optional)</label>
-                            <div style="display:flex;align-items:center;gap:8px;"><input type="password"
-                                    id="account_password" name="account_password" class="form-control"
-                                    placeholder="Set initial account password" style="flex:1;"><button type="button"
-                                    class="btn btn-outline" id="toggle_account_password" title="Show/Hide Password"><i
-                                        class="fas fa-eye"></i></button></div>
-                        </div>
-                        <div class="form-group"><label for="account_confirm_password">Confirm Password</label>
-                            <div style="display:flex;align-items:center;gap:8px;"><input type="password"
-                                    id="account_confirm_password" name="account_confirm_password" class="form-control"
-                                    placeholder="Re-enter password" style="flex:1;"><button type="button"
-                                    class="btn btn-outline" id="toggle_account_confirm_password"
-                                    title="Show/Hide Password"><i class="fas fa-eye"></i></button></div>
-                        </div>
-                        <div class="form-group"><label for="add_staff_id">Assign Staff</label><select id="add_staff_id"
-                                name="staff_id" class="form-control">
-                                <option value="">Unassigned</option>
-                                <?php if (!empty($staff_members)) {
-                                    foreach ($staff_members as $s) {
-                                        echo '<option value="' . htmlspecialchars($s['id']) . '">' . htmlspecialchars($s['name']) . ' (' . htmlspecialchars($s['email']) . ')</option>';
-                                    }
-                                } ?>
-                            </select></div>
-                        <div class="form-group"><label for="phone">Phone</label><input type="tel" id="phone"
-                                name="phone" class="form-control" placeholder="+63 1-456-7890"></div>
-                        <div class="form-group"><label for="address">Street Address</label><input type="text"
-                                id="address" name="address" class="form-control" placeholder="123 Main Street"></div>
-                        <div class="client-info-grid">
-                            <div class="form-group"><label for="city">City</label><input type="text" id="city"
-                                    name="city" class="form-control" placeholder="New York"></div>
-                            <div class="form-group"><label for="state">State/Province</label><input type="text"
-                                    id="state" name="state" class="form-control" placeholder="NY"></div>
-                        </div>
-                        <div class="form-group"><label for="zip_code">ZIP/Postal Code</label><input type="text"
-                                id="zip_code" name="zip_code" class="form-control" placeholder="10001"></div>
-                        <div class="client-info-grid">
-                            <div class="form-group"><label for="age">Age</label><input type="number" id="age" name="age"
-                                    class="form-control" min="1" max="120"></div>
-                            <div class="form-group"><label for="gender">Gender</label><select id="gender" name="gender"
-                                    class="form-control">
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select></div>
-                        </div>
-                        <div class="form-group"><label for="waist_circumference">Waist Circumference (cm)</label><input
-                                type="number" class="form-control" id="waist_circumference" name="waist_circumference"
-                                step="0.1" min="0" placeholder="Enter waist measurement"></div>
-                        <div class="form-group"><label for="hip_circumference">Hip Circumference (cm)</label><input
-                                type="number" class="form-control" id="hip_circumference" name="hip_circumference"
-                                step="0.1" min="0" placeholder="Enter hip measurement"></div>
-                        <div class="form-actions"><button type="button" class="btn btn-outline"
-                                onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Add
-                                Client</button></div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="modal" id="editClientModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Edit Client Information</h2>
-                        <button class="close-btn" onclick="closeEditModal()">&times;</button>
-                    </div>
-                    <form method="POST" id="editClientForm">
-                        <input type="hidden" name="action" value="update_client">
-                        <input type="hidden" id="edit_client_id" name="client_id">
-                        <div class="form-section">
-                            <div class="form-group"><label for="edit_name">Full Name</label><input type="text"
-                                    id="edit_name" name="name" class="form-control" required></div>
-                            <div class="form-group"><label for="edit_email">Email</label><input type="email"
-                                    id="edit_email" name="email" class="form-control" required></div>
-                            <div class="form-group"><label for="edit_staff_id">Assign Staff</label><select
-                                    id="edit_staff_id" name="staff_id" class="form-control">
-                                    <option value="">Unassigned</option>
-                                    <?php if (!empty($staff_members)) {
-                                        foreach ($staff_members as $s) {
-                                            echo '<option value="' . htmlspecialchars($s['id']) . '">' . htmlspecialchars($s['name']) . ' (' . htmlspecialchars($s['email']) . ')</option>';
-                                        }
-                                    } ?>
-                                </select></div>
-                            <div class="client-info-grid">
-                                <div class="form-group"><label for="edit_phone">Phone</label><input type="tel"
-                                        id="edit_phone" name="phone" class="form-control" placeholder="+63 1-456-7890">
-                                </div>
-                                <div class="form-group"><label for="edit_age">Age</label><input type="number"
-                                        id="edit_age" name="age" class="form-control" min="1" max="120"></div>
-                            </div>
-                            <div class="client-info-grid">
-                                <div class="form-group"><label for="edit_address">Street Address</label><input
-                                        type="text" id="edit_address" name="address" class="form-control"
-                                        placeholder="123 Main Street">
-                                </div>
-                                <div class="form-group"><label for="edit_city">City</label><input type="text"
-                                        id="edit_city" name="city" class="form-control" placeholder="New York"></div>
-                            </div>
-                            <div class="client-info-grid">
-                                <div class="form-group"><label for="edit_state">State/Province</label><input type="text"
-                                        id="edit_state" name="state" class="form-control" placeholder="NY"></div>
-                                <div class="form-group"><label for="edit_zip_code">ZIP/Postal Code</label><input
-                                        type="text" id="edit_zip_code" name="zip_code" class="form-control"
-                                        placeholder="10001"></div>
-                            </div>
-                            <div class="client-info-grid">
-                                <div class="form-group"><label for="edit_waist_circumference">Waist Circumference
-                                        (cm)</label><input type="number" id="edit_waist_circumference"
-                                        name="waist_circumference" class="form-control" step="0.1" min="0"
-                                        placeholder="Enter waist measurement"></div>
-                                <div class="form-group"><label for="edit_hip_circumference">Hip Circumference
-                                        (cm)</label><input type="number" id="edit_hip_circumference"
-                                        name="hip_circumference" class="form-control" step="0.1" min="0"
-                                        placeholder="Enter hip measurement"></div>
-                            </div>
-                            <div class="form-group"><label for="edit_new_password">New Password (linked user)</label>
-                                <div style="display:flex;align-items:center;gap:8px;"><input type="password"
-                                        id="edit_new_password" name="new_password" class="form-control"
-                                        placeholder="Optional" style="flex:1;"><button type="button"
-                                        class="btn btn-outline" id="toggle_edit_new_password"
-                                        title="Show/Hide Password"><i class="fas fa-eye"></i></button></div>
-                            </div>
-                            <div class="form-group"><label for="edit_confirm_new_password">Confirm New Password</label>
-                                <div style="display:flex;align-items:center;gap:8px;"><input type="password"
-                                        id="edit_confirm_new_password" name="confirm_new_password" class="form-control"
-                                        placeholder="Re-enter new password" style="flex:1;"><button type="button"
-                                        class="btn btn-outline" id="toggle_edit_confirm_new_password"
-                                        title="Show/Hide Password"><i class="fas fa-eye"></i></button></div>
-                            </div>
-                        </div>
-                        <div class="form-actions"><button type="button" class="btn btn-outline"
-                                onclick="closeEditModal()">Cancel</button><button type="submit"
-                                class="btn btn-primary">Update
-                                Client</button></div>
-                    </form>
-                </div>
-            </div>
+            <!-- Modals moved to bottom for viewport clearance -->
 
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
@@ -1382,5 +1236,148 @@ try {
             </div> <!-- end page-container -->
         </main> <!-- end main-content -->
     </div> <!-- end main-layout -->
+
+    <div class="modal" id="addClientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Client</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form method="POST" id="addClientForm">
+                <input type="hidden" name="action" value="add_client">
+                <div class="form-group"><label for="name">Full Name *</label><input type="text" id="name" name="name"
+                        class="form-control" placeholder="First and last name" required></div>
+                <div class="form-group"><label for="email">Email *</label><input type="email" id="email" name="email"
+                        class="form-control" placeholder="name@example.com" required></div>
+                <div class="form-group"><label for="account_password">Account Password (optional)</label>
+                    <div style="display:flex;align-items:center;gap:8px;"><input type="password" id="account_password"
+                            name="account_password" class="form-control" placeholder="Set initial account password"
+                            style="flex:1;"><button type="button" class="btn btn-outline" id="toggle_account_password"
+                            title="Show/Hide Password"><i class="fas fa-eye"></i></button></div>
+                </div>
+                <div class="form-group"><label for="account_confirm_password">Confirm Password</label>
+                    <div style="display:flex;align-items:center;gap:8px;"><input type="password"
+                            id="account_confirm_password" name="account_confirm_password" class="form-control"
+                            placeholder="Re-enter password" style="flex:1;"><button type="button"
+                            class="btn btn-outline" id="toggle_account_confirm_password" title="Show/Hide Password"><i
+                                class="fas fa-eye"></i></button></div>
+                </div>
+                <div class="form-group"><label for="add_staff_id">Assign Staff</label><select id="add_staff_id"
+                        name="staff_id" class="form-control">
+                        <option value="">Unassigned</option>
+                        <?php if (!empty($staff_members)) {
+                            foreach ($staff_members as $s) {
+                                echo '<option value="' . htmlspecialchars($s['id']) . '">' . htmlspecialchars($s['name']) . ' (' . htmlspecialchars($s['email']) . ')</option>';
+                            }
+                        } ?>
+                    </select></div>
+                <div class="form-group"><label for="phone">Phone</label><input type="tel" id="phone" name="phone"
+                        class="form-control" placeholder="+63 1-456-7890"></div>
+                <div class="form-group"><label for="address">Street Address</label><input type="text" id="address"
+                        name="address" class="form-control" placeholder="123 Main Street"></div>
+                <div class="client-info-grid">
+                    <div class="form-group"><label for="city">City</label><input type="text" id="city" name="city"
+                            class="form-control" placeholder="New York"></div>
+                    <div class="form-group"><label for="state">State/Province</label><input type="text" id="state"
+                            name="state" class="form-control" placeholder="NY"></div>
+                </div>
+                <div class="form-group"><label for="zip_code">ZIP/Postal Code</label><input type="text" id="zip_code"
+                        name="zip_code" class="form-control" placeholder="10001"></div>
+                <div class="client-info-grid">
+                    <div class="form-group"><label for="age">Age</label><input type="number" id="age" name="age"
+                            class="form-control" min="1" max="120"></div>
+                    <div class="form-group"><label for="gender">Gender</label><select id="gender" name="gender"
+                            class="form-control">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select></div>
+                </div>
+                <div class="form-group"><label for="waist_circumference">Waist Circumference (cm)</label><input
+                        type="number" class="form-control" id="waist_circumference" name="waist_circumference"
+                        step="0.1" min="0" placeholder="Enter waist measurement"></div>
+                <div class="form-group"><label for="hip_circumference">Hip Circumference (cm)</label><input
+                        type="number" class="form-control" id="hip_circumference" name="hip_circumference" step="0.1"
+                        min="0" placeholder="Enter hip measurement"></div>
+                <div class="form-actions"><button type="button" class="btn btn-outline"
+                        onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Add
+                        Client</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editClientModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Client Information</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form method="POST" id="editClientForm">
+                <input type="hidden" name="action" value="update_client">
+                <input type="hidden" id="edit_client_id" name="client_id">
+                <div class="form-section">
+                    <div class="form-group"><label for="edit_name">Full Name</label><input type="text" id="edit_name"
+                            name="name" class="form-control" required></div>
+                    <div class="form-group"><label for="edit_email">Email</label><input type="email" id="edit_email"
+                            name="email" class="form-control" required></div>
+                    <div class="form-group"><label for="edit_staff_id">Assign Staff</label><select id="edit_staff_id"
+                            name="staff_id" class="form-control">
+                            <option value="">Unassigned</option>
+                            <?php if (!empty($staff_members)) {
+                                foreach ($staff_members as $s) {
+                                    echo '<option value="' . htmlspecialchars($s['id']) . '">' . htmlspecialchars($s['name']) . ' (' . htmlspecialchars($s['email']) . ')</option>';
+                                }
+                            } ?>
+                        </select></div>
+                    <div class="client-info-grid">
+                        <div class="form-group"><label for="edit_phone">Phone</label><input type="tel" id="edit_phone"
+                                name="phone" class="form-control" placeholder="+63 1-456-7890">
+                        </div>
+                        <div class="form-group"><label for="edit_age">Age</label><input type="number" id="edit_age"
+                                name="age" class="form-control" min="1" max="120"></div>
+                    </div>
+                    <div class="client-info-grid">
+                        <div class="form-group"><label for="edit_address">Street Address</label><input type="text"
+                                id="edit_address" name="address" class="form-control" placeholder="123 Main Street">
+                        </div>
+                        <div class="form-group"><label for="edit_city">City</label><input type="text" id="edit_city"
+                                name="city" class="form-control" placeholder="New York"></div>
+                    </div>
+                    <div class="client-info-grid">
+                        <div class="form-group"><label for="edit_state">State/Province</label><input type="text"
+                                id="edit_state" name="state" class="form-control" placeholder="NY"></div>
+                        <div class="form-group"><label for="edit_zip_code">ZIP/Postal Code</label><input type="text"
+                                id="edit_zip_code" name="zip_code" class="form-control" placeholder="10001"></div>
+                    </div>
+                    <div class="client-info-grid">
+                        <div class="form-group"><label for="edit_waist_circumference">Waist Circumference
+                                (cm)</label><input type="number" id="edit_waist_circumference"
+                                name="waist_circumference" class="form-control" step="0.1" min="0"
+                                placeholder="Enter waist measurement"></div>
+                        <div class="form-group"><label for="edit_hip_circumference">Hip Circumference
+                                (cm)</label><input type="number" id="edit_hip_circumference" name="hip_circumference"
+                                class="form-control" step="0.1" min="0" placeholder="Enter hip measurement"></div>
+                    </div>
+                    <div class="form-group"><label for="edit_new_password">New Password (linked user)</label>
+                        <div style="display:flex;align-items:center;gap:8px;"><input type="password"
+                                id="edit_new_password" name="new_password" class="form-control" placeholder="Optional"
+                                style="flex:1;"><button type="button" class="btn btn-outline"
+                                id="toggle_edit_new_password" title="Show/Hide Password"><i
+                                    class="fas fa-eye"></i></button></div>
+                    </div>
+                    <div class="form-group"><label for="edit_confirm_new_password">Confirm New Password</label>
+                        <div style="display:flex;align-items:center;gap:8px;"><input type="password"
+                                id="edit_confirm_new_password" name="confirm_new_password" class="form-control"
+                                placeholder="Re-enter new password" style="flex:1;"><button type="button"
+                                class="btn btn-outline" id="toggle_edit_confirm_new_password"
+                                title="Show/Hide Password"><i class="fas fa-eye"></i></button></div>
+                    </div>
+                </div>
+                <div class="form-actions"><button type="button" class="btn btn-outline"
+                        onclick="closeEditModal()">Cancel</button><button type="submit" class="btn btn-primary">Update
+                        Client</button></div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
