@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
                 // Insert new user
-                $insert_sql = "INSERT INTO users (name, email, password, role, status) VALUES (?, ?, ?, ?, 'active')";
+                $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'active', NOW(), NOW())";
                 $insert_stmt = $conn->prepare($insert_sql);
                 
                 if ($insert_stmt->execute([$name, $email, $hashed_password, $role])) {

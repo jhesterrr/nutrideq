@@ -135,11 +135,15 @@ try {
 
     // 6. Recent System Activity (REAL DATA)
     $activity_sql = "
-        (SELECT 'user' as type, name as title, 'New User Registered' as description, created_at, 'success' as status FROM users ORDER BY created_at DESC LIMIT 5)
-        UNION ALL
-        (SELECT 'food' as type, food_name as title, CONCAT('Food logged by User ID: ', user_id) as description, created_at, 'info' as status FROM food_tracking ORDER BY created_at DESC LIMIT 5)
-        UNION ALL
-        (SELECT 'message' as type, 'New Message' as title, content as description, created_at, 'warning' as status FROM wellness_messages ORDER BY created_at DESC LIMIT 5)
+        SELECT * FROM (
+            (SELECT 'user' as type, name as title, 'New User Registered' as description, created_at, 'success' as status FROM users ORDER BY created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT 'user' as type, name as title, 'Profile Updated' as description, updated_at as created_at, 'info' as status FROM users WHERE updated_at > created_at ORDER BY updated_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT 'food' as type, food_name as title, CONCAT('Food logged by User ID: ', user_id) as description, created_at, 'info' as status FROM food_tracking ORDER BY created_at DESC LIMIT 10)
+            UNION ALL
+            (SELECT 'message' as type, 'New Message' as title, content as description, created_at, 'warning' as status FROM wellness_messages ORDER BY created_at DESC LIMIT 10)
+        ) combined_activity
         ORDER BY created_at DESC
         LIMIT 10
     ";

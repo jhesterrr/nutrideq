@@ -10,6 +10,17 @@
         console.log('Admin Real-time Engine Started');
         updateAllStats();
         setInterval(updateAllStats, POLL_INTERVAL);
+
+        // Manual Refresh Button
+        const refreshBtn = document.getElementById('refreshSystemActivity');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon) icon.classList.add('fa-spin');
+                updateAllStats();
+                setTimeout(() => { if (icon) icon.classList.remove('fa-spin'); }, 1000);
+            });
+        }
     }
 
     function updateAllStats() {
