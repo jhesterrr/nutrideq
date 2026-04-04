@@ -100,11 +100,6 @@ $sidebar_nav_links = getNavigationLinks($sidebar_user_role, $current_page);
 <link rel="stylesheet" href="css/logout-modal.css?v=119">
 <link rel="stylesheet" href="css/interactive-animations.css?v=119">
 
-        background: rgba(239, 68, 68, 0.1);
-        transform: rotate(90deg);
-    }
-</style>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         function checkMessages() {
