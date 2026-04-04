@@ -336,10 +336,13 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
+    z-index: 10000; /* Peak Visibility */
+    align-items: flex-start; /* Fix for tall modals */
     justify-content: center;
+    padding: 20px 0;
+    overflow-y: auto; /* Allow the modal parent to scroll */
     animation: fadeIn 0.3s ease;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-content {
@@ -347,10 +350,11 @@
     border-radius: var(--border-radius) !important;
     width: 90%;
     max-width: 500px;
+    margin: 20px auto; /* Centering on scroll */
     box-shadow: var(--shadow-hover) !important;
     animation: slideIn 0.3s ease;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: none !important; /* Managed by .modal overflow */
+    position: relative;
     backdrop-filter: blur(15px);
     border: 1px solid var(--glass-border) !important;
 }
@@ -416,9 +420,13 @@
     display: flex;
     gap: 15px;
     justify-content: flex-end;
-    padding: 15px 25px 25px;
+    padding: 20px 25px 35px; /* Added bottom buffer */
     border-top: 1px solid var(--border-color);
     margin-top: 10px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 
 .password-requirements {
