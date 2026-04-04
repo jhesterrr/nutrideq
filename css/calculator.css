@@ -1,16 +1,73 @@
-:root {
-    --primary: #2E8B57;
-    --primary-dark: #1e6b42;
-    --primary-light: #3cb371;
-    --secondary: #4A90E2;
-    --accent: #FF6B6B;
-    --light: #F8F9FA;
-    --dark: #212529;
-    --gray: #6C757D;
-    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
-    --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+/* Premium Calculator Enhancements (V125) */
+.calculator-card {
+    background: var(--bg-surface) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 24px !important;
+    box-shadow: var(--shadow-premium) !important;
+    overflow: hidden;
+}
+
+.result-card {
+    background: linear-gradient(145deg, #ffffff, #f1f2f6) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px !important;
+    padding: 25px !important;
+    transition: var(--transition-smooth) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--gradient);
+    opacity: 0.8;
+}
+
+.result-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 20px 40px rgba(46, 139, 87, 0.12) !important;
+}
+
+.result-value {
+    font-size: 2.8rem !important;
+    background: var(--gradient) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    letter-spacing: -1px;
+}
+
+.calculate-btn {
+    background: var(--gradient) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    height: 56px;
+    box-shadow: 0 10px 20px rgba(46, 139, 87, 0.2) !important;
+}
+
+.method-option.active {
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 8px 15px rgba(46, 139, 87, 0.25) !important;
+}
+
+.disclaimer-box {
+    background: #fff !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--shadow) !important;
+    border-radius: 18px !important;
+}
+
+/* Sync with Global Desktop Frame */
+@media screen and (min-width: 1025px) {
+    .main-content {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+        padding: 40px !important;
+    }
 }
 
 * {
