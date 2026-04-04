@@ -96,5 +96,7 @@ $sidebar_nav_links = getNavigationLinks($sidebar_user_role, $current_page);
     </div>
 </div>
 
-<link rel="stylesheet" href="css/logout-modal.css">
-<script src="scripts/dashboard.js" defer></script>
+<link rel="stylesheet" href="css/logout-modal.css?v=119">
+<link rel="stylesheet" href="css/interactive-animations.css?v=119">
+<script src="scripts/dashboard.js?v=119" defer></script>
+<script src="scripts/interactive-effects.js?v=119" defer></script>

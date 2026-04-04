@@ -1,0 +1,97 @@
+/* interactive-animations.css - Elite Premium Animations */
+
+:root {
+    --hover-transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    --hover-transform: translateY(-5px) scale(1.02);
+    --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Global Transitions */
+a, button, .btn, .card, .benefit-card, .nutrition-card, .contact-item, .nav-links a, input, select, textarea {
+    transition: var(--hover-transition) !important;
+}
+
+/* Enhanced Hover Effects for Cards */
+.card:hover, .benefit-card:hover, .nutrition-card:hover, .management-section:hover, .dashboard-section:hover {
+    transform: var(--hover-transform) !important;
+    box-shadow: var(--hover-shadow) !important;
+    border-color: var(--primary-light) !important;
+}
+
+/* Button Pulse and Shine */
+.btn:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 10px 20px rgba(46, 139, 87, 0.2) !important;
+}
+
+.btn-primary:active {
+    transform: scale(0.95) !important;
+}
+
+/* Smooth Sidebar Transitions */
+.nav-links a {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-links a:hover {
+    padding-left: 20px !important;
+    background: rgba(46, 139, 87, 0.05) !important;
+}
+
+.nav-links a i {
+    transition: transform 0.3s ease;
+}
+
+.nav-links a:hover i {
+    transform: scale(1.2) rotate(10deg);
+}
+
+/* Interactive Input Focus */
+input:focus, select:focus, textarea:focus {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1) !important;
+}
+
+/* Table Row Hover */
+tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(46, 139, 87, 0.02) !important;
+}
+
+/* Liquid Entrance for All Sections */
+.main-content > *, .container > section, .messaging-wrapper > * {
+    animation: liquidIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes liquidIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+/* Floating Animation for Icons */
+.benefit-icon i, .logo i, .feature-box i {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Magnetic Mouse Interaction Class (Used by JS) */
+.magnetic {
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}

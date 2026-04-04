@@ -85,6 +85,8 @@ if ($selected_thread_id) {
     <link rel="stylesheet" href="css/base.css?v=119">
     <link rel="stylesheet" href="css/sidebar.css?v=119">
     <link rel="stylesheet" href="css/logout-modal.css?v=119">
+    <link rel="stylesheet" href="css/interactive-animations.css?v=119">
+    <script src="scripts/interactive-effects.js?v=119" defer></script>
     <style>
         /* MOBILE STACKING DOMINION - V111 */
         body { margin: 0; background: #f4f7f6 !important; overflow: hidden; font-family:'Poppins',sans-serif; }
