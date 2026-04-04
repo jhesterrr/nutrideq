@@ -117,31 +117,22 @@
         });
     };
 
-    // 4. Reveal Animations on Scroll (Refined for Instant Visibility)
+    // 4. Reveal Animations on Scroll
     const initScrollReveal = () => {
-        // Only target elements that are NOT meant to be instantly visible or have a specific class
-        const sections = document.querySelectorAll('.reveal-on-scroll, section.reveal, .card.animate');
+        const sections = document.querySelectorAll('section, .main-content > *, tr');
         
-        // If there are no specific reveal elements, we exit early to save performance
-        if (sections.length === 0) return;
-
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    revealElement(entry.target);
+                    entry.target.classList.add('visible');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
                     observer.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.1 });
 
-        const revealElement = (el) => {
-            el.classList.add('visible');
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0) scale(1)';
-        };
-
         sections.forEach(sec => {
-            // Initial state for specifically tagged elements
             sec.style.opacity = '0';
             sec.style.transform = 'translateY(30px) scale(0.95)';
             sec.style.transition = 'all 0.8s cubic-bezier(0.23, 1, 0.32, 1)';

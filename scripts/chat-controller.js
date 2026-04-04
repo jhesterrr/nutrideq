@@ -14,7 +14,6 @@ class ChatController {
         this.inputArea = document.getElementById('messageInput') || document.querySelector('.chat-input');
         this.attachBtn = document.getElementById('attachBtn');
         this.fileInput = document.getElementById('fileInput');
-        this.messageForm = document.getElementById('messageForm');
 
         this.init();
     }
@@ -27,19 +26,11 @@ class ChatController {
 
         // Enter to Send
         if (this.inputArea) {
-            this.inputArea.addEventListener('keydown', (e) => {
+            this.inputArea.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     this.sendMessage();
                 }
-            });
-        }
-
-        // Form Submit
-        if (this.messageForm) {
-            this.messageForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.sendMessage();
             });
         }
 
@@ -154,58 +145,6 @@ class ChatController {
                 lb.style.display = 'flex';
                 setTimeout(() => { lbImg.style.transform = 'scale(1)'; }, 10);
             }
-        });
-    }
-
-    // AI SUGGESTIONS - V116
-    async toggleAISuggestions() {
-        const wrapper = document.getElementById('aiSuggestions');
-        if (!wrapper) return;
-
-        if (wrapper.classList.contains('visible')) {
-            wrapper.classList.remove('visible');
-            setTimeout(() => { if(!wrapper.classList.contains('visible')) wrapper.style.display = 'none'; }, 500);
-            return;
-        }
-
-        const context = this.inputArea ? this.inputArea.value : '';
-        wrapper.innerHTML = '<div style="padding:10px 32px; color:var(--text-tertiary); font-style:italic;"><i class="fas fa-spinner fa-spin"></i> Consulting AI...</div>';
-        wrapper.style.display = 'flex';
-        setTimeout(() => wrapper.classList.add('visible'), 10);
-
-        try {
-            const res = await fetch(`api/ai_suggest.php?context=${encodeURIComponent(context)}`);
-            const data = await res.json();
-            if (data.success) {
-                this.renderAISuggestions(data.suggestions);
-            }
-        } catch (e) {
-            console.error('AI Fetch error:', e);
-            wrapper.classList.remove('visible');
-        }
-    }
-
-    renderAISuggestions(suggestions) {
-        const wrapper = document.getElementById('aiSuggestions');
-        if (!wrapper) return;
-        
-        wrapper.innerHTML = '';
-        suggestions.forEach(txt => {
-            const card = document.createElement('div');
-            card.className = 'ai-suggestion-card';
-            card.innerHTML = `<i class="fas fa-magic" style="font-size:0.8rem; opacity:0.7;"></i> ${txt}`;
-            
-            card.onclick = () => {
-                if (this.inputArea) {
-                    this.inputArea.value = txt;
-                    this.inputArea.focus();
-                    this.inputArea.style.height = 'auto';
-                    this.inputArea.style.height = this.inputArea.scrollHeight + 'px';
-                }
-                wrapper.classList.remove('visible');
-                setTimeout(() => { if(!wrapper.classList.contains('visible')) wrapper.style.display = 'none'; }, 500);
-            };
-            wrapper.appendChild(card);
         });
     }
 }
