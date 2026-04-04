@@ -117,10 +117,14 @@
         });
     };
 
-    // 4. Reveal Animations on Scroll (Hardened with Fail-safe)
+    // 4. Reveal Animations on Scroll (Refined for Instant Visibility)
     const initScrollReveal = () => {
-        const sections = document.querySelectorAll('section, .main-content > *, tr, .dashboard-section, .card');
+        // Only target elements that are NOT meant to be instantly visible or have a specific class
+        const sections = document.querySelectorAll('.reveal-on-scroll, section.reveal, .card.animate');
         
+        // If there are no specific reveal elements, we exit early to save performance
+        if (sections.length === 0) return;
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -128,7 +132,7 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.05 });
+        }, { threshold: 0.1 });
 
         const revealElement = (el) => {
             el.classList.add('visible');
@@ -137,18 +141,12 @@
         };
 
         sections.forEach(sec => {
+            // Initial state for specifically tagged elements
             sec.style.opacity = '0';
             sec.style.transform = 'translateY(30px) scale(0.95)';
             sec.style.transition = 'all 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
             observer.observe(sec);
         });
-
-        // Global Fail-safe: Reveal everything after 1.5s if observer fails
-        setTimeout(() => {
-            sections.forEach(sec => {
-                if (sec.style.opacity === '0') revealElement(sec);
-            });
-        }, 1500);
     };
 
     const init = () => {
