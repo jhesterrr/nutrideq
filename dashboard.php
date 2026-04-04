@@ -1799,201 +1799,6 @@ $pdo = $database->getConnection();
                                 logoutModal.classList.remove('active');
                             }
                         });
-                        }
-
-                        .quick-action-icon.dietary {
-                            background: linear-gradient(135deg, #11998e, #38ef7d);
-                        }
-
-                        .quick-action-content h3 {
-                            font-size: 1.1rem;
-                            margin-bottom: 8px;
-                            color: var(--dark);
-                        }
-
-                        .quick-action-content p {
-                            font-size: 0.85rem;
-                            color: var(--gray);
-                            line-height: 1.4;
-                        }
-
-                        .two-column-layout {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 25px;
-                            margin-bottom: 30px;
-                        }
-
-                        .column {
-                            display: flex;
-                            flex-direction: column;
-                        }
-
-                        /* Fix button sizes in user dashboard */
-                        .user-dashboard .btn,
-                        .user-dashboard .btn-primary,
-                        .user-dashboard .btn-outline {
-                            padding: 8px 16px;
-                            font-size: 0.85rem;
-                            height: auto;
-                            min-height: 36px;
-                        }
-
-                        .user-dashboard .btn-primary {
-                            padding: 8px 16px;
-                            font-size: 0.85rem;
-                        }
-
-                        .user-dashboard .btn-outline {
-                            padding: 6px 12px;
-                            font-size: 0.8rem;
-                        }
-
-                        .user-dashboard .action-btn {
-                            width: 32px;
-                            height: 32px;
-                            padding: 0;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        }
-
-                        .user-dashboard .action-btn i {
-                            font-size: 0.8rem;
-                        }
-
-                        /* Fix the "View Details" buttons in meal plans */
-                        .user-dashboard .view-plan-btn {
-                            padding: 6px 12px;
-                            font-size: 0.8rem;
-                            min-width: auto;
-                        }
-
-                        /* Fix buttons in no-data messages */
-                        .user-dashboard .no-data-message .btn {
-                            padding: 8px 16px;
-                            font-size: 0.85rem;
-                            margin-top: 10px;
-                        }
-
-                        /* Fix section header buttons */
-                        .user-dashboard .section-header .btn {
-                            padding: 8px 16px;
-                            font-size: 0.85rem;
-                            white-space: nowrap;
-                        }
-
-                        /* Make sure quick action cards have proper button sizing */
-                        .user-dashboard .quick-action-card {
-                            padding: 20px;
-                        }
-
-                        .user-dashboard .quick-action-icon {
-                            width: 50px;
-                            height: 50px;
-                            font-size: 1.2rem;
-                        }
-
-                        .user-dashboard .quick-action-content h3 {
-                            font-size: 1rem;
-                            margin-bottom: 6px;
-                        }
-
-                        .user-dashboard .quick-action-content p {
-                            font-size: 0.8rem;
-                            line-height: 1.3;
-                        }
-
-                        @media (max-width: 768px) {
-                            .two-column-layout {
-                                grid-template-columns: 1fr;
-                            }
-
-                            .quick-actions-grid {
-                                grid-template-columns: 1fr;
-                            }
-                        }
-                    </style>
-                <?php endif; ?>
-
-            </div>
-
-            <!-- Add Food Dialog Modal (Admin) -->
-            <?php if ($user_role === 'admin'): ?>
-                <div class="dialog-modal" id="foodDialog">
-                    <div class="dialog-content">
-                        <div class="dialog-header">
-                            <h3>Add Nutritional Food</h3>
-                        </div>
-                        <div class="dialog-body">
-                            <p>Select the food you'd like to add to your nutrition plan:</p>
-                            <div class="food-options">
-                                <div class="food-option">
-                                    <input type="checkbox" id="food1">
-                                    <label for="food1">Fresh Fruits Basket</label>
-                                </div>
-                                <div class="food-option">
-                                    <input type="checkbox" id="food2">
-                                    <label for="food2">Vegetable Medley</label>
-                                </div>
-                                <div class="food-option">
-                                    <input type="checkbox" id="food3">
-                                    <label for="food3">Lean Protein Pack</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dialog-footer">
-                            <button class="btn btn-outline" id="cancelDialog">Cancel</button>
-                            <button class="btn btn-primary" id="confirmDialog">Add Selected</button>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <script src="scripts/dashboard.js"></script>
-            <?php if ($user_role === 'admin'): ?>
-                <script src="scripts/admin.js"></script>
-            <?php elseif ($user_role === 'staff'): ?>
-                <script src="scripts/staff.js"></script>
-            <?php endif; ?>
-
-            <!-- Logout Modal Functionality -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const logoutBtn = document.getElementById('logoutBtn');
-                    const logoutModal = document.getElementById('logoutModal');
-                    const cancelLogout = document.getElementById('cancelLogout');
-                    const confirmLogout = document.getElementById('confirmLogout');
-
-                    // Open logout modal
-                    if (logoutBtn && logoutModal) {
-                        logoutBtn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            logoutModal.classList.add('active');
-                        });
-                    }
-
-                    // Cancel logout
-                    if (cancelLogout && logoutModal) {
-                        cancelLogout.addEventListener('click', function () {
-                            logoutModal.classList.remove('active');
-                        });
-                    }
-
-                    // Confirm logout
-                    if (confirmLogout) {
-                        confirmLogout.addEventListener('click', function () {
-                            window.location.href = 'login-logout/logout.php';
-                        });
-                    }
-
-                    // Close modal when clicking outside
-                    if (logoutModal) {
-                        logoutModal.addEventListener('click', function (e) {
-                            if (e.target === logoutModal) {
-                                logoutModal.classList.remove('active');
-                            }
-                        });
                     }
 
                     // Close modal with Escape key
@@ -2005,80 +1810,92 @@ $pdo = $database->getConnection();
                 });
             </script>
 
+            <!-- Realtime Support & Reports -->
             <script src="scripts/realtime-dashboard.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
             <script src="scripts/user-realtime.js" defer></script>
 
-            <!-- Notification Toast -->
+            <!-- Notification Toast Container -->
             <div id="notificationToast" class="notification-toast">
-                <div class="toast-icon"><i class="fas fa-bell"></i></div>
-                <div class="toast-content">
-                    <h4 class="toast-title">New Notification</h4>
-                    <p class="toast-message" id="toastMessageText">Checking for updates...</p>
+                <div class="toast-icon">
+                    <i class="fas fa-comment-dots"></i>
                 </div>
-                <button class="toast-close" onclick="hideToast()"><i class="fas fa-times"></i></button>
+                <div class="toast-content">
+                    <h4 class="toast-title">New Message</h4>
+                    <p class="toast-message" id="toastMessageText">You have a new message from Client.</p>
+                </div>
+                <button class="toast-close" onclick="hideToast()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
+            <!-- Dashboard Polling Script -->
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     const toast = document.getElementById('notificationToast');
                     const audio = new Audio('assets/notification.mp3');
                     let knownMessageIds = new Set();
 
+                    // Initialize known IDs from PHP context if available
                     <?php if (isset($messages) && is_array($messages)): ?>
                         <?php foreach ($messages as $m): ?>
-                            knownMessageIds.add(<?php echo (int)$m['id']; ?>);
+                            knownMessageIds.add(<?php echo (int)($m['id'] ?? 0); ?>);
                         <?php endforeach; ?>
                     <?php endif; ?>
 
                     function checkMessages() {
                         fetch(BASE_URL + 'handlers/get_dashboard_messages.php')
-                            .then(r => r.json())
+                            .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
                                     if (data.unread_count !== undefined) {
                                         const badge = document.getElementById('unreadMessages');
                                         if (badge) badge.textContent = data.unread_count;
                                     }
-                                    checkForNew(data.messages);
+                                    checkForNewMessages(data.messages);
                                 }
-                            });
+                            })
+                            .catch(err => console.error('Polling error:', err));
                     }
 
-                    function checkForNew(messages) {
+                    function checkForNewMessages(messages) {
                         if (!messages) return;
                         let hasNew = false;
-                        let lastSender = '';
+                        let latestSender = '';
                         messages.forEach(msg => {
                             const id = parseInt(msg.id);
                             if (!knownMessageIds.has(id)) {
                                 knownMessageIds.add(id);
                                 if (!msg.is_read) {
                                     hasNew = true;
-                                    lastSender = msg.client_name;
+                                    latestSender = msg.client_name;
                                 }
                             }
                         });
-                        if (hasNew) showToast(lastSender);
+                        if (hasNew) showToast(latestSender);
                     }
 
                     function showToast(sender) {
-                        const txt = document.getElementById('toastMessageText');
-                        if (txt) txt.textContent = `New message from ${sender}`;
+                        const text = document.getElementById('toastMessageText');
+                        if (text) text.textContent = `New message from ${sender}`;
                         if (toast) {
                             toast.classList.add('show');
                             toast.onclick = (e) => {
                                 if (e.target.closest('.toast-close')) return;
-                                location.href = ('<?php echo $user_role; ?>' === 'admin' ? 'admin-internal-messages.php' : 'staff-messages.php');
+                                const userRole = '<?php echo $user_role; ?>';
+                                window.location.href = (userRole === 'admin') ? 'admin-internal-messages.php' : 'staff-messages.php';
                             };
                             setTimeout(hideToast, 5000);
                         }
                         try { audio.play(); } catch(e) {}
                     }
 
-                    window.hideToast = () => toast ? toast.classList.remove('show') : null;
+                    window.hideToast = function () {
+                        if (toast) toast.classList.remove('show');
+                    };
 
+                    // Only poll if on a relevant dashboard view
                     if (document.querySelector('.staff-grid') || document.querySelector('.admin-grid')) {
                         setInterval(checkMessages, 10000);
                     }
@@ -2098,7 +1915,7 @@ $pdo = $database->getConnection();
                 .toast-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(45,138,86,0.1); color: #2D8A56; display: flex; align-items: center; justify-content: center; }
                 .toast-title { margin: 0; font-size: 0.9rem; font-weight: 600; color: #333; }
                 .toast-message { margin: 0; font-size: 0.8rem; color: #666; }
-                .toast-close { background: none; border: none; color: #999; cursor: pointer; }
+                .toast-close { background: none; border: none; color: #999; cursor: pointer; font-size: 1rem; }
             </style>
 
             <script>
