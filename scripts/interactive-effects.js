@@ -117,20 +117,24 @@
         });
     };
 
-    // 4. Reveal Animations on Scroll
+    // 4. Reveal Animations on Scroll (Hardened with Fail-safe)
     const initScrollReveal = () => {
-        const sections = document.querySelectorAll('section, .main-content > *, tr');
+        const sections = document.querySelectorAll('section, .main-content > *, tr, .dashboard-section, .card');
         
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0) scale(1)';
+                    revealElement(entry.target);
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.1 });
+        }, { threshold: 0.05 });
+
+        const revealElement = (el) => {
+            el.classList.add('visible');
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0) scale(1)';
+        };
 
         sections.forEach(sec => {
             sec.style.opacity = '0';
@@ -138,6 +142,13 @@
             sec.style.transition = 'all 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
             observer.observe(sec);
         });
+
+        // Global Fail-safe: Reveal everything after 1.5s if observer fails
+        setTimeout(() => {
+            sections.forEach(sec => {
+                if (sec.style.opacity === '0') revealElement(sec);
+            });
+        }, 1500);
     };
 
     const init = () => {
