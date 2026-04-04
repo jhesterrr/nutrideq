@@ -1,4 +1,5 @@
 .sidebar {
+    font-family: 'Poppins', sans-serif !important;
     width: 260px;
     background: #ffffff;
     backdrop-filter: none;
@@ -17,7 +18,7 @@
 }
 
 .logo {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Playfair Display', serif !important;
     font-size: 24px;
     font-weight: 700;
     color: var(--primary);
@@ -59,6 +60,8 @@
     transition: all 0.2s ease;
     position: relative;
     font-weight: 500;
+    font-size: 14px !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 .nav-links a:hover,
@@ -144,7 +147,7 @@
     border: none;
     background: none;
     width: 100%;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif !important;
     font-size: 14px;
 }
 

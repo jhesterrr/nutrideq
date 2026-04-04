@@ -103,12 +103,9 @@ if ($selected_thread_id) {
 
         @keyframes liquidIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* THE ATOMIC SIDEBAR SYNC (PEAK Z-INDEX) */
-        .sidebar { background: #ffffff !important; border-right: 1px solid rgba(46, 139, 87, 0.1); padding: 20px 0; display: flex; flex-direction: column; width: 260px; height: 100vh; position: fixed; left: 0; top: 0; z-index: 9999 !important; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto !important; }
-        .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #2e8b57; display: flex; align-items: center; text-decoration: none; padding: 0 20px 20px; border-bottom: 1px solid rgba(46, 139, 87, 0.1); margin-bottom: 15px; }
-        .nav-links { list-style: none; padding: 0 15px; flex: 1; margin: 0; }
-        .nav-links a { display: flex; align-items: center; padding: 12px 15px; text-decoration: none; color: #555; border-radius: 10px; transition: all 0.3s ease; font-weight: 500; font-size: 14px; position: relative; }
-        .nav-links a:hover, .nav-links a.active { color: #2e8b57; background-color: rgba(46, 139, 87, 0.08); }
+        /* Unified Sidebar Integration */
+        .sidebar { font-family: 'Poppins', sans-serif !important; }
+        .logo { font-family: 'Playfair Display', serif !important; }
 
         .mobile-nav-header { display: none; background: #2e8b57; padding: 15px 20px; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; width: 100%; z-index: 9000; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9500 !important; backdrop-filter: blur(4px); }
