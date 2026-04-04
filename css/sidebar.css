@@ -40,8 +40,17 @@
 
 .nav-links {
     list-style: none;
-    padding: 0 15px;
+    padding: 0 12px;
     flex: 1;
+}
+
+.nav-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 20px 15px 10px;
 }
 
 .nav-links li {
@@ -75,13 +84,13 @@
 .nav-links a.active::after {
     content: '';
     position: absolute;
-    right: 0;
+    left: -12px;
     top: 50%;
     transform: translateY(-50%);
-    height: 60%;
-    width: 3px;
+    height: 70%;
+    width: 4px;
     background-color: #2D8A56;
-    border-radius: 4px 0 0 4px;
+    border-radius: 0 4px 4px 0;
 }
 
 .nav-links a i {

@@ -1799,6 +1799,201 @@ $pdo = $database->getConnection();
                                 logoutModal.classList.remove('active');
                             }
                         });
+                        }
+
+                        .quick-action-icon.dietary {
+                            background: linear-gradient(135deg, #11998e, #38ef7d);
+                        }
+
+                        .quick-action-content h3 {
+                            font-size: 1.1rem;
+                            margin-bottom: 8px;
+                            color: var(--dark);
+                        }
+
+                        .quick-action-content p {
+                            font-size: 0.85rem;
+                            color: var(--gray);
+                            line-height: 1.4;
+                        }
+
+                        .two-column-layout {
+                            display: grid;
+                            grid-template-columns: 1fr 1fr;
+                            gap: 25px;
+                            margin-bottom: 30px;
+                        }
+
+                        .column {
+                            display: flex;
+                            flex-direction: column;
+                        }
+
+                        /* Fix button sizes in user dashboard */
+                        .user-dashboard .btn,
+                        .user-dashboard .btn-primary,
+                        .user-dashboard .btn-outline {
+                            padding: 8px 16px;
+                            font-size: 0.85rem;
+                            height: auto;
+                            min-height: 36px;
+                        }
+
+                        .user-dashboard .btn-primary {
+                            padding: 8px 16px;
+                            font-size: 0.85rem;
+                        }
+
+                        .user-dashboard .btn-outline {
+                            padding: 6px 12px;
+                            font-size: 0.8rem;
+                        }
+
+                        .user-dashboard .action-btn {
+                            width: 32px;
+                            height: 32px;
+                            padding: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+                        .user-dashboard .action-btn i {
+                            font-size: 0.8rem;
+                        }
+
+                        /* Fix the "View Details" buttons in meal plans */
+                        .user-dashboard .view-plan-btn {
+                            padding: 6px 12px;
+                            font-size: 0.8rem;
+                            min-width: auto;
+                        }
+
+                        /* Fix buttons in no-data messages */
+                        .user-dashboard .no-data-message .btn {
+                            padding: 8px 16px;
+                            font-size: 0.85rem;
+                            margin-top: 10px;
+                        }
+
+                        /* Fix section header buttons */
+                        .user-dashboard .section-header .btn {
+                            padding: 8px 16px;
+                            font-size: 0.85rem;
+                            white-space: nowrap;
+                        }
+
+                        /* Make sure quick action cards have proper button sizing */
+                        .user-dashboard .quick-action-card {
+                            padding: 20px;
+                        }
+
+                        .user-dashboard .quick-action-icon {
+                            width: 50px;
+                            height: 50px;
+                            font-size: 1.2rem;
+                        }
+
+                        .user-dashboard .quick-action-content h3 {
+                            font-size: 1rem;
+                            margin-bottom: 6px;
+                        }
+
+                        .user-dashboard .quick-action-content p {
+                            font-size: 0.8rem;
+                            line-height: 1.3;
+                        }
+
+                        @media (max-width: 768px) {
+                            .two-column-layout {
+                                grid-template-columns: 1fr;
+                            }
+
+                            .quick-actions-grid {
+                                grid-template-columns: 1fr;
+                            }
+                        }
+                    </style>
+                <?php endif; ?>
+
+            </div>
+
+            <!-- Add Food Dialog Modal (Admin) -->
+            <?php if ($user_role === 'admin'): ?>
+                <div class="dialog-modal" id="foodDialog">
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h3>Add Nutritional Food</h3>
+                        </div>
+                        <div class="dialog-body">
+                            <p>Select the food you'd like to add to your nutrition plan:</p>
+                            <div class="food-options">
+                                <div class="food-option">
+                                    <input type="checkbox" id="food1">
+                                    <label for="food1">Fresh Fruits Basket</label>
+                                </div>
+                                <div class="food-option">
+                                    <input type="checkbox" id="food2">
+                                    <label for="food2">Vegetable Medley</label>
+                                </div>
+                                <div class="food-option">
+                                    <input type="checkbox" id="food3">
+                                    <label for="food3">Lean Protein Pack</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialog-footer">
+                            <button class="btn btn-outline" id="cancelDialog">Cancel</button>
+                            <button class="btn btn-primary" id="confirmDialog">Add Selected</button>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <script src="scripts/dashboard.js"></script>
+            <?php if ($user_role === 'admin'): ?>
+                <script src="scripts/admin.js"></script>
+            <?php elseif ($user_role === 'staff'): ?>
+                <script src="scripts/staff.js"></script>
+            <?php endif; ?>
+
+            <!-- Logout Modal Functionality -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const logoutBtn = document.getElementById('logoutBtn');
+                    const logoutModal = document.getElementById('logoutModal');
+                    const cancelLogout = document.getElementById('cancelLogout');
+                    const confirmLogout = document.getElementById('confirmLogout');
+
+                    // Open logout modal
+                    if (logoutBtn && logoutModal) {
+                        logoutBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            logoutModal.classList.add('active');
+                        });
+                    }
+
+                    // Cancel logout
+                    if (cancelLogout && logoutModal) {
+                        cancelLogout.addEventListener('click', function () {
+                            logoutModal.classList.remove('active');
+                        });
+                    }
+
+                    // Confirm logout
+                    if (confirmLogout) {
+                        confirmLogout.addEventListener('click', function () {
+                            window.location.href = 'login-logout/logout.php';
+                        });
+                    }
+
+                    // Close modal when clicking outside
+                    if (logoutModal) {
+                        logoutModal.addEventListener('click', function (e) {
+                            if (e.target === logoutModal) {
+                                logoutModal.classList.remove('active');
+                            }
+                        });
                     }
 
                     // Close modal with Escape key
@@ -1809,396 +2004,112 @@ $pdo = $database->getConnection();
                     });
                 });
             </script>
+
             <script src="scripts/realtime-dashboard.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
             <script src="scripts/user-realtime.js" defer></script>
-            <!-- Notification Toast Container -->
+
+            <!-- Notification Toast -->
             <div id="notificationToast" class="notification-toast">
-                <div class="toast-icon">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
+                <div class="toast-icon"><i class="fas fa-bell"></i></div>
                 <div class="toast-content">
-                    <h4 class="toast-title">New Message</h4>
-                    <p class="toast-message" id="toastMessageText">You have a new message from Client.</p>
+                    <h4 class="toast-title">New Notification</h4>
+                    <p class="toast-message" id="toastMessageText">Checking for updates...</p>
                 </div>
-                <button class="toast-close" onclick="hideToast()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="toast-close" onclick="hideToast()"><i class="fas fa-times"></i></button>
             </div>
 
-            <!-- Dashboard Polling Script -->
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    // Only run on staff dashboard
-                    if (!document.querySelector('.staff-grid')) return;
-
+                    const toast = document.getElementById('notificationToast');
+                    const audio = new Audio('assets/notification.mp3');
                     let knownMessageIds = new Set();
 
-                    // Initialize known IDs from PHP rendered list
                     <?php if (isset($messages) && is_array($messages)): ?>
                         <?php foreach ($messages as $m): ?>
-                            knownMessageIds.add(<?php echo $m['id']; ?>);
+                            knownMessageIds.add(<?php echo (int)$m['id']; ?>);
                         <?php endforeach; ?>
                     <?php endif; ?>
 
-                    const toast = document.getElementById('notificationToast');
-                    const audio = new Audio('assets/notification.mp3'); // Ensure this file exists or use a CDN sound if preferred, or silent
-
-                    // Polling Function
                     function checkMessages() {
                         fetch(BASE_URL + 'handlers/get_dashboard_messages.php')
-                            .then(response => response.json())
+                            .then(r => r.json())
                             .then(data => {
                                 if (data.success) {
-                                    updateUnreadBadge(data.unread_count);
-                                    updateMessageList(data.messages);
-                                    checkForNewMessages(data.messages);
+                                    if (data.unread_count !== undefined) {
+                                        const badge = document.getElementById('unreadMessages');
+                                        if (badge) badge.textContent = data.unread_count;
+                                    }
+                                    checkForNew(data.messages);
                                 }
-                            })
-                            .catch(err => console.error('Polling error:', err));
+                            });
                     }
 
-                    function updateUnreadBadge(count) {
-                        const badge = document.getElementById('unreadMessages');
-                        if (badge) badge.textContent = count;
-
-                        // Update Badge Style
-                        const trendIcon = badge.parentElement.querySelector('.metric-trend i');
-                        const trendText = badge.parentElement.querySelector('.metric-trend span');
-                        const trendContainer = badge.parentElement.querySelector('.metric-trend');
-
-                        if (count > 0) {
-                            trendContainer.className = 'metric-trend trend-alert';
-                            trendIcon.className = 'fas fa-exclamation-circle';
-                            trendText.textContent = 'Needs attention';
-                        } else {
-                            trendContainer.className = 'metric-trend trend-neutral';
-                            trendIcon.className = 'fas fa-check-circle';
-                            trendText.textContent = 'All caught up';
-                        }
-                    }
-
-                    function updateMessageList(messages) {
-                        const container = document.querySelector('.messages-list');
-                        if (!container) return;
-
-                        if (messages.length === 0) {
-                            container.innerHTML = `
-                        <div class="no-data-message">
-                            <i class="fas fa-comments"></i>
-                            <h3>No Messages</h3>
-                            <p>You have no messages from clients at this time.</p>
-                        </div>`;
-                            return;
-                        }
-
-                        const html = messages.map(msg => `
-                    <div class="message-item ${msg.is_read ? '' : 'unread'}">
-                        <div class="message-avatar">
-                            ${msg.client_name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div class="message-details">
-                            <div class="message-header">
-                                <div class="message-client">${msg.client_name}</div>
-                                <div class="message-time">${msg.time_display}</div>
-                            </div>
-                            <div class="message-preview">${msg.message}</div>
-                            ${!msg.is_read ? '<div class="message-status unread-badge">Unread</div>' : ''}
-                        </div>
-                        <div class="message-actions">
-                            <button class="action-btn view-btn" title="View Message" onclick="location.href='staff-messages.php?client_id=${msg.client_id}'">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-
-                        container.innerHTML = html;
-                    }
-
-                    function checkForNewMessages(messages) {
+                    function checkForNew(messages) {
+                        if (!messages) return;
                         let hasNew = false;
-                        let latestSender = '';
-
+                        let lastSender = '';
                         messages.forEach(msg => {
                             const id = parseInt(msg.id);
                             if (!knownMessageIds.has(id)) {
                                 knownMessageIds.add(id);
                                 if (!msg.is_read) {
                                     hasNew = true;
-                                    latestSender = msg.client_name;
+                                    lastSender = msg.client_name;
                                 }
                             }
                         });
-
-                        if (hasNew) {
-                            showToast(latestSender);
-                        }
+                        if (hasNew) showToast(lastSender);
                     }
 
                     function showToast(sender) {
-                        const text = document.getElementById('toastMessageText');
-                        text.textContent = `New message from ${sender}`;
-                        toast.classList.add('show');
-
-                        // Play sound (may be blocked by browser policy without interaction)
-                        try { audio.play().catch(e => { }); } catch (e) { }
-
-                        setTimeout(() => {
-                            hideToast();
-                        }, 5000);
-                    }
-
-                    window.hideToast = function () {
-                        toast.classList.remove('show');
-                    };
-
-                    // Poll every 10 seconds
-                    setInterval(checkMessages, 10000);
-                });
-                // --- ADMIN COMMAND CENTER LOGIC ---
-                let healthChart, activityChart;
-
-                function initCharts() {
-                    const healthCtx = document.getElementById('healthTrendsChart')?.getContext('2d');
-                    const activityCtx = document.getElementById('activityRatiosChart')?.getContext('2d');
-
-                    if (healthCtx) {
-                        healthChart = new Chart(healthCtx, {
-                            type: 'line',
-                            data: {
-                                labels: [],
-                                datasets: [
-                                    { label: 'Avg Calories', data: [], borderColor: '#2e8b57', backgroundColor: 'rgba(46, 139, 87, 0.1)', fill: true, tension: 0.4 },
-                                    { label: 'Avg Hydration (Glasses)', data: [], borderColor: '#4a90e2', backgroundColor: 'rgba(74, 144, 226, 0.1)', fill: true, tension: 0.4 }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: { legend: { labels: { color: '#333' } } },
-                                scales: {
-                                    y: { grid: { color: '#e9ecef' }, ticks: { color: '#666' } },
-                                    x: { grid: { color: '#e9ecef' }, ticks: { color: '#666' } }
-                                }
-                            }
-                        });
-                    }
-
-                    if (activityCtx) {
-                        activityChart = new Chart(activityCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: [],
-                                datasets: [
-                                    { label: 'User Logins', data: [], backgroundColor: '#f39c12' },
-                                    { label: 'Goals Met', data: [], backgroundColor: '#2e8b57' }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: { legend: { labels: { color: '#333' } } },
-                                scales: {
-                                    y: { grid: { color: '#e9ecef' }, ticks: { color: '#666' } },
-                                    x: { grid: { color: '#e9ecef' }, ticks: { color: '#666' } }
-                                }
-                            }
-                        });
-                    }
-                }
-
-                function updateDashboard(staffId) {
-                    fetch(BASE_URL + `api/admin_stats.php?staff_id=${staffId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (!data.success) return;
-
-                            // Update Health Chart
-                            if (healthChart) {
-                                healthChart.data.labels = data.health_trends.labels;
-                                healthChart.data.datasets[0].data = data.health_trends.calories;
-                                healthChart.data.datasets[1].data = data.health_trends.hydration;
-                                healthChart.update('none'); // No flickering
-                            }
-
-                            // Update Activity Chart
-                            if (activityChart) {
-                                activityChart.data.labels = data.activity_ratios.labels;
-                                activityChart.data.datasets[0].data = data.activity_ratios.logins;
-                                activityChart.data.datasets[1].data = data.activity_ratios.goals_met;
-                                activityChart.update('none');
-                            }
-
-                            // Update Workload
-                            const workloadPercent = (data.workload.total_clients / data.workload.max_capacity) * 100;
-                            document.getElementById('workloadProgressBar').style.width = workloadPercent + '%';
-                            document.getElementById('workloadText').innerHTML = `Utilizing <strong>${data.workload.total_clients}</strong> / ${data.workload.max_capacity} capacity (${Math.round(workloadPercent)}%)`;
-
-                            if (workloadPercent > 80) document.getElementById('workloadProgressBar').style.background = '#e74c3c';
-                            else if (workloadPercent > 50) document.getElementById('workloadProgressBar').style.background = '#f39c12';
-                            else document.getElementById('workloadProgressBar').style.background = '#2e8b57';
-
-                            // Update Alerts
-                            const alertsList = document.getElementById('alertsList');
-                            if (data.alerts.length === 0) {
-                                alertsList.innerHTML = '<div style="color: #999; font-size: 0.85rem; padding: 15px; border: 1px dashed #e9ecef; border-radius: 8px; text-align: center; background: #f8f9fa;">No immediate alerts.</div>';
-                            } else {
-                                alertsList.innerHTML = data.alerts.map(alert => `
-                                <div style="background: rgba(231, 76, 60, 0.08); border-left: 3px solid #e74c3c; padding: 12px; border-radius: 6px;">
-                                    <div style="font-weight: 500; font-size: 0.9rem; color: #333;">${alert.name}</div>
-                                    <div style="font-size: 0.8rem; color: #e74c3c; margin-top: 4px;">No activity for 48h (Last: ${alert.last_log || 'Never'})</div>
-                                </div>
-                            `).join('');
-                            }
-
-                            // Update Staff Engagement Delta Badges
-                            const deltaList = document.getElementById('staffDeltaList');
-                            const deltaBadge = document.getElementById('deltaSelectedBadge');
-
-                            if (data.staff_list && data.staff_list.length > 0) {
-                                deltaList.innerHTML = data.staff_list.map(staff => {
-                                    let badgeColor = '#95a5a6'; // Gray for null/0
-                                    let badgeText = 'N/A';
-                                    let textColor = '#fff';
-
-                                    if (staff.engagement_delta !== null) {
-                                        if (staff.engagement_delta > 0) {
-                                            badgeColor = '#27ae60';
-                                            badgeText = '+' + staff.engagement_delta + '%';
-                                        } else if (staff.engagement_delta < 0) {
-                                            badgeColor = '#e74c3c';
-                                            badgeText = staff.engagement_delta + '%';
-                                        } else {
-                                            badgeColor = '#95a5a6';
-                                            badgeText = '0%';
-                                        }
-                                    }
-
-                                    return `
-                                    <div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef;">
-                                        <span style="font-weight: 500; color: #333; font-size: 0.9rem;">${staff.name}</span>
-                                        <span style="background: ${badgeColor}; color: ${textColor}; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">${badgeText}</span>
-                                    </div>
-                                `;
-                                }).join('');
-                            } else {
-                                deltaList.innerHTML = '<div style="color: #999; font-size: 0.85rem;">No staff data available.</div>';
-                            }
-
-                            // Update selected staff badge in header
-                            if (staffId !== 'all' && data.engagement_delta !== null) {
-                                let headerColor = data.engagement_delta > 0 ? '#27ae60' : (data.engagement_delta < 0 ? '#e74c3c' : '#95a5a6');
-                                let headerText = data.engagement_delta > 0 ? '+' + data.engagement_delta + '%' : data.engagement_delta + '%';
-                                deltaBadge.style.display = 'inline-block';
-                                deltaBadge.style.background = headerColor;
-                                deltaBadge.style.color = '#fff';
-                                deltaBadge.textContent = headerText;
-                            } else {
-                                deltaBadge.style.display = 'none';
-                            }
-                        });
-                }
-
-                document.addEventListener('DOMContentLoaded', () => {
-                    const userRole = '<?php echo $user_role; ?>';
-                    if (userRole === 'admin') {
-                        initCharts();
-                        const staffFilter = document.getElementById('staffFilter');
-                        if (staffFilter) {
-                            staffFilter.addEventListener('change', (e) => updateDashboard(e.target.value));
-                            updateDashboard(staffFilter.value);
+                        const txt = document.getElementById('toastMessageText');
+                        if (txt) txt.textContent = `New message from ${sender}`;
+                        if (toast) {
+                            toast.classList.add('show');
+                            toast.onclick = (e) => {
+                                if (e.target.closest('.toast-close')) return;
+                                location.href = ('<?php echo $user_role; ?>' === 'admin' ? 'admin-internal-messages.php' : 'staff-messages.php');
+                            };
+                            setTimeout(hideToast, 5000);
                         }
+                        try { audio.play(); } catch(e) {}
+                    }
 
-                        // Auto-refresh every 60 seconds
-                        setInterval(() => {
-                            updateDashboard(staffFilter.value);
-                        }, 60000);
+                    window.hideToast = () => toast ? toast.classList.remove('show') : null;
+
+                    if (document.querySelector('.staff-grid') || document.querySelector('.admin-grid')) {
+                        setInterval(checkMessages, 10000);
                     }
                 });
             </script>
+
             <style>
                 .notification-toast {
-                    position: fixed;
-                    bottom: 30px;
-                    right: 30px;
-                    background: white;
-                    border-radius: 12px;
-                    padding: 15px 20px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-                    display: flex;
-                    align-items: center;
-                    gap: 15px;
-                    transform: translateY(100px);
-                    opacity: 0;
-                    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-                    z-index: 9999;
-                    border-left: 5px solid var(--accent);
-                    max-width: 350px;
+                    position: fixed; bottom: 30px; right: 30px;
+                    background: white; border-radius: 12px; padding: 15px 20px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px;
+                    transform: translateY(150px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    z-index: 10001; border-left: 5px solid #2D8A56; cursor: pointer;
                 }
-
-                .notification-toast.show {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-
-                .toast-icon {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    background: rgba(74, 144, 226, 0.1);
-                    color: var(--accent);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 1.2rem;
-                }
-
-                .toast-content h4 {
-                    margin: 0 0 5px 0;
-                    font-size: 0.95rem;
-                    color: var(--dark);
-                }
-
-                .toast-content p {
-                    margin: 0;
-                    font-size: 0.85rem;
-                    color: var(--gray);
-                }
-
-                .toast-close {
-                    background: none;
-                    border: none;
-                    color: #ccc;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    padding: 5px;
-                    transition: color 0.3s;
-                }
-
-                .toast-close:hover {
-                    color: var(--dark);
-                }
-
-                .metric-trend.trend-alert {
-                    color: #e74c3c;
-                    background: rgba(231, 76, 60, 0.1);
-                }
-
-                .metric-trend.trend-alert i {
-                    color: #e74c3c;
-                }
+                .notification-toast.show { transform: translateY(0); opacity: 1; }
+                .notification-toast:hover { transform: translateY(-5px); background: #f8fbf9; }
+                .toast-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(45,138,86,0.1); color: #2D8A56; display: flex; align-items: center; justify-content: center; }
+                .toast-title { margin: 0; font-size: 0.9rem; font-weight: 600; color: #333; }
+                .toast-message { margin: 0; font-size: 0.8rem; color: #666; }
+                .toast-close { background: none; border: none; color: #999; cursor: pointer; }
             </style>
+
             <script>
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('service-worker.js?v=2')
-                            .then(reg => console.log('NutriDeq Native App Enabled', reg.scope))
-                            .catch(err => console.error('Native App Connection Failed', err));
+                        navigator.serviceWorker.register('service-worker.js?v=2').catch(() => {});
                     });
                 }
             </script>
+        </div> <!-- Close .page-container -->
+    </main>
+</div> <!-- Close .main-layout -->
 </body>
-
-</html>            </div></main></div>
-
-
+</html>

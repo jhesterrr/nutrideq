@@ -158,7 +158,7 @@ if ($selected_thread_id) {
         <ul class="nav-links">
             <?php foreach ($nav_links as $link): ?>
                 <?php if (isset($link['type']) && $link['type'] === 'header'): ?>
-                    <li style="font-size:0.7rem; color:#999; text-transform:uppercase; margin-top:20px; margin-bottom:10px; padding-left:15px; font-weight:700;"><?= $link['text'] ?></li>
+                    <li class="nav-header"><?= htmlspecialchars($link['text']) ?></li>
                 <?php else: ?>
                     <li><a href="<?= $link['href'] ?>" class="<?= !empty($link['active'])?'active':'' ?>"><i class="<?= $link['icon'] ?>"></i> <span><?= $link['text'] ?></span></a></li>
                 <?php endif; ?>
