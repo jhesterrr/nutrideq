@@ -34,121 +34,257 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>NutriDeq - Food Exchange List</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <title>Food Exchange Terminal | NutriDeq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/food-exchange.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/dashboard-premium.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <link rel="stylesheet" href="css/mobile-style.css">
     <!-- dashboard.js included via sidebar.php -->
     <style>
-        /* Task 3 & 2: Tab Navigation Scroll & Boundaries */
+        /* ═══════════ FOOD EXCHANGE TERMINAL · PREMIUM SHELL ═══════════ */
+        .main-content { position: relative; overflow-x: hidden; }
+
+        /* ── Hero Terminal Header ── */
+        .fet-hero {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+            border-radius: 28px;
+            padding: 28px 36px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px -15px rgba(6, 78, 59, 0.4);
+        }
+        .fet-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -10%;
+            width: 60%; height: 200%;
+            background: radial-gradient(circle, rgba(52,211,153,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .fet-hero-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(1.4rem, 3vw, 2rem); color: #fff; margin: 0; letter-spacing: -0.03em; }
+        .fet-hero-sub { font-size: 0.9rem; color: rgba(167,243,208,0.85); margin: 4px 0 0; font-weight: 500; }
+        .fet-hero-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 8px 20px; color: #a7f3d0; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+        /* ── Pill Tab Navigation ── */
+        .tabs-container { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); overflow: visible; margin-bottom: 0; }
         .tabs-header {
             display: flex !important;
             flex-direction: row !important;
             overflow-x: auto !important;
             white-space: nowrap !important;
             -webkit-overflow-scrolling: touch !important;
-            gap: 10px !important;
-            padding: 12px 16px !important;
+            gap: 8px !important;
+            padding: 16px !important;
             width: 100% !important;
+            box-sizing: border-box !important;
+            background: rgba(0,0,0,0.03);
+            border-radius: 24px 24px 0 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 50 !important;
         }
-        .tabs-header::-webkit-scrollbar {
-            display: none !important;
-        }
-        
-        /* Task 2: Mobile Content Cutoffs & Top Alignment */
-        @media (max-width: 768px) {
-            .tab-content {
-                padding: 15px 10px !important;
-                margin-top: 10px !important;
-                box-sizing: border-box !important;
-                width: 100% !important;
-                overflow-x: hidden !important; 
-            }
-            .tabs-container {
-                box-sizing: border-box !important;
-                width: 100% !important;
-                overflow: visible !important; /* Prevent header cutoff */
-            }
-            .section-header h2 {
-                white-space: normal !important;
-                line-height: 1.4 !important;
-                font-size: 1.25rem !important;
-            }
-        }
-
-        /* Utility classes for Task 4 */
-        .d-none { display: none !important; }
-        .d-block { display: block !important; }
-        @media (min-width: 769px) {
-            .d-md-block { display: block !important; }
-            .d-md-none { display: none !important; }
-        }
-        @media (max-width: 768px) {
-            .d-md-block { display: none !important; }
-            .d-md-none { display: block !important; }
-        }
-
-        /* Task 4: Mobile Accordion Styles */
-        .fel-mobile-accordion {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .fel-accordion-item {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: 1px solid #f0f0f0;
-            overflow: hidden;
-        }
-        .fel-accordion-header {
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            color: var(--primary);
+        .tabs-header::-webkit-scrollbar { display: none !important; }
+        .tab {
+            padding: 10px 20px !important;
+            background: rgba(255,255,255,0.5) !important;
+            border: 1px solid var(--border-color) !important;
             cursor: pointer;
-            background: #f8fcf9;
-        }
-        .fel-accordion-content {
-            padding: 16px;
-            display: none;
-            border-top: 1px solid #f0f0f0;
-        }
-        .fel-accordion-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        .fel-mobile-item-row {
-            display: flex;
-            justify-content: space-between;
+            border-radius: 50px !important;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-secondary) !important;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap !important;
+            flex: 0 0 auto !important;
+            display: flex !important;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dashed #eee;
-            font-size: 0.9rem;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
-        .fel-mobile-item-row:last-child {
-            border-bottom: none;
+        .tab:hover { color: var(--primary) !important; background: #fff !important; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(5,150,105,0.1); }
+        .tab.active { color: white !important; background: var(--primary) !important; font-weight: 700; border-color: var(--primary) !important; box-shadow: 0 8px 20px rgba(5,150,105,0.25) !important; transform: translateY(-2px); }
+        .tab-icon { font-size: 0.95rem; }
+        .tab-content { display: none; padding: 28px; animation: fetFadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fetFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Section Headers ── */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .section-header h2 { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(1rem, 2.5vw, 1.3rem); color: var(--text-primary); white-space: normal; line-height: 1.3; }
+        .info-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; box-shadow: 0 4px 12px rgba(5,150,105,0.2); }
+        .info-btn:hover { transform: scale(1.1) rotate(15deg); box-shadow: 0 6px 20px rgba(5,150,105,0.35); }
+
+        /* ── Glass Tables ── */
+        .table-container { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border-color); }
+        .mobile-scroll-wrapper { min-width: 100%; }
+        .food-exchange-table { width: 100%; border-collapse: collapse; font-family: 'Outfit', sans-serif; font-size: 0.88rem; }
+        .food-exchange-table thead tr { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); }
+        .food-exchange-table th { color: #a7f3d0; font-weight: 700; padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .food-exchange-table th.active { background: rgba(52,211,153,0.25); color: #fff; }
+        .food-exchange-table td { padding: 10px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); transition: all 0.2s; }
+        .food-exchange-table tbody tr:hover td { background: rgba(5,150,105,0.04); }
+        .food-exchange-table tbody tr:last-child td { border-bottom: none; }
+        .food-group-header { background: linear-gradient(90deg, rgba(5,150,105,0.08), transparent); font-weight: 800; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .food-subgroup { color: var(--text-primary); font-weight: 600; }
+        .exchange-value { display: inline-block; font-weight: 700; color: var(--text-primary); }
+        .exchange-value.highlight { background: rgba(5,150,105,0.12); color: var(--primary); border-radius: 20px; padding: 2px 10px; font-weight: 800; }
+        .active-cell { background: rgba(5,150,105,0.05); }
+
+        /* ── Calorie Selector ── */
+        .food-exchange-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        .food-exchange-header h2 { font-family: 'Outfit', sans-serif; font-size: clamp(0.95rem, 2vw, 1.2rem); font-weight: 800; color: var(--text-primary); }
+        .food-exchange-controls { display: flex; align-items: center; gap: 12px; }
+        .calorie-selector { background: var(--bg-surface); border: 1.5px solid var(--border-color); border-radius: 50px; padding: 8px 18px; font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--text-primary); font-size: 0.9rem; outline: none; cursor: pointer; transition: all 0.3s; }
+        .calorie-selector:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+
+        /* ── Mobile Calorie Pills ── */
+        .mobile-calorie-pills-container { margin-bottom: 16px; }
+        .pill-slider-label { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+        .mobile-pill-slider { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+        .mobile-pill-slider::-webkit-scrollbar { display: none; }
+        .calorie-pill { flex-shrink: 0; padding: 6px 14px; border-radius: 50px; border: 1.5px solid var(--border-color); background: var(--bg-surface); font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; transition: all 0.25s; }
+        .calorie-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(5,150,105,0.25); }
+        .mobile-calorie-cards { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+        .mcv-category-header { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); padding: 12px 0 4px; border-bottom: 2px solid rgba(5,150,105,0.15); margin-bottom: 4px; }
+        .mcv-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .mcv-row--sub { padding-left: 12px; }
+        .mcv-label { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+        .mcv-value { font-weight: 800; color: var(--primary); font-size: 1rem; }
+
+        /* ── Mobile visibility toggles ── */
+        .mobile-view { display: none; }
+        @media (max-width: 768px) {
+            .mobile-view { display: block; }
+            .desktop-view { display: none; }
+            .tab-content { padding: 16px 14px !important; }
+            .fet-hero { padding: 20px; flex-direction: column; align-items: flex-start; gap: 12px; }
+            .fet-hero-badge { font-size: 0.75rem; }
         }
-        .fel-mobile-label {
-            font-weight: 600;
-            color: #4b5563;
-            max-width: 40%;
+        @media (min-width: 769px) {
+            .desktop-view { display: block; }
         }
-        .fel-mobile-value {
-            color: #6b7280;
-            text-align: right;
-            max-width: 55%;
-        }
+
+        /* ── Utility ── */
+        .d-none { display: none !important; }
+        @media (min-width: 769px) { .d-md-flex { display: flex !important; } .d-md-none { display: none !important; } }
+        @media (max-width: 768px) { .d-md-flex { display: none !important; } .d-md-none { display: flex !important; } }
+
+        /* ── Macronutrient Bento Grid ── */
+        .macronutrient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 20px; }
+        .macronutrient-card { background: var(--bg-surface); border-radius: 20px; padding: 22px; border: 1px solid var(--border-color); transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden; cursor: pointer; }
+        .macronutrient-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--gradient); transform: scaleX(0); transform-origin: left; transition: all 0.3s; }
+        .macronutrient-card:hover::before { transform: scaleX(1); }
+        .macronutrient-card:hover { transform: translateY(-8px); box-shadow: 0 16px 32px rgba(0,0,0,0.08); border-color: rgba(5,150,105,0.2); }
+        .macronutrient-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .macronutrient-title { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--primary); font-size: 1rem; padding-left: 14px; position: relative; }
+        .macronutrient-title::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 14px; background: var(--primary); border-radius: 4px; }
+        .macronutrient-energy { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .macronutrient-values { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); font-size: 0.88rem; transition: all 0.2s; }
+        .macronutrient-values:hover { transform: translateX(4px); }
+        .macronutrient-values:last-child { border-bottom: none; }
+        .macronutrient-label { font-weight: 600; color: var(--text-secondary); }
+        .macronutrient-amount { font-weight: 700; color: var(--text-primary); }
+
+        /* ── Calculation Steps ── */
+        .calculation-visual { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+        .calculation-step { background: var(--bg-surface); border-radius: 20px; padding: 22px; border: 1px solid var(--border-color); transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden; cursor: pointer; }
+        .calculation-step::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg,#7c3aed,#4f46e5); transform: scaleY(0); transform-origin: top; transition: all 0.3s; }
+        .calculation-step:hover::before, .calculation-step.expanded::before { transform: scaleY(1); }
+        .calculation-step:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+        .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
+        .step-title { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-primary); font-size: 1rem; padding-left: 14px; position: relative; }
+        .step-title::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 4px; height: 14px; background: #7c3aed; border-radius: 4px; }
+        .step-number { background: linear-gradient(135deg,#7c3aed,#4f46e5); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+        .step-content { margin-top: 16px; font-size: 0.9rem; display: none; line-height: 1.7; color: var(--text-secondary); }
+        .step-content strong { color: var(--text-primary); }
+        .calculation-step.expanded .step-content { display: block; animation: fetFadeIn 0.35s ease; }
+        .step-values { display: none; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        .calculation-step.expanded .step-values { display: flex; animation: fetFadeIn 0.4s ease 0.1s both; }
+        .value-card { flex: 1; min-width: 120px; background: rgba(124,58,237,0.06); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid rgba(124,58,237,0.1); }
+        .value-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px; }
+        .value-amount { font-weight: 800; font-size: 1rem; color: #7c3aed; font-family: 'Outfit', sans-serif; }
+        .step-total { display: none; background: rgba(124,58,237,0.08); border-radius: 12px; padding: 12px; margin-top: 14px; text-align: center; font-weight: 700; color: #7c3aed; border: 1px solid rgba(124,58,237,0.15); font-size: 0.9rem; }
+        .calculation-step.expanded .step-total { display: block; animation: fetFadeIn 0.4s ease 0.2s both; }
+        .food-exchange-footer { margin-top: 20px; padding: 16px; background: rgba(5,150,105,0.05); border-radius: 14px; border: 1px solid rgba(5,150,105,0.1); font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* ── Distribution Grid ── */
+        .distribution-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .distribution-card { background: var(--bg-surface); border-radius: 20px; padding: 22px; border: 1px solid var(--border-color); transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .distribution-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--gradient); transform: scaleX(0); transform-origin: left; transition: all 0.3s; }
+        .distribution-card:hover::before { transform: scaleX(1); }
+        .distribution-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,0.08); }
+        .distribution-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .distribution-title { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--primary); font-size: 1rem; }
+        .distribution-exchange { font-size: 0.8rem; font-weight: 700; background: rgba(5,150,105,0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; }
+        .distribution-time { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px; font-weight: 600; }
+        .distribution-time i { color: var(--primary); }
+        .distribution-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); }
+        .distribution-item:last-child { border-bottom: none; }
+        .distribution-item-icon { width: 32px; height: 32px; border-radius: 10px; background: rgba(5,150,105,0.08); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--primary); flex-shrink: 0; }
+        .distribution-item-name { flex: 1; font-weight: 600; font-size: 0.88rem; }
+        .distribution-item-amount { font-weight: 700; font-size: 0.85rem; color: var(--primary); }
+        .distribution-summary { display: flex; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .distribution-summary-item { flex: 1; text-align: center; }
+        .distribution-summary-value { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .distribution-summary-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+
+        /* ── Meal Cards ── */
+        .menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 20px; }
+        .meal-card { background: var(--bg-surface); border-radius: 20px; padding: 22px; border: 1px solid var(--border-color); transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
+        .meal-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,0.08); border-color: rgba(5,150,105,0.2); }
+        .meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .meal-title { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--primary); font-size: 1rem; }
+        .meal-exchange { font-size: 0.78rem; font-weight: 700; background: rgba(5,150,105,0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); font-size: 0.88rem; }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-food { font-weight: 600; }
+        .menu-measure { color: var(--primary); font-weight: 700; font-size: 0.82rem; background: rgba(5,150,105,0.07); padding: 2px 8px; border-radius: 20px; }
+
+        /* ── FEL Vertical Tabs ── */
+        .fel-vtabs { display: flex; gap: 20px; }
+        .fel-vtab-sidebar { display: flex; flex-direction: column; gap: 6px; width: 200px; flex-shrink: 0; }
+        .fel-vtab { padding: 10px 16px; background: rgba(255,255,255,0.4); border: 1px solid var(--border-color); border-radius: 14px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--text-secondary); cursor: pointer; text-align: left; transition: all 0.25s; display: flex; align-items: center; gap: 8px; }
+        .fel-vtab:hover { background: #fff; color: var(--primary); }
+        .fel-vtab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 6px 16px rgba(5,150,105,0.2); }
+        .fel-vtab-content { flex: 1; min-width: 0; }
+        .fel-pane { display: none; }
+        .fel-pane.active { display: block; animation: fetFadeIn 0.3s ease; }
+
+        /* ── Mobile Accordion (FEL) ── */
+        .fel-mobile-accordion { display: flex; flex-direction: column; gap: 10px; }
+        .fel-accordion-item { background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; }
+        .fel-accordion-header { padding: 14px 18px; display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--primary); cursor: pointer; background: rgba(5,150,105,0.04); transition: all 0.25s; }
+        .fel-accordion-header:hover { background: rgba(5,150,105,0.08); }
+        .fel-accordion-content { padding: 16px 18px; display: none; border-top: 1px solid var(--border-color); }
+        .fel-accordion-content.active { display: block; animation: fetFadeIn 0.3s ease; }
+        .fel-mobile-item-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); font-size: 0.88rem; }
+        .fel-mobile-item-row:last-child { border-bottom: none; }
+        .fel-mobile-label { font-weight: 700; color: var(--text-primary); min-width: 38%; }
+        .fel-mobile-value { color: var(--text-secondary); text-align: right; font-weight: 500; }
+
+        /* ── Food Exchange Legend ── */
+        .food-exchange-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); }
+        .legend-color { width: 14px; height: 14px; border-radius: 4px; }
+        .legend-vegetable { background: #16a34a; }
+        .legend-fruit { background: #d97706; }
+        .legend-milk { background: #2563eb; }
+        .legend-rice { background: #ca8a04; }
+        .legend-meat { background: #dc2626; }
+        .legend-fat { background: #7c3aed; }
+        .legend-sugar { background: #db2777; }
     </style>
 </head>
 
@@ -157,40 +293,35 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         <?php include 'includes/sidebar.php'; ?>
 
         <div class="main-content">
-            <div class="header">
-                <div class="page-title">
-                    <h1>Food Exchange List</h1>
-                    <p>Plan your meals with the food exchange system</p>
+            <!-- Ambient Mesh Background -->
+            <div class="mesh-gradient-container dashboard-mesh">
+                <div class="mesh-blob blob-1"></div>
+                <div class="mesh-blob blob-2"></div>
+                <div class="mesh-blob blob-3"></div>
+            </div>
+            <div class="glass-noise"></div>
+            <div class="spotlight" id="spotlight"></div>
+
+            <div class="page-container" style="position:relative;z-index:10;padding:20px 32px 32px;">
+
+            <!-- Hero Terminal Header -->
+            <div class="fet-hero">
+                <div>
+                    <h1 class="fet-hero-title"><i class="fas fa-exchange-alt" style="margin-right:14px;opacity:0.8;"></i>Food Exchange Terminal</h1>
+                    <p class="fet-hero-sub">Clinical Meal Planning & Dietary Exchange Reference System</p>
                 </div>
+                <div class="fet-hero-badge"><i class="fas fa-leaf"></i> NutriDeq FEL v2.0</div>
             </div>
 
-            <!-- NEW: Premium Tab Container -->
+            <!-- Food Exchange Terminal Tabs -->
             <div class="tabs-container">
-                <div class="tabs-header scroll-hide">
-                    <button class="tab active" data-tab="quick-reference">
-                        <i class="fas fa-table tab-icon"></i>
-                        <span>Quick Reference</span>
-                    </button>
-                    <button class="tab" data-tab="macronutrient">
-                        <i class="fas fa-apple-alt tab-icon"></i>
-                        <span>Macronutrient Composition</span>
-                    </button>
-                    <button class="tab" data-tab="calculation">
-                        <i class="fas fa-calculator tab-icon"></i>
-                        <span>Sample Computation</span>
-                    </button>
-                    <button class="tab" data-tab="distribution">
-                        <i class="fas fa-clock tab-icon"></i>
-                        <span>Meal Distribution</span>
-                    </button>
-                    <button class="tab" data-tab="sample-menu">
-                        <i class="fas fa-utensils tab-icon"></i>
-                        <span>Sample Menu</span>
-                    </button>
-                    <button class="tab" data-tab="food-exchange-list">
-                        <i class="fas fa-list-alt tab-icon"></i>
-                        <span>Food Exchange List</span>
-                    </button>
+                <div class="tabs-header">
+                    <button class="tab active" data-tab="quick-reference"><i class="fas fa-table tab-icon"></i><span>Quick Reference</span></button>
+                    <button class="tab" data-tab="macronutrient"><i class="fas fa-apple-alt tab-icon"></i><span>Macronutrients</span></button>
+                    <button class="tab" data-tab="calculation"><i class="fas fa-calculator tab-icon"></i><span>Computation</span></button>
+                    <button class="tab" data-tab="distribution"><i class="fas fa-clock tab-icon"></i><span>Meal Distribution</span></button>
+                    <button class="tab" data-tab="sample-menu"><i class="fas fa-utensils tab-icon"></i><span>Sample Menu</span></button>
+                    <button class="tab" data-tab="food-exchange-list"><i class="fas fa-list-alt tab-icon"></i><span>Exchange List</span></button>
                 </div>
 
                 <div class="tab-content active" id="quick-reference">
@@ -221,7 +352,9 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             </div>
                         </div>
 
-                        <div class="table-container table-responsive">
+                        <!-- Desktop table view -->
+                        <div class="desktop-view">
+                        <div class="table-container">
                             <div class="mobile-scroll-wrapper">
 
                             <table class="food-exchange-table calorie-ref-table">
@@ -476,9 +609,9 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </tr>
                                 </tbody>
                             </table>
-
                             </div>
                         </div>
+                        </div> <!-- end desktop-view -->
 
                         <!-- MOBILE ONLY: Dynamic Calorie Pill Selector -->
                         <div class="mobile-calorie-pills-container mobile-view">
@@ -1353,7 +1486,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                         <h2>FOOD EXCHANGE LIST (FEL)</h2>
                     </div>
 
-                    <div class="fel-vtabs d-none d-md-block">
+                    <div class="fel-vtabs d-none d-md-flex">
                         <!-- Vertical Tab Sidebar -->
                         <div class="fel-vtab-sidebar">
                             <button class="fel-vtab active" data-fel="fel-nuts"><i class="fas fa-seedling"></i> Nuts &amp; Seeds</button>
@@ -1980,6 +2113,15 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                 });
 
             });
+
+            // Spotlight tracking
+            const spotlight = document.getElementById('spotlight');
+            if (spotlight) {
+                document.addEventListener('mousemove', (e) => {
+                    spotlight.style.left = e.clientX + 'px';
+                    spotlight.style.top = e.clientY + 'px';
+                });
+            }
         </script>
 
 </body>

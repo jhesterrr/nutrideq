@@ -256,949 +256,572 @@ if (isset($_GET['tab'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>NutriDeq - Anthropometric Information</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriDeq – Anthropometric Information</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/help-tracker.css">
-    <link rel="stylesheet" href="css/messages.css">
-    <link rel="stylesheet" href="css/messages.css">
-    <link rel="stylesheet" href="css/nutrifacts.css">
-    <link rel="stylesheet" href="css/logout-modal.css">
-    <!-- Base and Mobile styles last for priority -->
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/mobile-style.css">
-    <!-- Choices JS for Searchable API Dropdowns -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <!-- Choices.js for searchable dropdowns -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <!-- dashboard.js included via sidebar.php -->
+    <!-- Core styles -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/logout-modal.css">
+    <link rel="stylesheet" href="css/premium-management.css">
+    <!-- Page-specific premium styles -->
+    <link rel="stylesheet" href="css/anthropometric-premium.css">
     <script>const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';</script>
 </head>
 
 <body>
-    <div class="main-layout">
-        <?php include 'includes/sidebar.php'; ?>
+<div class="main-layout">
+    <?php include 'includes/sidebar.php'; ?>
 
-        <main class="main-content">
-            <div class="page-container">
-                <div class="header">
-                    <div class="page-title">
-                        <h1>Anthropometric Information
-                            <?php if (isset($viewing_client_name)): ?>
-                                <span style="font-size: 1.2rem; color: var(--gray);"> - Viewing:
-                                    <?php echo htmlspecialchars($viewing_client_name); ?></span>
-                            <?php endif; ?>
-                        </h1>
-                        <p>
-                            <?php if (isset($viewing_client_name)): ?>
-                                Monitoring health data for <?php echo htmlspecialchars($viewing_client_name); ?>
-                            <?php else: ?>
-                                Track your health metrics and progress
-                            <?php endif; ?>
-                        </p>
-                    </div>
+    <main class="main-content">
+        <div class="page-container ai-page">
 
-                    <div class="header-actions">
-                        <?php if (isset($viewing_client_name)): ?>
-                            <a href="user-management-staff.php" class="btn-back">
-                                <i class="fas fa-arrow-left"></i> <span>Back to Clients</span>
-                            </a>
+            <?php
+            // ── Pre-compute display values ──────────────────────────────
+            $sc = $selected_client;
+            $bmi_val   = 0;
+            $bmi_label = 'N/A';
+            $bmi_class = 'neutral';
+            $whr_val   = 'N/A';
+            $whr_risk  = 'N/A';
+            if ($sc) {
+                if (!empty($sc['weight']) && !empty($sc['height']) && $sc['height'] > 0) {
+                    $hm = $sc['height'] / 100;
+                    $bmi_val = round($sc['weight'] / ($hm * $hm), 1);
+                    if ($bmi_val < 18.5)      { $bmi_label = 'Underweight'; $bmi_class = 'info'; }
+                    elseif ($bmi_val < 25)    { $bmi_label = 'Normal';      $bmi_class = 'normal'; }
+                    elseif ($bmi_val < 30)    { $bmi_label = 'Overweight';  $bmi_class = 'warn'; }
+                    else                      { $bmi_label = 'Obese';       $bmi_class = 'danger'; }
+                }
+                if (!empty($sc['waist_circumference']) && !empty($sc['hip_circumference']) && $sc['hip_circumference'] > 0) {
+                    $whr_val  = number_format($sc['waist_circumference'] / $sc['hip_circumference'], 2);
+                    $gender   = $sc['gender'] ?? '';
+                    $whr_risk = ($gender === 'male') ? (($sc['waist_circumference'] / $sc['hip_circumference'] <= 0.9) ? 'Low Risk' : 'High Risk')
+                                                     : (($sc['waist_circumference'] / $sc['hip_circumference'] <= 0.85) ? 'Low Risk' : 'High Risk');
+                }
+                $client_initials = getInitials($sc['name']);
+                $optimal_low = $optimal_high = 0;
+                if (!empty($sc['height'])) {
+                    $hm2 = $sc['height'] / 100;
+                    $optimal_low  = number_format(18.5 * $hm2 * $hm2, 1);
+                    $optimal_high = number_format(24.9 * $hm2 * $hm2, 1);
+                }
+            }
+            ?>
+
+            <!-- ═══ HERO BANNER ═══ -->
+            <?php if ($selected_client): ?>
+            <div class="ai-hero stagger d-1">
+                <div class="ai-hero-avatar"><?= htmlspecialchars($client_initials) ?></div>
+                <div class="ai-hero-info">
+                    <h1 class="ai-hero-name"><?= htmlspecialchars($sc['name']) ?></h1>
+                    <p class="ai-hero-subtitle">
+                        <i class="fas fa-id-card"></i> <?= $sc['age'] ? $sc['age'].' years' : 'Age not set' ?>
+                        <span class="ai-sep">·</span> 
+                        <i class="fas fa-venus-mars"></i> <?= $sc['gender'] ? ucfirst($sc['gender']) : 'Gender unknown' ?>
+                        <span class="ai-sep">·</span>
+                        <i class="fas fa-location-dot"></i> <?= $sc['city'] ? htmlspecialchars($sc['city']) : 'Location not set' ?>
+                    </p>
+                    <div class="ai-hero-badges">
+                        <div class="ai-badge"><i class="fas fa-weight-scale"></i> <?= $sc['weight'] ? $sc['weight'].' kg' : 'Weight pending' ?></div>
+                        <div class="ai-badge"><i class="fas fa-ruler-vertical"></i> <?= $sc['height'] ? $sc['height'].' cm' : 'Height pending' ?></div>
+                        <?php if ($bmi_val > 0): ?>
+                        <div class="ai-badge ai-badge-bmi bmi-<?= $bmi_class ?>"><i class="fas fa-chart-simple"></i> BMI <?= $bmi_val ?> — <?= $bmi_label ?></div>
                         <?php endif; ?>
-
-                        <div class="">
-                            <i class=""></i>
-                            <div class=""></div>
-                        </div>
+                        <div class="ai-badge" style="background:#dcfce7; color:#166534; border-color:#bbf7d0;"><i class="fas fa-circle-check"></i> Active Case</div>
                     </div>
                 </div>
-
-                <!-- Display error messages -->
-                <?php if (isset($error)): ?>
-                    <div class="error-message"
-                        style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
-                        <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (isset($_SESSION['success'])): ?>
-                    <div class="success-message"
-                        style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
-                        <i class="fas fa-check-circle"></i>
-                        <?php echo htmlspecialchars($_SESSION['success']);
-                        unset($_SESSION['success']); ?>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Client Selector -->
-                <div class="client-selector">
-                    <label for="clientSelect"><i class="fas fa-user-friends"></i> Select Client:</label>
-                    <select class="client-select" id="clientSelect"
-                        onchange="if(this.value) location.href='?client_id=' + this.value">
-                        <option value="">-- Choose a Client --</option>
-                        <?php foreach ($clients as $client): ?>
-                            <option value="<?php echo $client['id']; ?>" <?php echo $selected_client_id == $client['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($client['name']); ?>
-                                (<?php echo htmlspecialchars($client['email']); ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="ai-hero-actions">
+                    <?php if ($is_staff || $is_admin): ?>
+                    <a href="user-management-staff.php" class="ai-btn-back">
+                        <i class="fas fa-chevron-left"></i> Client List
+                    </a>
+                    <?php endif; ?>
                 </div>
+            </div>
+            <?php else: ?>
+            <div class="ai-hero ai-hero-empty stagger d-1">
+                <div class="ai-hero-avatar" style="background:rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.3);">
+                    <i class="fas fa-users-medical" style="font-size:1.6rem; opacity:0.8;"></i>
+                </div>
+                <div class="ai-hero-info">
+                    <h1 class="ai-hero-name">Anthropometric Hub</h1>
+                    <p class="ai-hero-subtitle">Comprehensive clinical tracking, food exchange management, and health analytics.</p>
+                </div>
+            </div>
+            <?php endif; ?>
 
-                <?php if (!$selected_client): ?>
-                    <div class="no-client-message">
-                        <i class="fas fa-user-friends"></i>
-                        <h3>No Client Selected</h3>
-                        <p>Please select a client from the dropdown above to view their health tracker.</p>
-                        <?php if (empty($clients)): ?>
-                            <p style="margin-top: 10px; color: var(--accent);">
-                                <i class="fas fa-info-circle"></i> You don't have any active clients assigned yet.
-                            </p>
-                        <?php endif; ?>
-                    </div>
-                <?php else: ?>
-                    <!-- Premium Tab Container -->
-                    <div class="tabs-container">
-                        <div class="tabs-header">
-                            <button class="tab <?php echo $active_tab === 'personal-info' ? 'active' : ''; ?>"
-                                data-tab="personal-info" onclick="switchTab('personal-info')">
-                                <i class="fas fa-user-circle tab-icon"></i>
-                                <span>Client Info</span>
-                            </button>
-                            <button class="tab <?php echo $active_tab === 'food-tracker' ? 'active' : ''; ?>"
-                                data-tab="food-tracker" onclick="switchTab('food-tracker')">
-                                <i class="fas fa-utensils tab-icon"></i>
-                                <span>Food Tracker</span>
-                            </button>
-                            <button class="tab <?php echo $active_tab === 'body-stats' ? 'active' : ''; ?>"
-                                data-tab="body-stats" onclick="switchTab('body-stats')">
-                                <i class="fas fa-chart-line tab-icon"></i>
-                                <span>Body Statistics</span>
-                            </button>
-                            <button class="tab <?php echo $active_tab === 'progress' ? 'active' : ''; ?>"
-                                data-tab="progress" onclick="switchTab('progress')">
-                                <i class="fas fa-calendar-alt tab-icon"></i>
-                                <span>Meal Planner</span>
-                            </button>
-                        </div>
-                        <!-- Tab content starts below -->
+            <!-- ═══ ALERTS ═══ -->
+            <?php if (isset($error)): ?>
+            <div class="ai-alert ai-alert-error"><i class="fas fa-exclamation-triangle"></i> <?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['success'])): ?>
+            <div class="ai-alert ai-alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+            <?php endif; ?>
 
-                        <!-- Personal Info Tab -->
-                        <div class="tab-content <?php echo $active_tab === 'personal-info' ? 'active' : ''; ?>"
-                            id="personal-info">
-                            <div class="section-header">
-                                <h2>Client Information</h2>
-                                <div class="section-actions">
+            <!-- ═══ CLIENT SELECTOR ═══ -->
+            <div class="ai-selector-bar">
+                <div class="ai-selector-icon"><i class="fas fa-user-friends"></i></div>
+                <span class="ai-selector-label">Client</span>
+                <select onchange="if(this.value) location.href='?client_id='+this.value" id="clientSelect">
+                    <option value="">— Choose a Client —</option>
+                    <?php foreach ($clients as $client): ?>
+                    <option value="<?= $client['id'] ?>" <?= $selected_client_id == $client['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($client['name']) ?> (<?= htmlspecialchars($client['email']) ?>)
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-                                </div>
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="fullName">Full Name</label>
-                                    <input type="text" class="form-control" id="fullName"
-                                        value="<?php echo htmlspecialchars($selected_client['name']); ?>" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="email">Email Address</label>
-                                    <input type="email" class="form-control" id="email"
-                                        value="<?php echo htmlspecialchars($selected_client['email']); ?>" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="phone">Phone Number</label>
-                                    <input type="tel" class="form-control" id="phone"
-                                        value="<?php echo htmlspecialchars($selected_client['phone'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="age">Age</label>
-                                    <input type="text" class="form-control" id="age"
-                                        value="<?php echo htmlspecialchars($selected_client['age'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="gender">Gender</label>
-                                    <input type="text" class="form-control" id="gender"
-                                        value="<?php echo htmlspecialchars(ucfirst($selected_client['gender'] ?? 'Not provided')); ?>"
-                                        readonly>
-                                </div>
-
-                                <!-- Address Fields -->
-                                <div class="form-group">
-                                    <label for="address">Street Address</label>
-                                    <input type="text" class="form-control" id="address"
-                                        value="<?php echo htmlspecialchars($selected_client['address'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="city">City</label>
-                                    <input type="text" class="form-control" id="city"
-                                        value="<?php echo htmlspecialchars($selected_client['city'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="state">State/Province</label>
-                                    <input type="text" class="form-control" id="state"
-                                        value="<?php echo htmlspecialchars($selected_client['state'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="zip_code">ZIP/Postal Code</label>
-                                    <input type="text" class="form-control" id="zip_code"
-                                        value="<?php echo htmlspecialchars($selected_client['zip_code'] ?? 'Not provided'); ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group full-width">
-                                    <label for="health_conditions">Health Conditions</label>
-                                    <textarea class="form-control" id="health_conditions" rows="3"
-                                        readonly><?php echo htmlspecialchars($selected_client['health_conditions'] ?? 'No health conditions reported'); ?></textarea>
-                                </div>
-
-                                <div class="form-group full-width">
-                                    <label for="dietary_restrictions">Dietary Restrictions</label>
-                                    <textarea class="form-control" id="dietary_restrictions" rows="3"
-                                        readonly><?php echo htmlspecialchars($selected_client['dietary_restrictions'] ?? 'No dietary restrictions'); ?></textarea>
-                                </div>
-
-                                <div class="form-group full-width">
-                                    <label for="goals">Health/Nutrition Goals</label>
-                                    <textarea class="form-control" id="goals" rows="3"
-                                        readonly><?php echo htmlspecialchars($selected_client['goals'] ?? 'No goals set'); ?></textarea>
-                                </div>
-
-                                <div class="form-group full-width">
-                                    <label for="notes">Dietician Notes</label>
-                                    <textarea class="form-control" id="notes" rows="4"
-                                        readonly><?php echo htmlspecialchars($selected_client['notes'] ?? 'No notes yet'); ?></textarea>
-                                </div>
-                            </div>
-
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $selected_client['age'] ?? 'N/A'; ?></div>
-                                    <div class="stat-label">Age</div>
-                                    <div class="stat-trend">Active Client</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $selected_client['weight'] ?? 'N/A'; ?>kg</div>
-                                    <div class="stat-label">Current Weight</div>
-                                    <div class="stat-trend">Latest</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $selected_client['height'] ?? 'N/A'; ?>cm</div>
-                                    <div class="stat-label">Height</div>
-                                    <div class="stat-trend">Recorded</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">
-                                        <?php if ($selected_client['city']): ?>
-                                            <i class="fas fa-map-marker-alt"></i>
-                                            <?php echo htmlspecialchars($selected_client['city']); ?>
-                                        <?php else: ?>
-                                            Location N/A
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="stat-label">Location</div>
-                                    <div class="stat-trend trend-up">Client Area</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Food Tracker Tab -->
-                        <div class="tab-content <?php echo $active_tab === 'food-tracker' ? 'active' : ''; ?>"
-                            id="food-tracker">
-                            <div class="section-header">
-                                <h2>Daily Food Intake Tracker</h2>
-                                <div class="section-actions">
-
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Today's Food Intake - <?php echo date('F j, Y'); ?></label>
-                                <div class="food-entries">
-                                    <?php if (empty($food_entries)): ?>
-                                        <div class="no-client-message" style="padding: 30px;">
-                                            <i class="fas fa-utensils"></i>
-                                            <p>No food entries recorded for today.</p>
-                                        </div>
-                                    <?php else: ?>
-                                        <?php foreach ($food_entries as $food): ?>
-                                            <div class="food-entry">
-                                                <div class="food-icon">
-                                                    <i class="fas fa-<?php
-                                                    switch ($food['meal_type']) {
-                                                        case 'breakfast':
-                                                            echo 'coffee';
-                                                            break;
-                                                        case 'lunch':
-                                                            echo 'utensils';
-                                                            break;
-                                                        case 'dinner':
-                                                            echo 'moon';
-                                                            break;
-                                                        default:
-                                                            echo 'apple-alt';
-                                                    }
-                                                    ?>"></i>
-                                                </div>
-                                                <div class="food-details">
-                                                    <div class="food-name"><?php echo ucfirst($food['meal_type']); ?>:
-                                                        <?php echo htmlspecialchars($food['food_name']); ?>
-                                                    </div>
-                                                    <div class="food-macros">
-                                                        Protein: <?php echo $food['protein'] ?? '0'; ?>g |
-                                                        Carbs: <?php echo $food['carbs'] ?? '0'; ?>g |
-                                                        Fat: <?php echo $food['fat'] ?? '0'; ?>g
-                                                    </div>
-                                                </div>
-                                                <div class="food-calories"><?php echo $food['calories']; ?> kcal</div>
-                                                <?php if ($selected_client): ?>
-                                                    <div class="food-actions">
-                                                        <form method="POST" style="display:inline;">
-                                                            <input type="hidden" name="action" value="delete_food_entry">
-                                                            <input type="hidden" name="client_id"
-                                                                value="<?php echo htmlspecialchars($selected_client['id']); ?>">
-                                                            <input type="hidden" name="entry_id"
-                                                                value="<?php echo htmlspecialchars($food['id']); ?>">
-                                                            <button type="submit" class="btn btn-outline" title="Delete"><i
-                                                                    class="fas fa-trash"></i></button>
-                                                        </form>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <?php if ($selected_client): ?>
-                                <div class="form-group">
-                                    <h3 style="margin-bottom:10px;">Add Food Entry</h3>
-                                    <form method="POST" class="inline-form">
-                                        <input type="hidden" name="action" value="add_food_entry">
-                                        <input type="hidden" name="client_id"
-                                            value="<?php echo htmlspecialchars($selected_client['id']); ?>">
-                                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                                            <select name="meal_type" class="form-control" style="max-width:180px;">
-                                                <option value="breakfast">Breakfast</option>
-                                                <option value="lunch">Lunch</option>
-                                                <option value="dinner">Dinner</option>
-                                                <option value="snack">Snack</option>
-                                                <option value="custom" selected>Custom</option>
-                                            </select>
-                                            <input type="text" name="food_name" class="form-control" placeholder="Food name"
-                                                required style="flex:1;min-width:220px;">
-                                            <input type="number" step="0.1" name="calories" class="form-control"
-                                                placeholder="kcal" style="max-width:120px;">
-                                            <input type="number" step="0.1" name="protein" class="form-control"
-                                                placeholder="Protein g" style="max-width:140px;">
-                                            <input type="number" step="0.1" name="carbs" class="form-control"
-                                                placeholder="Carbs g" style="max-width:140px;">
-                                            <input type="number" step="0.1" name="fat" class="form-control" placeholder="Fat g"
-                                                style="max-width:120px;">
-                                            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i>
-                                                Add</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $calories_today; ?></div>
-                                    <div class="stat-label">Calories Today</div>
-                                    <div class="stat-trend">Total intake</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo count($food_entries); ?></div>
-                                    <div class="stat-label">Meals Logged</div>
-                                    <div class="stat-trend">Today</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo date('H:i'); ?></div>
-                                    <div class="stat-label">Last Update</div>
-                                    <div class="stat-trend">Current time</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">Active</div>
-                                    <div class="stat-label">Tracking</div>
-                                    <div class="stat-trend trend-up">Ongoing</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Body Statistics Tab -->
-                        <div class="tab-content <?php echo $active_tab === 'body-stats' ? 'active' : ''; ?>"
-                            id="body-stats">
-                            <div class="section-header">
-                                <h2>Body Measurements & Statistics</h2>
-                                <div class="section-actions">
-
-                                </div>
-                            </div>
-
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="currentWeight">Current Weight (kg)</label>
-                                    <input type="text" class="form-control" id="currentWeight"
-                                        value="<?php echo $selected_client['weight'] ? $selected_client['weight'] . ' kg' : 'Not recorded'; ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="targetWeight">Optimal Weight Range (kg)</label>
-                                    <?php
-                                    $optimal_weight = 'Need height data';
-                                    if (isset($selected_client['height']) && $selected_client['height'] > 0) {
-                                        $height = $selected_client['height'];
-                                        $height_in_meters = $height / 100;
-
-                                        // Calculate healthy BMI range (18.5 - 24.9)
-                                        $bmi_low = 18.5 * ($height_in_meters * $height_in_meters);
-                                        $bmi_high = 24.9 * ($height_in_meters * $height_in_meters);
-
-                                        $optimal_weight = number_format($bmi_low, 1) . " - " . number_format($bmi_high, 1) . " kg";
-                                    }
-                                    ?>
-                                    <input type="text" class="form-control" id="targetWeight"
-                                        value="<?php echo $optimal_weight; ?>" readonly>
-                                    <small class="form-text text-muted">Healthy BMI Range (18.5 - 24.9)</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="height">Height (cm)</label>
-                                    <input type="text" class="form-control" id="height"
-                                        value="<?php echo $selected_client['height'] ? $selected_client['height'] . ' cm' : 'Not recorded'; ?>"
-                                        readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="bmi">BMI</label>
-                                    <input type="text" class="form-control" id="bmi" value="<?php
-                                    if (isset($selected_client['weight']) && isset($selected_client['height'])) {
-                                        $height_in_meters = $selected_client['height'] / 100;
-                                        $bmi = $selected_client['weight'] / ($height_in_meters * $height_in_meters);
-                                        echo number_format($bmi, 1);
-                                    } else {
-                                        echo 'Not calculated';
-                                    }
-                                    ?>" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="waist">Waist Circumference (cm)</label>
-                                    <input type="text" class="form-control" id="waist" value="<?php
-                                    if (isset($selected_client['waist_circumference'])) {
-                                        echo $selected_client['waist_circumference'] . ' cm';
-                                    } else {
-                                        echo 'Not recorded';
-                                    }
-                                    ?>" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="hip">Hip Circumference (cm)</label>
-                                    <input type="text" class="form-control" id="hip" value="<?php
-                                    if (isset($selected_client['hip_circumference'])) {
-                                        echo $selected_client['hip_circumference'] . ' cm';
-                                    } else {
-                                        echo 'Not recorded';
-                                    }
-                                    ?>" readonly>
-                                </div>
-                            </div>
-
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php
-                                    if (isset($selected_client['weight']) && isset($selected_client['height'])) {
-                                        $height_in_meters = $selected_client['height'] / 100;
-                                        $bmi_value = $selected_client['weight'] / ($height_in_meters * $height_in_meters);
-                                        echo number_format($bmi_value, 1);
-                                    } else {
-                                        echo 'N/A';
-                                    }
-                                    ?></div>
-                                    <div class="stat-label">Current BMI</div>
-                                    <div class="stat-trend">
-                                        <?php
-                                        if (isset($selected_client['weight']) && isset($selected_client['height'])) {
-                                            $height_in_meters = $selected_client['height'] / 100;
-                                            $bmi_value = $selected_client['weight'] / ($height_in_meters * $height_in_meters);
-                                            if ($bmi_value < 18.5)
-                                                echo 'Underweight';
-                                            elseif ($bmi_value < 25)
-                                                echo 'Normal';
-                                            elseif ($bmi_value < 30)
-                                                echo 'Overweight';
-                                            else
-                                                echo 'Obese';
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-value">
-                                        <?php
-                                        if (isset($selected_client['weight']) && isset($selected_client['height'])) {
-                                            // Calculate optimal weight (midpoint of healthy BMI range)
-                                            $height_in_meters = $selected_client['height'] / 100;
-                                            $optimal_weight_mid = 21.7 * ($height_in_meters * $height_in_meters);
-                                            $weight_diff = $selected_client['weight'] - $optimal_weight_mid;
-                                            echo number_format(abs($weight_diff), 1) . 'kg';
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="stat-label">To Optimal Weight</div>
-                                    <div class="stat-trend <?php
-                                    if (isset($weight_diff)) {
-                                        echo $weight_diff > 0 ? 'trend-down' : ($weight_diff < 0 ? 'trend-up' : 'trend-neutral');
-                                    } else {
-                                        echo 'trend-neutral';
-                                    }
-                                    ?>">
-                                        <?php
-                                        if (isset($weight_diff)) {
-                                            echo $weight_diff > 0 ? 'To lose' : ($weight_diff < 0 ? 'To gain' : 'Ideal weight');
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-value">
-                                        <?php
-                                        if (isset($selected_client['waist_circumference']) && isset($selected_client['hip_circumference'])) {
-                                            echo number_format($selected_client['waist_circumference'] / $selected_client['hip_circumference'], 2);
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="stat-label">Waist-Hip Ratio</div>
-                                    <div class="stat-trend">
-                                        <?php
-                                        if (isset($selected_client['waist_circumference']) && isset($selected_client['hip_circumference'])) {
-                                            $wh_ratio = $selected_client['waist_circumference'] / $selected_client['hip_circumference'];
-                                            $gender = $selected_client['gender'] ?? '';
-                                            if ($gender === 'male') {
-                                                echo ($wh_ratio <= 0.9) ? 'Low risk' : 'High risk';
-                                            } else {
-                                                echo ($wh_ratio <= 0.85) ? 'Low risk' : 'High risk';
-                                            }
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-value">
-                                        <?php
-                                        if (isset($selected_client['created_at'])) {
-                                            echo date('M j', strtotime($selected_client['created_at']));
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="stat-label">Last Update</div>
-                                    <div class="stat-trend">
-                                        <?php
-                                        if (isset($selected_client['created_at'])) {
-                                            $days_ago = floor((time() - strtotime($selected_client['created_at'])) / (60 * 60 * 24));
-                                            if ($days_ago == 0)
-                                                echo 'Today';
-                                            elseif ($days_ago == 1)
-                                                echo 'Yesterday';
-                                            elseif ($days_ago < 7)
-                                                echo $days_ago . ' days ago';
-                                            else
-                                                echo 'Updated';
-                                        } else {
-                                            echo 'Initial';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php if ($selected_client): ?>
-                                <div class="section-header"
-                                    style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                                    <h2>Update Body Measurements</h2>
-                                </div>
-                                <form method="POST" id="updateBodyStatsForm">
-                                    <input type="hidden" name="action" value="update_body_stats">
-                                    <input type="hidden" name="client_id"
-                                        value="<?php echo htmlspecialchars($selected_client['id']); ?>">
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label for="upd_weight">Weight (kg)</label>
-                                            <input type="number" step="0.1" id="upd_weight" name="weight" class="form-control"
-                                                value="<?php echo htmlspecialchars($selected_client['weight'] ?? ''); ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="upd_height">Height (cm)</label>
-                                            <input type="number" step="0.1" id="upd_height" name="height" class="form-control"
-                                                value="<?php echo htmlspecialchars($selected_client['height'] ?? ''); ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="upd_waist">Waist (cm)</label>
-                                            <input type="number" step="0.1" id="upd_waist" name="waist_circumference"
-                                                class="form-control"
-                                                value="<?php echo htmlspecialchars($selected_client['waist_circumference'] ?? ''); ?>">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="upd_hip">Hip (cm)</label>
-                                            <input type="number" step="0.1" id="upd_hip" name="hip_circumference"
-                                                class="form-control"
-                                                value="<?php echo htmlspecialchars($selected_client['hip_circumference'] ?? ''); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-actions">
-                                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save
-                                            Measurements</button>
-                                    </div>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Meal Planner Tab -->
-                        <div class="tab-content <?php echo $active_tab === 'progress' ? 'active' : ''; ?>" id="progress">
-                            <div class="section-header">
-                                <h2>Food Exchange List</h2>
-                                <div class="section-actions">
-                                    <button class="btn btn-primary" id="saveMealPlan">
-                                        <i class="fas fa-save"></i> Save Meal Plan
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- FNRI Style Table Layout -->
-                            <div class="fel-container">
-                                <div class="fel-header">
-                                    <h3><i class="fas fa-exchange-alt"></i> Meal Planning List</h3>
-                                    <p>Select food items and specify quantities for each exchange group</p>
-                                </div>
-
-                                <div class="fel-table-container">
-                                    <table class="fel-table">
-                                        <thead>
-                                            <tr>
-                                                <th width="25%">Food Group & Items</th>
-                                                <th width="15%">Exchange</th>
-                                                <th width="12%">Weight (g)</th>
-                                                <th width="12%">Energy (kcal)</th>
-                                                <th width="12%">Protein (g)</th>
-                                                <th width="12%">Fat (g)</th>
-                                                <th width="12%">CHO (g)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <!-- Vegetables Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-carrot"></i>
-                                                    <strong>VEGETABLES</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td>
-                                                    <select id="veg-select" class="food-select">
-                                                        <option value="">Select Vegetable Type</option>
-                                                        <?php if (!empty($food_items_by_group['vegetable'])): ?>
-                                                            <?php foreach ($food_items_by_group['vegetable'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options if no database data -->
-                                                            <option value="leafy">Leafy, flower, fruit vegetables</option>
-                                                            <option value="root">Root, tuber, bulb vegetables</option>
-                                                            <option value="starchy">Starchy vegetables</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td id="vegetable-exchange">-</td>
-                                                <td id="vegetable-weight">-</td>
-                                                <td id="vegetable-energy">-</td>
-                                                <td id="vegetable-protein">-</td>
-                                                <td id="vegetable-fat">-</td>
-                                                <td id="vegetable-cho">-</td>
-                                            </tr>
-
-                                            <!-- Fruits Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-apple-alt"></i>
-                                                    <strong>FRUITS</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td data-label="Food Item">
-                                                    <select id="fruit-select" class="food-select">
-                                                        <option value="">Select Fruit</option>
-                                                        <?php if (!empty($food_items_by_group['fruit'])): ?>
-                                                            <?php foreach ($food_items_by_group['fruit'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options -->
-                                                            <option value="banana">Banana (saba)</option>
-                                                            <option value="mango">Mango</option>
-                                                            <option value="apple">Apple</option>
-                                                            <option value="orange">Orange</option>
-                                                            <option value="papaya">Papaya</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td data-label="Exchange" id="fruit-exchange">-</td>
-                                                <td data-label="Weight" id="fruit-weight">-</td>
-                                                <td data-label="Energy" id="fruit-energy">-</td>
-                                                <td data-label="Protein" id="fruit-protein">-</td>
-                                                <td data-label="Fat" id="fruit-fat">-</td>
-                                                <td data-label="CHO" id="fruit-cho">-</td>
-                                            </tr>
-
-                                            <!-- Milk Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-wine-bottle"></i>
-                                                    <strong>MILK</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td data-label="Food Item">
-                                                    <select id="milk-select" class="food-select">
-                                                        <option value="">Select Milk Type</option>
-                                                        <?php if (!empty($food_items_by_group['milk'])): ?>
-                                                            <?php foreach ($food_items_by_group['milk'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options -->
-                                                            <option value="whole">Whole, fresh/evap</option>
-                                                            <option value="lowfat">Low-fat, fresh</option>
-                                                            <option value="nonfat">Non-fat, powdered</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td data-label="Exchange" id="milk-exchange">-</td>
-                                                <td data-label="Weight" id="milk-weight">-</td>
-                                                <td data-label="Energy" id="milk-energy">-</td>
-                                                <td data-label="Protein" id="milk-protein">-</td>
-                                                <td data-label="Fat" id="milk-fat">-</td>
-                                                <td data-label="CHO" id="milk-cho">-</td>
-                                            </tr>
-
-                                            <!-- Rice Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-bread-slice"></i>
-                                                    <strong>RICE, RICE SUBSTITUTES & PRODUCTS</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td data-label="Food Item">
-                                                    <select id="rice-select" class="food-select">
-                                                        <option value="">Select Rice/Grain</option>
-                                                        <?php if (!empty($food_items_by_group['rice'])): ?>
-                                                            <?php foreach ($food_items_by_group['rice'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options -->
-                                                            <option value="rice_well">Rice, well-milled</option>
-                                                            <option value="rice_medium">Rice, medium-milled</option>
-                                                            <option value="rice_brown">Rice, brown</option>
-                                                            <option value="bread">Bread</option>
-                                                            <option value="noodles">Noodles</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td data-label="Exchange" id="rice-exchange">-</td>
-                                                <td data-label="Weight" id="rice-weight">-</td>
-                                                <td data-label="Energy" id="rice-energy">-</td>
-                                                <td data-label="Protein" id="rice-protein">-</td>
-                                                <td data-label="Fat" id="rice-fat">-</td>
-                                                <td data-label="CHO" id="rice-cho">-</td>
-                                            </tr>
-
-                                            <!-- Meat Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-drumstick-bite"></i>
-                                                    <strong>MEAT, POULTRY, FISH & PRODUCTS</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td data-label="Food Item">
-                                                    <select id="meat-select" class="food-select">
-                                                        <option value="">Select Meat/Fish</option>
-                                                        <?php if (!empty($food_items_by_group['meat'])): ?>
-                                                            <?php foreach ($food_items_by_group['meat'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options -->
-                                                            <option value="lean">Lean meat</option>
-                                                            <option value="medium">Medium-fat meat</option>
-                                                            <option value="high">High-fat meat</option>
-                                                            <option value="fish">Fish, lean</option>
-                                                            <option value="fish_medium">Fish, medium-fat</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td data-label="Exchange" id="meat-exchange">-</td>
-                                                <td data-label="Weight" id="meat-weight">-</td>
-                                                <td data-label="Energy" id="meat-energy">-</td>
-                                                <td data-label="Protein" id="meat-protein">-</td>
-                                                <td data-label="Fat" id="meat-fat">-</td>
-                                                <td data-label="CHO" id="meat-cho">-</td>
-                                            </tr>
-
-                                            <!-- Fats Group -->
-                                            <tr class="group-header">
-                                                <td colspan="7">
-                                                    <i class="fas fa-oil-can"></i>
-                                                    <strong>FATS & OILS</strong>
-                                                </td>
-                                            </tr>
-                                            <tr class="food-item">
-                                                <td data-label="Food Item">
-                                                    <select id="fat-select" class="food-select">
-                                                        <option value="">Select Fat/Oil Type</option>
-                                                        <?php if (!empty($food_items_by_group['fat'])): ?>
-                                                            <?php foreach ($food_items_by_group['fat'] as $item): ?>
-                                                                <option value="<?php echo htmlspecialchars($item['id']); ?>"
-                                                                    data-exchange="<?php echo htmlspecialchars($item['exchanges'] ?? '1'); ?>"
-                                                                    data-weight="<?php echo htmlspecialchars($item['serving_size'] ?? ''); ?>"
-                                                                    data-energy="<?php echo htmlspecialchars($item['energy'] ?? '0'); ?>"
-                                                                    data-protein="<?php echo htmlspecialchars($item['protein'] ?? '0'); ?>"
-                                                                    data-fat="<?php echo htmlspecialchars($item['fat'] ?? '0'); ?>"
-                                                                    data-cho="<?php echo htmlspecialchars($item['carbohydrates'] ?? '0'); ?>">
-                                                                    <?php echo htmlspecialchars($item['food_name']); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        <?php else: ?>
-                                                            <!-- Fallback options -->
-                                                            <option value="butter">Butter, margarine</option>
-                                                            <option value="oil">Cooking oil</option>
-                                                            <option value="mayo">Mayonnaise</option>
-                                                        <?php endif; ?>
-                                                    </select>
-                                                </td>
-                                                <td data-label="Exchange" id="fat-exchange">-</td>
-                                                <td data-label="Weight" id="fat-weight">-</td>
-                                                <td data-label="Energy" id="fat-energy">-</td>
-                                                <td data-label="Protein" id="fat-protein">-</td>
-                                                <td data-label="Fat" id="fat-fat">-</td>
-                                                <td data-label="CHO" id="fat-cho">-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <!-- Selected Items Summary -->
-                                <div class="selected-items-section">
-                                    <h4><i class="fas fa-list-check"></i> Selected Food Items</h4>
-                                    <div class="selected-items-list" id="selectedItems">
-                                        <div class="no-selection">No food items selected yet</div>
-                                    </div>
-                                </div>
-
-                                <!-- Nutrition Summary -->
-                                <div class="nutrition-summary-fel">
-                                    <div class="summary-header">
-                                        <h4><i class="fas fa-calculator"></i> Total Nutritional Values</h4>
-                                    </div>
-                                    <div class="summary-grid">
-                                        <div class="summary-item">
-                                            <div class="summary-value" id="total-energy">0</div>
-                                            <div class="summary-label">Energy (kcal)</div>
-                                        </div>
-                                        <div class="summary-item">
-                                            <div class="summary-value" id="total-protein">0</div>
-                                            <div class="summary-label">Protein (g)</div>
-                                        </div>
-                                        <div class="summary-item">
-                                            <div class="summary-value" id="total-fat">0</div>
-                                            <div class="summary-label">Fat (g)</div>
-                                        </div>
-                                        <div class="summary-item">
-                                            <div class="summary-value" id="total-cho">0</div>
-                                            <div class="summary-label">CHO (g)</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <?php if (!$selected_client): ?>
+            <!-- ═══ EMPTY STATE ═══ -->
+            <div class="ai-empty">
+                <div class="ai-empty-icon"><i class="fas fa-user-friends"></i></div>
+                <h3>No Client Selected</h3>
+                <p>Select a client from the dropdown above to view their health tracker.</p>
+                <?php if (empty($clients)): ?>
+                <p style="margin-top:8px;color:#d97706;font-size:0.85rem;"><i class="fas fa-info-circle"></i> You don't have any active clients assigned yet.</p>
                 <?php endif; ?>
             </div>
-        </main>
 
+            <?php else: ?>
+
+            <!-- ═══ STAT RIBBON ═══ -->
+            <div class="ai-stat-ribbon">
+                <div class="ai-stat-card">
+                    <div class="ai-stat-icon"><i class="fas fa-weight"></i></div>
+                    <div class="ai-stat-val"><?= $sc['weight'] ? $sc['weight'] : '—' ?></div>
+                    <div class="ai-stat-label">Weight (kg)</div>
+                    <?php if ($bmi_val > 0): ?>
+                    <span class="ai-stat-badge <?= $bmi_class ?>"><?= $bmi_label ?></span>
+                    <?php else: ?><span class="ai-stat-badge neutral">Not recorded</span><?php endif; ?>
+                </div>
+                <div class="ai-stat-card">
+                    <div class="ai-stat-icon"><i class="fas fa-ruler-vertical"></i></div>
+                    <div class="ai-stat-val"><?= $sc['height'] ? $sc['height'] : '—' ?></div>
+                    <div class="ai-stat-label">Height (cm)</div>
+                    <span class="ai-stat-badge neutral"><?= ($optimal_low && $optimal_high) ? "Ideal: {$optimal_low}–{$optimal_high} kg" : 'Needs height' ?></span>
+                </div>
+                <div class="ai-stat-card">
+                    <div class="ai-stat-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="ai-stat-val"><?= $bmi_val ?: '—' ?></div>
+                    <div class="ai-stat-label">BMI</div>
+                    <span class="ai-stat-badge <?= $bmi_class ?>"><?= $bmi_label ?></span>
+                </div>
+                <div class="ai-stat-card">
+                    <div class="ai-stat-icon"><i class="fas fa-circle-dot"></i></div>
+                    <div class="ai-stat-val"><?= $whr_val ?></div>
+                    <div class="ai-stat-label">Waist-Hip Ratio</div>
+                    <span class="ai-stat-badge <?= $whr_risk === 'High Risk' ? 'danger' : ($whr_risk === 'Low Risk' ? '' : 'neutral') ?>"><?= $whr_risk ?></span>
+                </div>
+            </div>
+
+            <!-- ═══ TABS CONTAINER ═══ -->
+            <!-- Keep original .tabs-container wrapper so switchTab() JS still works -->
+            <div class="ai-tabs-wrap tabs-container">
+
+                <!-- Tab Rail -->
+                <div class="ai-tab-rail stagger d-3">
+                    <button class="ai-tab-btn tab <?= $active_tab === 'personal-info' ? 'active' : '' ?>" data-tab="personal-info" onclick="switchTab('personal-info')">
+                        <i class="fas fa-address-card"></i> <span>Client Info</span>
+                    </button>
+                    <button class="ai-tab-btn tab <?= $active_tab === 'food-tracker' ? 'active' : '' ?>" data-tab="food-tracker" onclick="switchTab('food-tracker')">
+                        <i class="fas fa-clipboard-list"></i> <span>Food Tracker</span>
+                    </button>
+                    <button class="ai-tab-btn tab <?= $active_tab === 'body-stats' ? 'active' : '' ?>" data-tab="body-stats" onclick="switchTab('body-stats')">
+                        <i class="fas fa-weight-scale"></i> <span>Body Statistics</span>
+                    </button>
+                    <button class="ai-tab-btn tab <?= $active_tab === 'progress' ? 'active' : '' ?>" data-tab="progress" onclick="switchTab('progress')">
+                        <i class="fas fa-utensils-crossed"></i> <span>Meal Planner</span>
+                    </button>
+                </div>
+
+                <!-- ── TAB 1: Client Info ── -->
+                <div class="ai-tab-panel tab-content <?= $active_tab === 'personal-info' ? 'active' : '' ?>" id="personal-info">
+                    <div class="ai-section-header">
+                        <h2 class="ai-section-title"><i class="fas fa-user-circle"></i> Client Information</h2>
+                    </div>
+
+                    <p class="ai-group-label"><i class="fas fa-id-card"></i> Personal Details</p>
+                    <div class="ai-form-grid">
+                        <div class="ai-field">
+                            <label>Full Name</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-user"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['name']) ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Email Address</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-envelope"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['email']) ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Phone Number</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-phone"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['phone'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Age</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-birthday-cake"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['age'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Gender</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-venus-mars"></i></div>
+                            <input type="text" value="<?= htmlspecialchars(ucfirst($sc['gender'] ?? 'Not provided')) ?>" readonly></div>
+                        </div>
+                    </div>
+
+                    <p class="ai-group-label"><i class="fas fa-map-marker-alt"></i> Address</p>
+                    <div class="ai-form-grid">
+                        <div class="ai-field ai-field-full">
+                            <label>Street Address</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-road"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['address'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>City</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-city"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['city'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>State / Province</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-map"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['state'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>ZIP / Postal Code</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-mailbox"></i></div>
+                            <input type="text" value="<?= htmlspecialchars($sc['zip_code'] ?? 'Not provided') ?>" readonly></div>
+                        </div>
+                    </div>
+
+                    <p class="ai-group-label"><i class="fas fa-heart-pulse"></i> Health Profile</p>
+                    <div class="ai-form-grid">
+                        <div class="ai-field ai-field-full">
+                            <label>Health Conditions</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon" style="align-self:flex-start;padding-top:12px;"><i class="fas fa-notes-medical"></i></div>
+                            <textarea rows="3" readonly><?= htmlspecialchars($sc['health_conditions'] ?? 'No health conditions reported') ?></textarea></div>
+                        </div>
+                        <div class="ai-field ai-field-full">
+                            <label>Dietary Restrictions</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon" style="align-self:flex-start;padding-top:12px;"><i class="fas fa-ban"></i></div>
+                            <textarea rows="3" readonly><?= htmlspecialchars($sc['dietary_restrictions'] ?? 'No dietary restrictions') ?></textarea></div>
+                        </div>
+                        <div class="ai-field ai-field-full">
+                            <label>Health / Nutrition Goals</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon" style="align-self:flex-start;padding-top:12px;"><i class="fas fa-bullseye"></i></div>
+                            <textarea rows="3" readonly><?= htmlspecialchars($sc['goals'] ?? 'No goals set') ?></textarea></div>
+                        </div>
+                        <div class="ai-field ai-field-full">
+                            <label>Dietician Notes</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon" style="align-self:flex-start;padding-top:12px;"><i class="fas fa-clipboard"></i></div>
+                            <textarea rows="4" readonly><?= htmlspecialchars($sc['notes'] ?? 'No notes yet') ?></textarea></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB 2: Food Tracker ── -->
+                <div class="ai-tab-panel tab-content <?= $active_tab === 'food-tracker' ? 'active' : '' ?>" id="food-tracker">
+                    <div class="ai-section-header">
+                        <h2 class="ai-section-title"><i class="fas fa-utensils"></i> Daily Food Intake — <?= date('F j, Y') ?></h2>
+                    </div>
+
+                    <!-- Food entries list -->
+                    <?php if (empty($food_entries)): ?>
+                    <div class="ai-empty" style="padding:48px;border-radius:16px;">
+                        <div class="ai-empty-icon" style="width:56px;height:56px;font-size:1.4rem;border-radius:16px;"><i class="fas fa-utensils"></i></div>
+                        <h3 style="font-size:1rem;">No entries today</h3>
+                        <p>Add food items below to start tracking.</p>
+                    </div>
+                    <?php else: ?>
+                    <div class="ai-food-list">
+                        <?php foreach ($food_entries as $food):
+                            $mealClass = 'meal-'.($food['meal_type'] ?? 'custom');
+                            $mealIcon  = match($food['meal_type'] ?? '') { 'breakfast'=>'fa-coffee','lunch'=>'fa-utensils','dinner'=>'fa-moon','snack'=>'fa-apple-alt', default=>'fa-bowl-food' };
+                        ?>
+                        <div class="ai-food-entry">
+                            <div class="ai-food-entry-icon <?= $mealClass ?>"><i class="fas <?= $mealIcon ?>"></i></div>
+                            <div class="ai-food-entry-info">
+                                <div class="ai-food-entry-name"><?= ucfirst($food['meal_type'] ?? 'Custom') ?>: <?= htmlspecialchars($food['food_name']) ?></div>
+                                <div class="ai-food-entry-macros">
+                                    <span><b>P</b> <?= $food['protein'] ?? 0 ?>g</span>
+                                    <span><b>C</b> <?= $food['carbs'] ?? 0 ?>g</span>
+                                    <span><b>F</b> <?= $food['fat'] ?? 0 ?>g</span>
+                                </div>
+                            </div>
+                            <div class="ai-food-entry-kcal"><?= $food['calories'] ?><small> kcal</small></div>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="delete_food_entry">
+                                <input type="hidden" name="client_id" value="<?= htmlspecialchars($sc['id']) ?>">
+                                <input type="hidden" name="entry_id" value="<?= htmlspecialchars($food['id']) ?>">
+                                <button type="submit" class="ai-food-del-btn" title="Remove"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Add food form -->
+                    <div class="ai-add-food-form">
+                        <h4><i class="fas fa-plus-circle"></i> Add Food Entry</h4>
+                        <form method="POST">
+                            <input type="hidden" name="action" value="add_food_entry">
+                            <input type="hidden" name="client_id" value="<?= htmlspecialchars($sc['id']) ?>">
+                            <div class="ai-add-food-inputs">
+                                <select name="meal_type">
+                                    <option value="breakfast">Breakfast</option>
+                                    <option value="lunch">Lunch</option>
+                                    <option value="dinner">Dinner</option>
+                                    <option value="snack">Snack</option>
+                                    <option value="custom" selected>Custom</option>
+                                </select>
+                                <input type="text" name="food_name" placeholder="Food name" required>
+                                <input type="number" step="0.1" name="calories" placeholder="kcal">
+                                <input type="number" step="0.1" name="protein" placeholder="Protein g">
+                                <input type="number" step="0.1" name="carbs" placeholder="Carbs g">
+                                <input type="number" step="0.1" name="fat" placeholder="Fat g">
+                                <button type="submit" class="ai-btn-add"><i class="fas fa-plus"></i> Add</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Food mini-stats -->
+                    <div class="ai-food-stats stagger d-3">
+                        <div class="ai-food-stat">
+                            <div class="ai-food-stat-icon" style="color:#f97316;"><i class="fas fa-fire-flame-curved"></i></div>
+                            <div class="ai-food-stat-val"><?= $calories_today ?></div>
+                            <div class="ai-food-stat-label">Calories Today</div>
+                        </div>
+                        <div class="ai-food-stat">
+                            <div class="ai-food-stat-icon" style="color:#10b981;"><i class="fas fa-bowl-food"></i></div>
+                            <div class="ai-food-stat-val"><?= count($food_entries) ?></div>
+                            <div class="ai-food-stat-label">Meals Logged</div>
+                        </div>
+                        <div class="ai-food-stat">
+                            <div class="ai-food-stat-icon" style="color:#6366f1;"><i class="fas fa-clock-rotate-left"></i></div>
+                            <div class="ai-food-stat-val"><?= date('H:i') ?></div>
+                            <div class="ai-food-stat-label">Last Update</div>
+                        </div>
+                        <div class="ai-food-stat">
+                            <div class="ai-food-stat-icon" style="color:#d946ef;"><i class="fas fa-signal"></i></div>
+                            <div class="ai-food-stat-val" style="color:#10b981;font-size:1rem;">Active</div>
+                            <div class="ai-food-stat-label">Tracking Mode</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── TAB 3: Body Statistics ── -->
+                <div class="ai-tab-panel tab-content <?= $active_tab === 'body-stats' ? 'active' : '' ?>" id="body-stats">
+                    <div class="ai-section-header">
+                        <h2 class="ai-section-title"><i class="fas fa-chart-line"></i> Body Measurements &amp; Statistics</h2>
+                    </div>
+
+                    <p class="ai-group-label"><i class="fas fa-eye"></i> Current Measurements (Read-Only)</p>
+                    <div class="ai-form-grid">
+                        <div class="ai-field">
+                            <label>Current Weight</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-weight"></i></div>
+                            <input type="text" value="<?= $sc['weight'] ? $sc['weight'].' kg' : 'Not recorded' ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Height</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-ruler-vertical"></i></div>
+                            <input type="text" value="<?= $sc['height'] ? $sc['height'].' cm' : 'Not recorded' ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>BMI</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-chart-bar"></i></div>
+                            <input type="text" value="<?= $bmi_val ?: 'Not calculated' ?>" readonly></div>
+                            <?php if ($bmi_val): ?><div class="ai-field-hint">Classification: <strong><?= $bmi_label ?></strong></div><?php endif; ?>
+                        </div>
+                        <div class="ai-field">
+                            <label>Optimal Weight Range</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-bullseye"></i></div>
+                            <input type="text" value="<?= ($optimal_low && $optimal_high) ? "{$optimal_low} – {$optimal_high} kg" : 'Need height data' ?>" readonly></div>
+                            <div class="ai-field-hint">Healthy BMI range: 18.5 – 24.9</div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Waist Circumference</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-circle-dot"></i></div>
+                            <input type="text" value="<?= !empty($sc['waist_circumference']) ? $sc['waist_circumference'].' cm' : 'Not recorded' ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Hip Circumference</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-circle-dot"></i></div>
+                            <input type="text" value="<?= !empty($sc['hip_circumference']) ? $sc['hip_circumference'].' cm' : 'Not recorded' ?>" readonly></div>
+                        </div>
+                        <div class="ai-field">
+                            <label>Waist-Hip Ratio</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-arrows-left-right"></i></div>
+                            <input type="text" value="<?= $whr_val ?>" readonly></div>
+                            <?php if ($whr_risk !== 'N/A'): ?><div class="ai-field-hint">Risk level: <strong><?= $whr_risk ?></strong></div><?php endif; ?>
+                        </div>
+                        <div class="ai-field">
+                            <label>Client Since</label>
+                            <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-calendar"></i></div>
+                            <input type="text" value="<?= !empty($sc['created_at']) ? date('M j, Y', strtotime($sc['created_at'])) : 'N/A' ?>" readonly></div>
+                        </div>
+                    </div>
+
+                    <!-- Update form -->
+                    <div class="ai-update-section">
+                        <h3><i class="fas fa-pen-to-square"></i> Update Body Measurements</h3>
+                        <form method="POST" id="updateBodyStatsForm">
+                            <input type="hidden" name="action" value="update_body_stats">
+                            <input type="hidden" name="client_id" value="<?= htmlspecialchars($sc['id']) ?>">
+                            <div class="ai-form-grid">
+                                <div class="ai-field">
+                                    <label for="upd_weight">Weight (kg)</label>
+                                    <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-weight"></i></div>
+                                    <input type="number" step="0.1" id="upd_weight" name="weight" value="<?= htmlspecialchars($sc['weight'] ?? '') ?>" placeholder="e.g. 65.0"></div>
+                                </div>
+                                <div class="ai-field">
+                                    <label for="upd_height">Height (cm)</label>
+                                    <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-ruler-vertical"></i></div>
+                                    <input type="number" step="0.1" id="upd_height" name="height" value="<?= htmlspecialchars($sc['height'] ?? '') ?>" placeholder="e.g. 165"></div>
+                                </div>
+                                <div class="ai-field">
+                                    <label for="upd_waist">Waist (cm)</label>
+                                    <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-circle-dot"></i></div>
+                                    <input type="number" step="0.1" id="upd_waist" name="waist_circumference" value="<?= htmlspecialchars($sc['waist_circumference'] ?? '') ?>" placeholder="e.g. 82"></div>
+                                </div>
+                                <div class="ai-field">
+                                    <label for="upd_hip">Hip (cm)</label>
+                                    <div class="ai-field-inner"><div class="ai-field-icon"><i class="fas fa-circle-dot"></i></div>
+                                    <input type="number" step="0.1" id="upd_hip" name="hip_circumference" value="<?= htmlspecialchars($sc['hip_circumference'] ?? '') ?>" placeholder="e.g. 95"></div>
+                                </div>
+                            </div>
+                            <button type="submit" class="ai-btn-save"><i class="fas fa-save"></i> Save Measurements</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ── TAB 4: Meal Planner (Food Exchange List) ── -->
+                <div class="ai-tab-panel tab-content <?= $active_tab === 'progress' ? 'active' : '' ?>" id="progress">
+                    <div class="ai-meal-header">
+                        <h2 class="ai-section-title" style="margin:0;"><i class="fas fa-exchange-alt"></i> Food Exchange List</h2>
+                        <button class="ai-btn-save-meal" id="saveMealPlan"><i class="fas fa-save"></i> Save Meal Plan</button>
+                    </div>
+
+                    <div class="ai-table-wrap">
+                        <table class="ai-exchange-table fel-table">
+                            <thead>
+                                <tr>
+                                    <th width="25%">Food Group &amp; Items</th>
+                                    <th width="15%">Exchange</th>
+                                    <th width="12%">Weight (g)</th>
+                                    <th width="12%">Energy (kcal)</th>
+                                    <th width="12%">Protein (g)</th>
+                                    <th width="12%">Fat (g)</th>
+                                    <th width="12%">CHO (g)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-carrot"></i> <strong>VEGETABLES</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="veg-select" class="food-select">
+                                        <option value="">Select Vegetable Type</option>
+                                        <?php if (!empty($food_items_by_group['vegetable'])): foreach ($food_items_by_group['vegetable'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="leafy">Leafy, flower, fruit vegetables</option><option value="root">Root, tuber, bulb vegetables</option><option value="starchy">Starchy vegetables</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="vegetable-exchange">-</td><td id="vegetable-weight">-</td><td id="vegetable-energy">-</td><td id="vegetable-protein">-</td><td id="vegetable-fat">-</td><td id="vegetable-cho">-</td></tr>
+
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-apple-alt"></i> <strong>FRUITS</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="fruit-select" class="food-select">
+                                        <option value="">Select Fruit</option>
+                                        <?php if (!empty($food_items_by_group['fruit'])): foreach ($food_items_by_group['fruit'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="banana">Banana (saba)</option><option value="mango">Mango</option><option value="apple">Apple</option><option value="orange">Orange</option><option value="papaya">Papaya</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="fruit-exchange">-</td><td id="fruit-weight">-</td><td id="fruit-energy">-</td><td id="fruit-protein">-</td><td id="fruit-fat">-</td><td id="fruit-cho">-</td></tr>
+
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-wine-bottle"></i> <strong>MILK</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="milk-select" class="food-select">
+                                        <option value="">Select Milk Type</option>
+                                        <?php if (!empty($food_items_by_group['milk'])): foreach ($food_items_by_group['milk'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="whole">Whole, fresh/evap</option><option value="lowfat">Low-fat, fresh</option><option value="nonfat">Non-fat, powdered</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="milk-exchange">-</td><td id="milk-weight">-</td><td id="milk-energy">-</td><td id="milk-protein">-</td><td id="milk-fat">-</td><td id="milk-cho">-</td></tr>
+
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-bread-slice"></i> <strong>RICE, RICE SUBSTITUTES &amp; PRODUCTS</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="rice-select" class="food-select">
+                                        <option value="">Select Rice/Grain</option>
+                                        <?php if (!empty($food_items_by_group['rice'])): foreach ($food_items_by_group['rice'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="rice_well">Rice, well-milled</option><option value="rice_medium">Rice, medium-milled</option><option value="rice_brown">Rice, brown</option><option value="bread">Bread</option><option value="noodles">Noodles</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="rice-exchange">-</td><td id="rice-weight">-</td><td id="rice-energy">-</td><td id="rice-protein">-</td><td id="rice-fat">-</td><td id="rice-cho">-</td></tr>
+
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-drumstick-bite"></i> <strong>MEAT, POULTRY, FISH &amp; PRODUCTS</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="meat-select" class="food-select">
+                                        <option value="">Select Meat/Fish</option>
+                                        <?php if (!empty($food_items_by_group['meat'])): foreach ($food_items_by_group['meat'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="lean">Lean meat</option><option value="medium">Medium-fat meat</option><option value="high">High-fat meat</option><option value="fish">Fish, lean</option><option value="fish_medium">Fish, medium-fat</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="meat-exchange">-</td><td id="meat-weight">-</td><td id="meat-energy">-</td><td id="meat-protein">-</td><td id="meat-fat">-</td><td id="meat-cho">-</td></tr>
+
+                                <tr class="group-header"><td colspan="7"><i class="fas fa-oil-can"></i> <strong>FATS &amp; OILS</strong></td></tr>
+                                <tr class="food-item"><td>
+                                    <select id="fat-select" class="food-select">
+                                        <option value="">Select Fat/Oil Type</option>
+                                        <?php if (!empty($food_items_by_group['fat'])): foreach ($food_items_by_group['fat'] as $item): ?>
+                                        <option value="<?= htmlspecialchars($item['id']) ?>" data-exchange="<?= htmlspecialchars($item['exchanges']??'1') ?>" data-weight="<?= htmlspecialchars($item['serving_size']??'') ?>" data-energy="<?= htmlspecialchars($item['energy']??'0') ?>" data-protein="<?= htmlspecialchars($item['protein']??'0') ?>" data-fat="<?= htmlspecialchars($item['fat']??'0') ?>" data-cho="<?= htmlspecialchars($item['carbohydrates']??'0') ?>"><?= htmlspecialchars($item['food_name']) ?></option>
+                                        <?php endforeach; else: ?>
+                                        <option value="butter">Butter, margarine</option><option value="oil">Cooking oil</option><option value="mayo">Mayonnaise</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </td><td id="fat-exchange">-</td><td id="fat-weight">-</td><td id="fat-energy">-</td><td id="fat-protein">-</td><td id="fat-fat">-</td><td id="fat-cho">-</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Selected Items Summary -->
+                    <div class="selected-items-section" style="margin-top:20px;background:#f9fafb;border:1.5px solid #f3f4f6;border-radius:14px;padding:18px 20px;">
+                        <h4 style="font-family:'Outfit',sans-serif;font-size:0.9rem;font-weight:800;color:#111827;margin:0 0 12px;display:flex;align-items:center;gap:8px;"><i class="fas fa-list-check" style="color:#059669;"></i> Selected Food Items</h4>
+                        <div class="selected-items-list" id="selectedItems">
+                            <div class="no-selection" style="color:#9ca3af;font-size:0.85rem;font-style:italic;">No food items selected yet</div>
+                        </div>
+                    </div>
+
+                    <!-- Nutrition Summary -->
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;">
+                        <div class="ai-food-stat"><div class="ai-food-stat-val" id="total-energy">0</div><div class="ai-food-stat-label">Energy (kcal)</div></div>
+                        <div class="ai-food-stat"><div class="ai-food-stat-val" id="total-protein">0</div><div class="ai-food-stat-label">Protein (g)</div></div>
+                        <div class="ai-food-stat"><div class="ai-food-stat-val" id="total-fat">0</div><div class="ai-food-stat-label">Fat (g)</div></div>
+                        <div class="ai-food-stat"><div class="ai-food-stat-val" id="total-cho">0</div><div class="ai-food-stat-label">CHO (g)</div></div>
+                    </div>
+                </div>
+
+            </div><!-- /.ai-tabs-wrap -->
+
+            <?php endif; ?>
+        </div><!-- /.page-container -->
+    </main>
+</div><!-- /.main-layout -->
         <script>
             // FNRI FEL Data - MUST BE GLOBAL
             const felData = {

@@ -35,12 +35,22 @@
                     // Update workload if elements exist
                     if (data.workload) {
                         const pct = Math.round((data.workload.total_clients / data.workload.max_capacity) * 100);
-                        document.getElementById('workloadProgressBar').style.width = pct + '%';
-                        document.getElementById('workloadText').innerText = `${data.workload.total_clients} Active Clients (${pct}% Capacity)`;
+                        const progressBar = document.getElementById('workloadProgressBar');
+                        const workloadText = document.getElementById('workloadText');
+                        if (progressBar) progressBar.style.width = pct + '%';
+                        if (workloadText) workloadText.innerText = `${data.workload.total_clients} Active Clients (${pct}% Capacity)`;
                     }
+                } else {
+                    console.error('API Error:', data.error);
+                    const list = document.getElementById('recentActivityList');
+                    if (list) list.innerHTML = `<div style="text-align: center; padding: 20px; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Sync Error</div>`;
                 }
             })
-            .catch(err => console.error('Real-time update error:', err));
+            .catch(err => {
+                console.error('Real-time update error:', err);
+                const list = document.getElementById('recentActivityList');
+                if (list) list.innerHTML = `<div style="text-align: center; padding: 20px; color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Sync Offline</div>`;
+            });
     }
 
     function renderInfluenceList(staff) {

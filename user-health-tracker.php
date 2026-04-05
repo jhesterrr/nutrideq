@@ -399,46 +399,56 @@ $active_tab = $_SESSION['active_health_tracker_tab'] ?? 'personal-info';
                                     </div>
                                 <?php else: ?>
                                     <?php foreach ($food_entries as $food): ?>
-                                        <div class="food-entry">
-                                            <div class="food-icon">
+                                        <div class="food-entry" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease;">
+                                            <div class="bento-stat-icon" style="flex-shrink: 0; background: rgba(16, 185, 129, 0.1); color: #10b981; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.25rem;">
                                                 <i class="fas fa-<?php
                                                 switch ($food['meal_type']) {
-                                                    case 'breakfast':
-                                                        echo 'coffee';
-                                                        break;
-                                                    case 'lunch':
-                                                        echo 'utensils';
-                                                        break;
-                                                    case 'dinner':
-                                                        echo 'moon';
-                                                        break;
-                                                    default:
-                                                        echo 'apple-alt';
+                                                    case 'breakfast': echo 'coffee'; break;
+                                                    case 'lunch': echo 'utensils'; break;
+                                                    case 'dinner': echo 'moon'; break;
+                                                    default: echo 'apple-alt';
                                                 }
                                                 ?>"></i>
                                             </div>
-                                            <div class="food-details">
-                                                <div class="food-name"><?php echo ucfirst($food['meal_type']); ?>:
-                                                    <?php echo htmlspecialchars($food['food_name']); ?>
+                                            <div style="flex: 1;">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                                                    <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #1e293b;">
+                                                        <?php echo htmlspecialchars($food['food_name']); ?>
+                                                    </h4>
+                                                    <?php if ($food['meal_type'] === 'custom'): ?>
+                                                        <span style="font-size: 0.8rem; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; background: #eff6ff; padding: 2px 8px; border-radius: 6px; border: 1px solid #bfdbfe;">
+                                                            <i class="fas fa-clipboard-list"></i> Planned
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; background: #f1f5f9; padding: 2px 8px; border-radius: 6px;">
+                                                            <?php echo ucfirst($food['meal_type']); ?>
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </div>
-                                                <div class="food-macros">
-                                                    Protein: <?php echo htmlspecialchars($food['protein'] ?? '0'); ?>g |
-                                                    Carbs: <?php echo htmlspecialchars($food['carbs'] ?? '0'); ?>g |
-                                                    Fat: <?php echo htmlspecialchars($food['fat'] ?? '0'); ?>g
+                                                <div style="display: flex; gap: 12px; font-size: 0.85rem; color: #64748b; font-weight: 500;">
+                                                    <span><b style="color: #10b981;">P:</b> <?php echo htmlspecialchars($food['protein'] ?? '0'); ?>g</span>
+                                                    <span><b style="color: #6366f1;">C:</b> <?php echo htmlspecialchars($food['carbs'] ?? '0'); ?>g</span>
+                                                    <span><b style="color: #f59e0b;">F:</b> <?php echo htmlspecialchars($food['fat'] ?? '0'); ?>g</span>
                                                 </div>
                                             </div>
-                                            <div class="food-calories"><?php echo htmlspecialchars($food['calories'] ?? '0'); ?>
-                                                kcal
-                                            </div>
-                                            <div class="food-actions">
-                                                <button class="btn-icon"
-                                                    onclick="editFoodEntry(<?php echo (int) $food['id']; ?>)">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-icon"
-                                                    onclick="deleteFoodEntry(<?php echo (int) $food['id']; ?>)">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                            <div style="text-align: right;">
+                                                <div style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; color: #111827;">
+                                                    <?php echo htmlspecialchars($food['calories'] ?? '0'); ?><small style="font-size: 0.6em; opacity: 0.6; margin-left: 2px;">kcal</small>
+                                                </div>
+                                                <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;">
+                                                    <?php if ($food['meal_type'] === 'custom'): ?>
+                                                        <button class="btn-dash-action" style="padding: 8px 16px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 600; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); cursor: pointer;" onclick="showConsumeModal(<?php echo (int) $food['id']; ?>, '<?php echo htmlspecialchars(addslashes($food['food_name'])); ?>')">
+                                                            <i class="fas fa-check"></i> Consume
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button class="btn-dash-action" style="padding: 6px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; cursor: pointer;" onclick="editFoodEntry(<?php echo (int) $food['id']; ?>)">
+                                                            <i class="fas fa-edit" style="font-size: 0.8rem; color: #64748b;"></i>
+                                                        </button>
+                                                        <button class="btn-dash-action" style="padding: 6px; border-radius: 8px; background: #fff1f2; border: 1px solid #ffe4e6; color: #f43f5e; cursor: pointer;" onclick="deleteFoodEntry(<?php echo (int) $food['id']; ?>)">
+                                                            <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -780,41 +790,163 @@ $active_tab = $_SESSION['active_health_tracker_tab'] ?? 'personal-info';
                 </div>
             </div>
 
+            <!-- Consume Meal Modal -->
+            <div id="consumeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center;">
+                <div style="background:white; padding:30px; border-radius:24px; width:400px; max-width:90%; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+                    <h3 style="margin-bottom:5px; font-family:'Outfit', sans-serif;">Confirm Consumption</h3>
+                    <p style="color:#64748b; font-size:0.9rem; margin-bottom:20px;">When did you consume <strong id="consumeFoodName" style="color:#1e293b;"></strong>?</p>
+                    
+                    <form id="consumeForm">
+                        <input type="hidden" id="consumeTrackingId" name="tracking_id">
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px;">
+                            <label style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
+                                <input type="radio" name="meal_type" value="Breakfast" style="display:none;" required onchange="updateRadioStyling(this)">
+                                <i class="fas fa-coffee" style="display:block; font-size: 1.5rem; color: #6366f1; margin-bottom: 8px;"></i>
+                                <span style="font-size:0.85rem; font-weight:600; color:#475569;">Breakfast</span>
+                            </label>
+                            <label style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
+                                <input type="radio" name="meal_type" value="Lunch" style="display:none;" required onchange="updateRadioStyling(this)">
+                                <i class="fas fa-utensils" style="display:block; font-size: 1.5rem; color: #f59e0b; margin-bottom: 8px;"></i>
+                                <span style="font-size:0.85rem; font-weight:600; color:#475569;">Lunch</span>
+                            </label>
+                            <label style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
+                                <input type="radio" name="meal_type" value="Dinner" style="display:none;" required onchange="updateRadioStyling(this)">
+                                <i class="fas fa-moon" style="display:block; font-size: 1.5rem; color: #8b5cf6; margin-bottom: 8px;"></i>
+                                <span style="font-size:0.85rem; font-weight:600; color:#475569;">Dinner</span>
+                            </label>
+                            <label style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc;">
+                                <input type="radio" name="meal_type" value="Snack" style="display:none;" required onchange="updateRadioStyling(this)">
+                                <i class="fas fa-apple-alt" style="display:block; font-size: 1.5rem; color: #10b981; margin-bottom: 8px;"></i>
+                                <span style="font-size:0.85rem; font-weight:600; color:#475569;">Snack</span>
+                            </label>
+                        </div>
+                        
+                        <div style="display:flex; justify-content:flex-end; gap:12px;">
+                            <button type="button" onclick="closeConsumeModal()" style="padding:10px 20px; border-radius:12px; background:white; color:#64748b; border: 1.5px solid #e2e8f0; font-weight:600; cursor:pointer;">Cancel</button>
+                            <button type="submit" style="padding:10px 20px; border-radius:12px; background:#10b981; color:white; border:none; font-weight:700; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <i class="fas fa-share-square"></i> Confirm to Diary
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <script>
-                // FNRI FEL Data and client-side functions (kept as existing code)
-                const felData = {
-                    vegetables: {
-                        leafy: { exchange: "1 cup", weight: "100", energy: "25", protein: "2", fat: "0", cho: "5" },
-                        root: { exchange: "½ cup", weight: "50", energy: "50", protein: "1", fat: "0", cho: "11" },
-                        starchy: { exchange: "½ cup", weight: "80", energy: "70", protein: "2", fat: "0", cho: "15" }
-                    },
-                    fruits: {
-                        banana: { exchange: "1 piece", weight: "70", energy: "77", protein: "1", fat: "0", cho: "20" },
-                        papaya: { exchange: "1 slice", weight: "100", energy: "39", protein: "0", fat: "0", cho: "10" }
-                    },
-                    milk: { /* ... */ },
-                    rice: { /* ... */ },
-                    meat: { /* ... */ },
-                    fats: { /* ... */ }
-                };
+                function showConsumeModal(id, name) {
+                    document.getElementById('consumeTrackingId').value = id;
+                    document.getElementById('consumeFoodName').textContent = name;
+                    document.getElementById('consumeModal').style.display = 'flex';
+                    // Reset radios
+                    const form = document.getElementById('consumeForm');
+                    form.reset();
+                    updateRadioStyling(null);
+                }
 
+                function closeConsumeModal() {
+                    document.getElementById('consumeModal').style.display = 'none';
+                }
+
+                function updateRadioStyling(selectedInput) {
+                    const labels = document.querySelectorAll('#consumeForm label');
+                    labels.forEach(l => {
+                        l.style.borderColor = '#e2e8f0';
+                        l.style.background = '#f8fafc';
+                        l.style.boxShadow = 'none';
+                    });
+                    if (selectedInput) {
+                        const lbl = selectedInput.closest('label');
+                        lbl.style.borderColor = '#10b981';
+                        lbl.style.background = '#ecfdf5';
+                        lbl.style.boxShadow = '0 4px 10px rgba(16, 185, 129, 0.1)';
+                    }
+                }
+
+                document.getElementById('consumeForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    
+                    const btn = this.querySelector('button[type="submit"]');
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transferring...';
+                    btn.disabled = true;
+
+                    fetch(BASE_URL + 'api/consume_meal.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.success) {
+                            closeConsumeModal();
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                            btn.innerHTML = originalHTML;
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Network Error');
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    });
+                });
+
+                // FNRI FEL Data and client-side functions (Restored Logic)
                 let selectedItems = [];
 
-                // (All updateXDetails, addSelectedItem, removeSelectedItem, updateNutritionSummary, editProfile, addFoodEntry, editFoodEntry, deleteFoodEntry, updateBodyStats)
-                // Keep existing JS functions but ensure DOM bindings happen after DOMContentLoaded.
-                // For brevity here we assume the functions are unchanged and present below:
-                // ...existing code for JS functions...
-                function updateVegetableDetails(select) { /* ...existing code... */ }
-                function updateFruitDetails(select) { /* ...existing code... */ }
-                function updateMilkDetails(select) { /* ...existing code... */ }
-                function updateRiceDetails(select) { /* ...existing code... */ }
-                function updateMeatDetails(select) { /* ...existing code... */ }
-                function updateFatDetails(select) { /* ...existing code... */ }
-                function addSelectedItem(group, name, data) { /* ...existing code... */ }
-                function removeSelectedItem(id) { /* ...existing code... */ }
-                function updateSelectedItemsList() { /* ...existing code... */ }
-                function updateNutritionSummary() { /* ...existing code... */ }
+                function addSelectedItem(group, name, data) {
+                    const item = {
+                        group,
+                        name,
+                        data,
+                        id: Date.now() + Math.random()
+                    };
+                    selectedItems.push(item);
+                    updateSelectedItemsList();
+                    updateNutritionSummary();
+                }
+
+                function removeSelectedItem(id) {
+                    selectedItems = selectedItems.filter(item => item.id !== id);
+                    updateSelectedItemsList();
+                    updateNutritionSummary();
+                }
+
+                function updateSelectedItemsList() {
+                    const container = document.getElementById('selectedItemsList');
+                    if (!container) return;
+                    if (selectedItems.length === 0) {
+                        container.innerHTML = '<div class="no-selection" style="padding:20px; text-align:center; color:#64748b;">No food items selected yet</div>';
+                        return;
+                    }
+                    container.innerHTML = selectedItems.map(item => `
+                    <div class="selected-item" style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #e2e8f0;">
+                        <div>
+                            <div style="font-weight:600; color:#1e293b;">${item.name} <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(${item.group})</span></div>
+                            <div style="font-size:0.8rem; color:#64748b;">
+                                ${item.data.exchange} Ex. | ${item.data.energy} kcal | P:${item.data.protein}g F:${item.data.fat}g C:${item.data.cho}g
+                            </div>
+                        </div>
+                        <button onclick="removeSelectedItem(${item.id})" style="background:none; border:none; color:#f43f5e; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    </div>
+                `).join('');
+                }
+
+                function updateNutritionSummary() {
+                    const totalEnergy = selectedItems.reduce((sum, item) => sum + parseInt(item.data.energy || 0), 0);
+                    const totalProtein = selectedItems.reduce((sum, item) => sum + parseInt(item.data.protein || 0), 0);
+                    const totalFat = selectedItems.reduce((sum, item) => sum + parseInt(item.data.fat || 0), 0);
+                    const totalCHO = selectedItems.reduce((sum, item) => sum + parseInt(item.data.cho || 0), 0);
+
+                    if (document.getElementById('total-energy')) document.getElementById('total-energy').innerHTML = totalEnergy + '<small style="font-size: 0.6em; margin-left: 2px;">kcal</small>';
+                    if (document.getElementById('total-protein')) document.getElementById('total-protein').innerHTML = totalProtein + '<small style="font-size: 0.6em; margin-left: 2px;">g</small>';
+                    if (document.getElementById('total-fat')) document.getElementById('total-fat').innerHTML = totalFat + '<small style="font-size: 0.6em; margin-left: 2px;">g</small>';
+                    if (document.getElementById('total-cho')) document.getElementById('total-cho').innerHTML = totalCHO + '<small style="font-size: 0.6em; margin-left: 2px;">g</small>';
+                }
+
                 function editProfile() { alert('Profile editing feature would open a form here.'); }
                 function addFoodEntry() { alert('Food entry feature would open a form here.'); }
                 function editFoodEntry(id) { alert('Editing food entry ID: ' + id); }

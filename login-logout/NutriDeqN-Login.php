@@ -3,7 +3,6 @@
 require_once '../database.php';
 
 // Process login if form is submitted
-// Process login if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     session_start();
     // FORCE NO-CACHE - SECURITY FIX
@@ -15,18 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input_password = $_POST['password'];
     
     try {
-        // Create database connection
         $database = new Database();
         $pdo = $database->getConnection();
         
-        // Check if user exists
         $stmt = $pdo->prepare("SELECT id, name, email, password, role, status FROM users WHERE email = ?");
         $stmt->execute([$email]);
         
         if ($stmt->rowCount() == 1) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Check if account is active
             if ($user['status'] !== 'active') {
                 $_SESSION['error'] = "Your account has been deactivated. Please contact administrator.";
                 $_SESSION['login_email'] = $email;
@@ -34,9 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
             
-            // Verify password
             if (password_verify($input_password, $user['password'])) {
-                // Standardize role: 'regular' -> 'user'
                 if ($user['role'] === 'regular') {
                     $user['role'] = 'user';
                 }
@@ -48,11 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['logged_in'] = true;
                 
-                // Update last login
                 $update_stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
                 $update_stmt->execute([$user['id']]);
                 
-                // Redirect to unified dashboard - all roles go to dashboard.php
                 header("Location: ../dashboard.php");
                 exit();
             } else {
@@ -67,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         }
-        
     } catch (PDOException $e) {
         $_SESSION['error'] = "Database error: " . $e->getMessage();
         header("Location: " . $_SERVER['PHP_SELF']);
@@ -75,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Display error messages from session
 if (isset($_SESSION['error'])) {
     $login_error = $_SESSION['error'];
     unset($_SESSION['error']);
@@ -83,889 +73,286 @@ if (isset($_SESSION['error'])) {
     $login_error = '';
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>NutriDeq - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>NutriDeq - Portal Authentication</title>
+    <link rel="stylesheet" href="../css/base.css?v=205">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/mobile-style.css?v=119">
-    <link rel="stylesheet" href="../css/interactive-animations.css?v=119">
-    <script src="../scripts/interactive-effects.js?v=119" defer></script>
     <style>
-         :root {
-            --primary: #2E8B57;
-            --primary-dark: #1e6b42;
-            --primary-light: #3cb371;
-            --secondary: #4A90E2;
-            --accent: #FF6B6B;
-            --light: #F8F9FA;
-            --dark: #212529;
-            --gray: #6C757D;
-            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
-            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        /* =========================================================
+           NUTRI-GLASS : ULTRA-DYNAMIC AUTH (WOW FACTOR)
+           ========================================================= */
+        :root {
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --primary: #10b981; 
+            --primary-dark: #047857;
+            --accent: #f59e0b; 
+            --accent-alt: #3b82f6; 
+            --glass-border: rgba(255, 255, 255, 0.8);
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
         body {
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background-color: var(--light);
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            margin: 0; padding: 0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden; 
         }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+
+        /* --- Mega Gradient & Interactivity Base --- */
+        .page-wrapper {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            z-index: 1; display:flex; justify-content:center; align-items:center;
         }
-        /* Header & Navigation */
-        
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: var(--shadow);
+
+        /* Mouse Spotlight Follower */
+        .spotlight {
             position: fixed;
-            width: 100%;
-            z-index: 1000;
-            padding: 15px 0;
-            transition: var(--transition);
+            top: 0; left: 0; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: -1;
+            transform: translate(-50%, -50%); transition: opacity 0.5s ease;
         }
+
+        /* Abstract Fluid Gradient Mesh Background */
+        .gradient-mesh { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2; background: #f8fafc; }
+        .mesh-blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.7; animation: moveBlobs 20s infinite alternate ease-in-out; }
+        .mesh-1 { width: 50vw; height: 50vw; background: rgba(16, 185, 129, 0.15); top: -10%; left: -10%; }
+        .mesh-2 { width: 40vw; height: 40vw; background: rgba(59, 130, 246, 0.1); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .mesh-3 { width: 45vw; height: 45vw; background: rgba(245, 158, 11, 0.1); top: 30%; left: 40%; animation-delay: -10s; }
+
+        @keyframes moveBlobs {
+            0% { transform: scale(1) translate(0,0) rotate(0deg); }
+            50% { transform: scale(1.1) translate(10%, 10%) rotate(45deg); }
+            100% { transform: scale(0.9) translate(-10%, -10%) rotate(90deg); }
+        }
+
+        /* 2D Floating Molecular Objects */
+        .floating-object {
+            position: absolute; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: var(--primary); z-index: 0; pointer-events: none;
+        }
+        .obj-1 { width: 80px; height: 80px; top: 20%; left: 20%; animation: floatObj 8s infinite alternate; }
+        .obj-2 { width: 60px; height: 60px; bottom: 20%; right: 20%; animation: floatObj 6s infinite alternate-reverse; color: var(--accent-alt);}
+
+        @keyframes floatObj { 0% { transform: translateY(0); } 100% { transform: translateY(-30px); } }
+
+        /* Perspective Wrapper for 3D Card Tilt */
+        .tilt-wrapper { perspective: 1200px; z-index: 10; padding: 20px;}
+
+        /* Central Glass Card */
+        .auth-card {
+            width: 100vw; max-width: 480px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,1); border-radius: 36px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.1), inset 0 0 0 2px rgba(255,255,255,0.8);
+            transform-style: preserve-3d; transition: transform 0.1s ease;
+            position: relative; 
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+
+        .auth-card-inner {
+            padding: 50px 40px; overflow-y: auto; overflow-x: hidden;
+            transform: translateZ(40px); /* Pushes content out in 3D space */
+        }
+        .auth-card-inner::-webkit-scrollbar { width: 4px; }
+        .auth-card-inner::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        /* Animating load-in */
+        .tilt-wrapper { animation: popIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(30px) scale(0.95); }
+        @keyframes popIn { to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        /* Logo & Header */
+        .auth-header { text-align: center; margin-bottom: 40px; }
+        .logo-link { display: inline-flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none; margin-bottom: 24px; position: relative; }
+        .logo-link img { height: 40px; border-radius: 10px; transition: 0.5s; }
+        .logo-link:hover img { transform: rotate(15deg) scale(1.1); }
+        .logo-text { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: var(--text-dark); }
+        .logo-text span { color: var(--primary); }
+
+        .auth-header h1 { font-family: 'Outfit'; font-size: 2.2rem; color: var(--text-dark); margin: 0 0 8px 0; letter-spacing: -1px; }
+        .auth-header p { color: var(--text-muted); margin: 0; font-size: 1rem; line-height: 1.6;}
+
+        /* Form styling */
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 700; color: #334155; margin-bottom: 8px; }
         
-        header.scrolled {
-            padding: 10px 0;
-        }
-        
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-        
-        .logo i {
-            margin-right: 10px;
-            font-size: 32px;
-        }
-        
-        .logo-img {
-            height: 40px;
-            width: auto;
-            border-radius: 6px;
-            margin-right: 0px;
-            vertical-align: middle;
-        }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
-        }
-        
-        .nav-links li {
-            margin-left: 30px;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-            transition: var(--transition);
-            position: relative;
-        }
-        
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-        
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary);
-            transition: var(--transition);
-        }
-        
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-        
-        .auth-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .btn {
-            padding: 10px 24px;
-            border-radius: 50px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-        
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: 2px solid var(--primary);
-        }
-        
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
-        }
-        /* Auth Pages Layout */
-        
-        .auth-container {
-            display: flex;
-            min-height: 100vh;
-            padding-top: 80px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .auth-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.03;
-        }
-        
-        .auth-bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--gradient);
-        }
-        
-        .auth-bg-circle:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: -150px;
-            right: -100px;
-        }
-        
-        .auth-bg-circle:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            bottom: -80px;
-            left: -80px;
-        }
-        
-        .auth-bg-circle:nth-child(3) {
-            width: 150px;
-            height: 150px;
-            top: 50%;
-            left: 60%;
-        }
-        
-        .auth-left {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            position: relative;
-        }
-        
-        .auth-left-content {
-            max-width: 500px;
-            z-index: 1;
-            text-align: center;
-        }
-        
-        .auth-left-content h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            margin-bottom: 20px;
-            line-height: 1.2;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .auth-left-content p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            color: var(--gray);
-        }
-        
-        .floating-icons {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .floating-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            animation: float 6s ease-in-out infinite;
-            color: var(--primary);
-            font-size: 32px;
-        }
-        
-        .floating-icon:nth-child(2) {
-            animation-delay: 1s;
-        }
-        
-        .floating-icon:nth-child(3) {
-            animation-delay: 2s;
-        }
-        
-        @keyframes float {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-        
-        .auth-right {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-        
-        .auth-form-container {
-            width: 100%;
-            max-width: 450px;
-            animation: fadeInUp 0.8s ease;
-            position: relative;
-        }
-        
-        .form-decoration {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            border-radius: 25px;
-        }
-        
-        .form-decoration::before {
-            content: '';
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(46, 139, 87, 0.05);
-            top: -100px;
-            right: -100px;
-        }
-        
-        .form-decoration::after {
-            content: '';
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: rgba(74, 144, 226, 0.05);
-            bottom: -80px;
-            left: -80px;
-        }
-        
-        .auth-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .auth-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            color: var(--dark);
-            margin-bottom: 10px;
-        }
-        
-        .auth-header p {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-        
-        .auth-form {
-            background: white;
-            padding: 40px;
-            border-radius: 25px;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark);
-            transition: var(--transition);
-        }
-        
-        .input-with-icon {
-            position: relative;
-        }
-        
-        .input-with-icon i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray);
-            font-size: 18px;
-            transition: var(--transition);
-        }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon { position: absolute; left: 16px; color: #94a3b8; font-size: 16px; transition: 0.3s; pointer-events: none; }
         
         .form-control {
-            width: 100%;
-            padding: 15px 15px 15px 50px;
-            border: 2px solid #e9ecef;
-            border-radius: 15px;
-            font-size: 16px;
-            transition: var(--transition);
-            font-family: 'Poppins', sans-serif;
-            background: rgba(248, 249, 250, 0.5);
+            width: 100%; padding: 14px 16px 14px 44px;
+            background: rgba(255,255,255,0.8); border: 2px solid #e2e8f0; border-radius: 16px;
+            font-size: 15px; font-family: 'Inter'; color: var(--text-dark);
+            transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
-            background: white;
-        }
-        
-        .form-control:focus+i {
-            color: var(--primary);
-        }
-        
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-        }
-        
-        .remember-me input {
-            margin-right: 8px;
-        }
-        
-        .forgot-password {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        
-        .forgot-password:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
-        
-        .auth-button {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .auth-button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%);
-            transform-origin: 50% 50%;
-        }
-        
-        .auth-button:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-        
-        @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.5;
-            }
-            100% {
-                transform: scale(100, 100);
-                opacity: 0;
-            }
-        }
-        
-        .auth-redirect {
-            text-align: center;
-            margin-top: 25px;
-        }
-        
-        .auth-redirect a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        
-        .auth-redirect a:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
-        
-        /* Error Message */
-        .error-message {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        /* Footer */
-        
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 40px 0 20px;
-            margin-top: auto;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-        
-        .footer-column h3 {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 10px;
-        }
-        
-        .footer-column h3::after {
-            content: '';
-            position: absolute;
-            width: 40px;
-            height: 3px;
-            background: var(--primary);
-            bottom: 0;
-            left: 0;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-        
-        .footer-links a {
-            color: #b0b7c3;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .footer-links a:hover {
-            color: white;
-            padding-left: 5px;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .social-links a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .social-links a:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #b0b7c3;
-            font-size: 0.9rem;
-        }
-        /* Animation Classes */
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        /* Loading Animation */
-        
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(46, 139, 87, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 20px;
-        }
-        
-        .loading p {
-            font-size: 1.2rem;
-            color: var(--primary);
-        }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        /* Responsive Styles */
-        
-        @media (max-width: 991px) {
-            .auth-container { flex-direction: column; }
-            .auth-left { padding: 40px 20px 20px; }
-            .auth-left-content h1 { font-size: 2.2rem; }
-            .floating-icons { margin-top: 20px; gap: 15px; }
-            .floating-icon { width: 50px; height: 50px; font-size: 20px; }
-            .auth-right { padding: 20px; }
-        }
-        
-        @media (max-width: 768px) {
-            .navbar { padding: 0 5px; }
-            .nav-links { display: none; }
-            #landingNavToggle { display: flex !important; }
 
-            .auth-header h2 { font-size: 2rem; }
-            .auth-form { padding: 25px 20px; border-radius: 20px; }
-            .form-control { padding: 12px 12px 12px 45px; font-size: 15px; }
-            .auth-button { padding: 12px !important; font-size: 1rem !important; }
-            
-            .auth-left { display: none; } /* Hide welcome text on very small screens to focus on login */
+        .form-control::placeholder { color: #94a3b8; font-weight: 400; }
+        .form-control:focus { outline: none; border-color: var(--primary); background: #ffffff; box-shadow: 0 4px 15px rgba(16,185,129,0.1); transform: translateY(-2px); }
+        .form-control:focus + .input-icon { color: var(--primary); transform: scale(1.1); }
+
+        /* Options */
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; font-size: 0.9rem; }
+        .remember-me { display: flex; align-items: center; gap: 8px; color: #475569; font-weight: 500; cursor: pointer; user-select: none; }
+        
+        .checkbox-custom {
+            appearance: none; width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 6px;
+            display: inline-flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .checkbox-custom:checked { background: var(--primary); border-color: var(--primary); }
+        .checkbox-custom:checked::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 12px; position: absolute; }
+
+        .forgot-link { color: var(--primary); font-weight: 700; text-decoration: none; transition: 0.3s; }
+        .forgot-link:hover { color: var(--primary-dark); }
+
+        /* Submit Button Glow Effect */
+        .btn-submit {
+            width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
+            background: var(--primary); color: white; border: none; border-radius: 16px;
+            cursor: pointer; transition: all 0.4s ease; box-shadow: 0 10px 25px rgba(16,185,129,0.3);
+            position: relative; overflow: hidden;
+        }
+        .btn-submit::after { content: ''; position: absolute; top:0; left:-100%; width: 100%; height:100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: 0.5s; }
+        .btn-submit:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 35px rgba(16,185,129,0.4); }
+        .btn-submit:hover::after { left: 100%; }
+
+        .auth-footer { margin-top: 30px; text-align: center; color: #64748b; font-size: 0.95rem; }
+        .auth-footer a { color: var(--primary); font-weight: 800; text-decoration: none; }
+        .auth-footer a:hover { text-decoration: underline; }
+
+        .error-message { background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; padding: 14px; border-radius: 12px; margin-bottom: 24px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; animation: shake 0.5s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);}
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        /* Form Stagger Reveals */
+        .stagger { opacity: 0; transform: translateY(15px) translateZ(40px); animation: fadeUp 0.5s ease forwards; }
+        .d-1 { animation-delay: 0.3s; } .d-2 { animation-delay: 0.4s; } .d-3 { animation-delay: 0.5s; } .d-4 { animation-delay: 0.6s; }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0) translateZ(40px); } }
+
+        @media (max-width: 480px) {
+            .tilt-wrapper { padding: 16px; perspective: none; }
+            .auth-card { border-radius: 24px; transform: none !important;}
+            .auth-card-inner { padding: 40px 24px; transform: none !important;}
+            .auth-header h1 { font-size: 1.8rem; }
+            .spotlight, .floating-object { display: none; }
         }
     </style>
 </head>
-
 <body>
-    <!-- Loading Screen -->
-    <div class="loading" id="loadingScreen">
-        <div class="loading-spinner"></div>
-        <p>Logging you in...</p>
-    </div>
 
-    <!-- Header -->
-    <header id="header">
-        <div class="container">
-            <nav class="navbar">
-                <a href="../index.php" class="logo">
-                    <img src="../assets/img/logo.png" alt="NutriDeq" class="logo-img" style="height: 60px;"> NutriDeq
-                </a>
-                <ul class="nav-links">
-                    <li><a href="../index.php">Home</a></li>
-<li><a href="../index.php#why-healthy">Benefits</a></li>
-<li><a href="../index.php#calculator">Calculator</a></li>
-<li><a href="../index.php#features">Features</a></li>
-<li><a href="../index.php#contact">Contact</a></li>
-                </ul>
-                <div class="auth-buttons">
-                    <a href="NutriDeqN-Login.php" class="btn btn-outline" style="padding: 6px 14px; font-size: 14px;">Sign In</a>
-                    <a href="NutriDeqN-Signup.php" class="btn btn-primary" style="padding: 6px 14px; font-size: 14px; display: none;">Sign Up</a>
-                </div>
-                <button class="mobile-nav-toggle" id="landingNavToggle"
-                    style="position: static; margin-left: 10px; display: none; width: 40px; height: 40px; justify-content: center; align-items: center; border-radius: 10px; border: 1px solid #ddd; background: #fff;">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Login Content -->
-    <div class="auth-container">
-        <div class="auth-bg">
-            <div class="auth-bg-circle"></div>
-            <div class="auth-bg-circle"></div>
-            <div class="auth-bg-circle"></div>
+    <div class="page-wrapper" id="page-wrapper">
+        <!-- Background Mechanics -->
+        <div class="gradient-mesh">
+            <div class="mesh-blob mesh-1"></div>
+            <div class="mesh-blob mesh-2"></div>
+            <div class="mesh-blob mesh-3"></div>
         </div>
 
-        <div class="auth-left">
-            <div class="auth-left-content">
-                <h1>Welcome Back to Your Health Journey</h1>
-                <p>Continue tracking your nutrition, achieving your goals, and transforming your lifestyle with personalized guidance.</p>
-                <div class="floating-icons">
-                    <div class="floating-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="floating-icon">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <div class="floating-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="auth-right">
-            <div class="auth-form-container">
-                <div class="form-decoration"></div>
-                <div class="auth-header">
-                    <h2>Login</h2>
-                    <p>Welcome back! Please enter your details</p>
-                </div>
-                
-                <?php if (!empty($login_error)): ?>
-    <div class="error-message">
-        <?php echo $login_error; ?>
-    </div>
-<?php endif; ?>
-                
-                <form class="auth-form" method="POST" action="NutriDeqN-Login.php" id="loginForm">
-                    <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" id="login-email" name="email" class="form-control" placeholder="example@email.com" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="login-password" name="password" class="form-control" placeholder="••••••••" required>
-                        </div>
-                    </div>
-                    <div class="form-options">
-                        <div class="remember-me">
-                            <input type="checkbox" id="remember" name="remember">
-                            <label for="remember">Remember me</label>
-                        </div>
-                        <a href="#" class="forgot-password">Forgot password?</a>
-                    </div>
-                    <button type="submit" class="btn btn-primary auth-button" id="loginButton">Login</button>
+        <div class="spotlight" id="spotlight"></div>
 
-                    <div class="auth-redirect">
-                        Don't have an account? <a href="NutriDeqN-Signup.php">Sign up</a>
+        <div class="floating-object obj-1 parallax-obj" data-speed="1.5"><i class="fas fa-satellite-dish"></i></div>
+        <div class="floating-object obj-2 parallax-obj" data-speed="-2"><i class="fas fa-lock"></i></div>
+
+        <!-- Central Auth Architecture -->
+        <div class="tilt-wrapper" id="tilt-wrapper">
+            <div class="auth-card" id="auth-card">
+                <div class="auth-card-inner">
+                    <div class="auth-header">
+                        <a href="../index.php" class="logo-link stagger d-1">
+                            <img src="../assets/img/logo.png" alt="NutriDeq Logo">
+                            <div class="logo-text">Nutri<span>Deq</span></div>
+                        </a>
+                        <h1 class="stagger d-1">Welcome Back</h1>
+                        <p class="stagger d-1">Log in to manage your patients and diets</p>
                     </div>
-                </form>
+
+                    <?php if (!empty($login_error)): ?>
+                        <div class="error-message stagger d-2">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <?php echo htmlspecialchars($login_error); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="NutriDeqN-Login.php" id="loginForm">
+                        <div class="form-group stagger d-2">
+                            <label for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <input type="email" id="email" name="email" class="form-control" placeholder="dietitian@clinic.com" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group stagger d-3">
+                            <label for="password">Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                                <i class="fas fa-fingerprint input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-options stagger d-3">
+                            <label class="remember-me">
+                                <input type="checkbox" name="remember" class="checkbox-custom">
+                                Remember me
+                            </label>
+                            <a href="#" class="forgot-link">Forgot password?</a>
+                        </div>
+
+                        <div class="stagger d-4">
+                            <button type="submit" class="btn-submit">Sign In</button>
+                        </div>
+                    </form>
+
+                    <div class="auth-footer stagger d-4">
+                        Don't have an account? <a href="NutriDeqN-Signup.php">Create an Account</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer id="contact">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>NutriDeq</h3>
-                    <p>Your personal health and nutrition companion. We help you achieve your wellness goals through personalized tracking and guidance.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-                <div class="footer-column">
-                    <h3>Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="index.php">Home</a></li>
-                        <li><a href="index.php#why-healthy">Benefits</a></li>
-                        <li><a href="index.php#calculator">Calculator</a></li>
-                        <li><a href="index.php#features">Features</a></li>
-                        <li><a href="index.php#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Features</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Diet Tracker</a></li>
-                        <li><a href="#">Meal Planner</a></li>
-                        <li><a href="#">Nutrition Advice</a></li>
-                        <li><a href="#">Progress Analytics</a></li>
-                        <li><a href="#">Recipe Database</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Contact Us</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Health Street, Wellness City</li>
-                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
-                        <li><i class="fas fa-envelope"></i> info@nutrideq.com</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>&copy; 2023 NutriDeq. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
+    <!-- Interface WOW Logic -->
     <script>
-        // Header scroll effect
-        window.addEventListener('scroll', function() {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const spotlight = document.getElementById('spotlight');
+            const authCard = document.getElementById('auth-card');
+            const parallaxObjs = document.querySelectorAll('.parallax-obj');
 
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            // Show loading screen
-            document.getElementById('loadingScreen').style.display = 'flex';
-            
-            // Form will be submitted to PHP naturally
-        });
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
 
-        // Input focus effects
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.parentElement.querySelector('label').style.color = 'var(--primary)';
-            });
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                requestAnimationFrame(() => {
+                    // Spotlight Background
+                    spotlight.style.left = mouseX + 'px';
+                    spotlight.style.top = mouseY + 'px';
 
-            input.addEventListener('blur', function() {
-                this.parentElement.parentElement.querySelector('label').style.color = 'var(--dark)';
-            });
-        });
+                    // Math for tilt
+                    let xOffset = (mouseX - window.innerWidth / 2) / window.innerWidth;
+                    let yOffset = (mouseY - window.innerHeight / 2) / window.innerHeight;
 
-        // Landing Page Mobile Menu Logic
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('landingNavToggle');
-            const navLinks = document.querySelector('.nav-links');
-
-            if (toggle && navLinks) {
-                toggle.addEventListener('click', function () {
-                    navLinks.classList.toggle('active');
-                    const icon = toggle.querySelector('i');
-                    if (navLinks.classList.contains('active')) {
-                        icon.className = 'fas fa-times';
-                    } else {
-                        icon.className = 'fas fa-bars';
+                    // 3D Card Tilt 
+                    if (window.innerWidth > 480) { // Keep disabled on mobile
+                        authCard.style.transform = `rotateY(${xOffset * 10}deg) rotateX(${-yOffset * 10}deg)`;
                     }
-                });
 
-                // Close menu when link clicked
-                navLinks.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navLinks.classList.remove('active');
-                        toggle.querySelector('i').className = 'fas fa-bars';
+                    // 2D Floating Molecular Parallax
+                    parallaxObjs.forEach(obj => {
+                        let speed = parseFloat(obj.getAttribute('data-speed'));
+                        obj.style.transform = `translate(${xOffset * 80 * speed}px, ${yOffset * 80 * speed}px)`;
                     });
                 });
-            }
+            });
         });
-
-        // Remove demo credentials for security in production
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     document.getElementById('login-email').value = 'demo@nutrideq.com';
-        //     document.getElementById('login-password').value = 'password123';
-        // });
     </script>
 </body>
-
 </html>

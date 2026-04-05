@@ -77,10 +77,10 @@ class ChatController {
                 const html = `
                     <div class="message-wrapper ${isMe ? 'sent' : 'received'}" id="msg-${msg.id}">
                         <div class="message-bubble">
-                            <div style="font-size:0.7rem; color:var(--primary-green); margin-bottom:2px; font-weight:600;">${msg.sender_name}</div>
                             ${content}
                             <div class="msg-time">${msg.pretty_time}</div>
                         </div>
+
                     </div>
                 `;
                 this.chatMessages.insertAdjacentHTML('beforeend', html);

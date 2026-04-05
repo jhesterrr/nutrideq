@@ -6,13 +6,13 @@ body {
 }
 
 .table-container {
-    background: var(--bg-surface);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    background: transparent !important;
+    border-radius: 0;
+    padding: 0 5px;
+    box-shadow: none;
     margin-bottom: 30px;
     overflow-x: auto;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: none;
     position: relative;
     z-index: 1;
 }
@@ -20,52 +20,58 @@ body {
 .fct-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 8px;
-    margin-top: -8px;
+    border-spacing: 0 16px;
+    margin-top: 0;
 }
 
 .fct-table th {
-    padding: 15px 20px;
-    font-weight: 600;
+    padding: 5px 25px 0px 25px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
     text-align: left;
-    border-bottom: 2px solid #f1f3f5;
+    border-bottom: none;
+    opacity: 0.7;
 }
 
 .fct-table td {
-    padding: 18px 20px;
-    background: var(--bg-surface);
-    border-top: 1px solid #f8f9fa;
-    border-bottom: 1px solid #f8f9fa;
+    padding: 22px 25px;
     vertical-align: middle;
-    transition: all 0.3s ease;
+    border: none !important;
 }
 
 .fct-table tbody tr {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: var(--transition-premium);
 }
 
 .fct-table tbody tr:hover td {
-    background: #fdfdfd;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    background: transparent;
+}
+
+.fct-table tbody tr:hover {
+    transform: translateY(-3px);
+    background: var(--bg-surface);
+    
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
 }
 
 .fct-table td:first-child {
-    border-left: 1px solid #f8f9fa;
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
 }
 
 .fct-table td:last-child {
-    border-right: 1px solid #f8f9fa;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 
 .food-id-tag {

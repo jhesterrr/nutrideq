@@ -98,11 +98,12 @@ function getFoodIcon(string $category): array
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FCT Library | NutriDeq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard-interactive.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -110,6 +111,7 @@ function getFoodIcon(string $category): array
     <!-- Choices.js (Base Styles First) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <link rel="stylesheet" href="css/fct-style.css">
+    <link rel="stylesheet" href="css/dashboard-premium.css">
     <link rel="stylesheet" href="css/mobile-style.css">
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <!-- dashboard.js included via sidebar.php -->
@@ -126,7 +128,7 @@ function getFoodIcon(string $category): array
             top: 100% !important;
             left: 0 !important;
             width: 100% !important;
-            z-index: 10000 !important;
+            z-index: 100000 !important;
             background-color: #ffffff !important;
             opacity: 1 !important;
             visibility: visible !important;
@@ -138,7 +140,9 @@ function getFoodIcon(string $category): array
         /* Prevent ALL parents from clipping the dropdown */
         .choices__inner, .choices__list,
         .ant-space-compact, .ant-input-wrapper,
-        .ant-controls-group, .card {
+        .ant-controls-group, .card,
+        /* CRITICAL: Ensure dash-panel doesn't clip its children */
+        .dash-panel {
             overflow: visible !important;
         }
         /* Dark readable text inside dropdown items */
@@ -209,7 +213,9 @@ function getFoodIcon(string $category): array
                 box-sizing: border-box !important;
             }
         }
-    </style>
+    
+        
+</style>
 </head>
 
 <body>
@@ -218,48 +224,115 @@ function getFoodIcon(string $category): array
         <?php include 'includes/sidebar.php'; ?>
 
         <main class="main-content">
+            <!-- Organic Background Engine -->
+            <div class="organic-bg" id="organicBg">
+                <div class="organic-blob blob-1"></div>
+                <div class="organic-blob blob-2"></div>
+                <div class="organic-blob blob-3"></div>
+            </div>
+            <!-- Custom Ring Cursor -->
+            <div class="cursor-ring" id="cursorRing"></div>
             <div class="page-container fct-container">
-                <div class="header">
-                    <div class="page-title">
-                        <h1>FCT Library</h1>
-                        <p>Philippine Food Composition Data</p>
-                    </div>
-                    <div class="header-actions">
-                        <?php if (FCTHelper::canManage($user_role)): ?>
-                            <button class="btn btn-primary btn-add-fab" onclick="showAddModal()">
-                                <i class="fas fa-plus"></i> Add New Item
-                            </button>
-                        <?php
-endif; ?>
+                <div class="dash-hero-ribbon dashFadeIn" style="padding: 30px 40px; margin-bottom: 24px;">
+                    <div class="dash-hero-content">
+                        <p class="dash-hero-welcome">Clinical Database</p>
+                        <h1 style="font-size: 2.2rem;">FCT Library</h1>
+                        <p>Philippine Nutrient Encyclopedia & Nutritional Intelligence</p>
                     </div>
                 </div>
 
-                <!-- Controls -->
-                <div class="card" style="padding: 1.5rem; margin-bottom: 2rem; border-radius: 12px;">
-                    <form action="" method="GET" class="ant-controls-group">
-                        <div class="ant-space-compact" style="width: 100%;">
-                            <div class="ant-input-wrapper">
-                                <span class="ant-input-prefix"><i class="fas fa-search"></i></span>
-                                <input type="text" name="search" class="ant-input"
-                                    placeholder="Search by food name or ID..."
+                <!-- Search & Filters -->
+                <div class="dash-panel stagger d-2" style="padding: 24px; margin-bottom: 28px; min-height: auto; overflow: visible !important; z-index: 1000; position: relative !important;">
+                    <form action="" method="GET">
+                        <div style="display: grid; grid-template-columns: 1fr 280px auto; gap: 16px; align-items: center;">
+                            <div class="search-box" style="position: relative; margin-bottom: 0; background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 16px; padding: 0 20px; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease;">
+                                <i class="fas fa-search" style="color: #9ca3af;"></i>
+                                <input type="text" name="search" placeholder="Search by name or ID..."
                                     value="<?php echo htmlspecialchars($search); ?>"
-                                    onkeydown="if(event.key === 'Enter') this.form.submit();">
+                                    style="border: none; background: transparent; height: 54px; width: 100%; outline: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.95rem; color: #111827;">
                             </div>
-                            <select name="cat" class="ant-select searchable-select" aria-label="Category Filter">
-                                <option value="">All Categories</option>
+                            <select name="cat" class="searchable-select">
+                                <option value="">Global Category Overview</option>
                                 <?php foreach ($fct_categories as $catOption): ?>
                                     <option value="<?php echo htmlspecialchars($catOption); ?>" <?php echo $category == $catOption ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($catOption); ?>
                                     </option>
-                                <?php
-endforeach; ?>
+                                <?php endforeach; ?>
                             </select>
+                            <?php if (FCTHelper::canManage($user_role)): ?>
+                                <button type="button" class="btn-premium-add" onclick="showAddModal()" style="height: 54px; width: 54px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 16px;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>
 
                 <!-- Data Table -->
-                <div class="table-container">
+                <!-- Encyclopedia View -->
+                <div class="dash-panel stagger d-3">
+                    <div class="activity-feed">
+                        <?php if (empty($items)): ?>
+                            <div style="text-align: center; padding: 80px 20px; color: #9ca3af;">
+                                <i class="fas fa-layer-group" style="font-size: 3rem; margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                                <p style="font-weight: 500; font-size: 1.1rem;">No nutritional records found matching your criteria.</p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($items as $item): ?>
+                                <?php [$icon, $color, $bg] = getFoodIcon($item['category'] ?? ''); ?>
+                                <div class="activity-item" style="padding: 20px; transition: all 0.3s ease; cursor: pointer; border-bottom: 1px solid #f3f4f6;" onclick="viewDetails(<?php echo $item['id']; ?>)">
+                                    <div class="activity-icon" style="width: 54px; height: 54px; border-radius: 16px; background: <?php echo $bg; ?>; color: <?php echo $color; ?>; font-size: 1.3rem;">
+                                        <i class="fas <?php echo $icon; ?>"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div>
+                                                <p class="activity-text" style="font-size: 1.1rem; color: #111827;"><b><?php echo htmlspecialchars($item['food_name']); ?></b></p>
+                                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                                    <span style="font-family: 'SFMono-Regular', monospace; font-size: 0.75rem; background: #f3f4f6; color: #6b7280; padding: 2px 8px; border-radius: 6px; font-weight: 600;">
+                                                        ID: <?php echo htmlspecialchars($item['food_id']); ?>
+                                                    </span>
+                                                    <span class="profile-badge" style="font-family: 'Inter', sans-serif; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 12px; border-radius: 50px; background: <?php echo $bg; ?>; color: <?php echo $color; ?>; border: none; display: inline-flex; align-items: center; justify-content: center; height: 22px;">
+                                                        <?php echo htmlspecialchars($item['category']); ?>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="ant-btn-group" onclick="event.stopPropagation();">
+                                                <?php if ($user_role === 'user'): ?>
+                                                    <button type="button" class="ant-btn ant-btn-icon-only" title="Log to Diary"
+                                                        style="color: #10b981; background: #ecfdf5; border: none; width: 42px; height: 42px; border-radius: 12px;"
+                                                        onclick="openLogModal(<?php echo $item['id']; ?>)">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <button type="button" class="ant-btn ant-btn-icon-only" title="View Details"
+                                                    style="background: #f9fafb; border: none; width: 42px; height: 42px; border-radius: 12px; color: #4b5563;"
+                                                    onclick="viewDetails(<?php echo $item['id']; ?>)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <?php if (FCTHelper::canManage($user_role)): ?>
+                                                    <button type="button" class="ant-btn ant-btn-icon-only"
+                                                        style="background: #eff6ff; color: #3b82f6; border: none; width: 42px; height: 42px; border-radius: 12px;"
+                                                        title="Edit Item" onclick="editItem(<?php echo $item['id']; ?>)">
+                                                        <i class="fas fa-pen-to-square"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                                <?php if (FCTHelper::canDelete($user_role)): ?>
+                                                    <button type="button" class="ant-btn ant-btn-icon-only"
+                                                        style="background: #fef2f2; color: #ef4444; border: none; width: 42px; height: 42px; border-radius: 12px;"
+                                                        title="Delete Item" onclick="deleteItem(<?php echo $item['id']; ?>)">
+                                                        <i class="fas fa-trash-can"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div style="display:none;">
                     <table class="fct-table">
                         <thead>
                             <tr>

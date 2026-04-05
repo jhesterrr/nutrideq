@@ -10,125 +10,285 @@ header("Pragma: no-cache");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>NutriDeq - Health & Nutrition Tracker</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="css/mobile-style.css?v=119">
-    <link rel="stylesheet" href="css/interactive-animations.css?v=119">
-    <style>
-        :root {
-            --primary: #2E8B57;
-            --primary-dark: #1e6b42;
-            --primary-light: #3cb371;
-            --secondary: #4A90E2;
-            --accent: #FF6B6B;
-            --light: #F8F9FA;
-            --dark: #212529;
-            --gray: #6C757D;
-            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            --shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 20px 50px rgba(0, 0, 0, 0.1);
-        }
+    <title>NutriDeq - Next-Gen Clinical Intelligence</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <link rel="stylesheet" href="css/base.css?v=205">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* =========================================================
+           NUTRI-GLASS : ULTRA-DYNAMIC (WOW FACTOR)
+           ========================================================= */
+        :root {
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --primary: #10b981;
+            /* Vibrant Emerald */
+            --primary-dark: #047857;
+            --accent: #f59e0b;
+            /* Amber */
+            --accent-alt: #3b82f6;
+            /* Blue for contrast */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background-color: var(--light);
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: var(--text-dark);
             overflow-x: hidden;
+            scroll-behavior: smooth;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* --- Mega Gradient & Interactivity Base --- */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Mouse Spotlight Follower */
+        .spotlight {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.5s ease;
+        }
+
+        /* Abstract Fluid Gradient Mesh Background */
+        .gradient-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: #f8fafc;
+        }
+
+        .mesh-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.8;
+            animation: moveBlobs 20s infinite alternate ease-in-out;
+        }
+
+        .mesh-1 {
+            width: 50vw;
+            height: 50vw;
+            background: rgba(16, 185, 129, 0.2);
+            top: -20%;
+            left: -10%;
+        }
+
+        .mesh-2 {
+            width: 40vw;
+            height: 40vw;
+            background: rgba(59, 130, 246, 0.15);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .mesh-3 {
+            width: 45vw;
+            height: 45vw;
+            background: rgba(245, 158, 11, 0.1);
+            top: 30%;
+            left: 40%;
+            animation-delay: -10s;
+        }
+
+        @keyframes moveBlobs {
+            0% {
+                transform: scale(1) translate(0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.2) translate(10%, 10%) rotate(45deg);
+            }
+
+            100% {
+                transform: scale(0.8) translate(-10%, -10%) rotate(90deg);
+            }
+        }
+
+        /* 2D Floating Molecular Objects */
+        .floating-object {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* JS Parallax Targets */
+        .obj-1 {
+            width: 80px;
+            height: 80px;
+            top: 15%;
+            left: 10%;
+            font-size: 24px;
+            animation: floatObj 8s infinite alternate;
+        }
+
+        .obj-2 {
+            width: 40px;
+            height: 40px;
+            top: 40%;
+            right: 15%;
+            animation: floatObj 6s infinite alternate-reverse;
+            color: var(--accent-alt);
+        }
+
+        .obj-3 {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation: floatObj 7s infinite alternate;
+            color: var(--accent);
+        }
+
+        .obj-4 {
+            width: 50px;
+            height: 50px;
+            top: 60%;
+            right: 5%;
+            animation: floatObj 9s infinite alternate-reverse;
+        }
+
+        @keyframes floatObj {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-30px);
+            }
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
         }
 
-        /* Header & Navigation */
-
+        /* Header Engine */
         header {
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            box-shadow: var(--shadow);
             position: fixed;
-            width: 100%;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1300px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             z-index: 1000;
-            padding: 20px 0;
-            transition: var(--transition);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        header.scrolled {
-            padding: 10px 0;
-        }
-
-        .navbar {
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.4s ease;
+        }
+
+        header.scrolled {
+            top: 10px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
             display: flex;
             align-items: center;
             text-decoration: none;
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo i {
-            margin-right: 10px;
-            font-size: 32px;
+        .logo img {
+            height: 38px;
+            margin-right: 12px;
+            border-radius: 8px;
+            z-index: 2;
+            transition: transform 0.5s;
         }
 
-        .logo-img {
-            height: 40px;
-            width: auto;
-            border-radius: 6px;
+        .logo:hover img {
+            transform: rotate(15deg) scale(1.1);
+        }
 
-            vertical-align: middle;
+        .logo-text {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--text-dark);
+            z-index: 2;
+        }
+
+        .logo-text span {
+            color: var(--primary);
         }
 
         .nav-links {
             display: flex;
             list-style: none;
-        }
-
-        .nav-links li {
-            margin-left: 30px;
+            gap: 32px;
+            margin: 0;
+            padding: 0;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-            transition: var(--transition);
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 15px;
             position: relative;
+            padding: 5px 0;
         }
 
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
+        /* Hover line animation */
         .nav-links a::after {
             content: '';
             position: absolute;
+            bottom: 0;
+            left: 0;
             width: 0;
             height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary);
-            transition: var(--transition);
+            background: var(--primary);
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .nav-links a:hover::after {
@@ -137,917 +297,880 @@ header("Pragma: no-cache");
 
         .auth-buttons {
             display: flex;
-            gap: 15px;
+            gap: 12px;
         }
 
         .btn {
-            padding: 10px 24px;
-            border-radius: 50px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: 2px solid var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        /* Hero Section */
-
-        .hero {
-            padding: 180px 0 120px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: rgba(46, 139, 87, 0.1);
-            top: -300px;
-            right: -200px;
-            z-index: 0;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: rgba(74, 144, 226, 0.1);
-            bottom: -200px;
-            left: -100px;
-            z-index: 0;
-        }
-
-        .hero-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-text {
-            flex: 1;
-            max-width: 600px;
-        }
-
-        .hero-image {
-            flex: 1;
-            text-align: center;
-        }
-
-        .hero-image img {
-            max-width: 100%;
-            border-radius: 20px;
-            box-shadow: var(--shadow-hover);
-            transform: perspective(1000px) rotateY(-10deg);
-            transition: var(--transition);
-        }
-
-        .hero-image img:hover {
-            transform: perspective(1000px) rotateY(0deg);
-        }
-
-        .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
+            gap: 8px;
+            border-radius: 100px;
+            padding: 12px 28px;
             font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            color: var(--dark);
+            font-size: 15px;
+            text-decoration: none;
+            transition: 0.4s;
+            cursor: pointer;
+            border: none;
+            letter-spacing: 0.3px;
         }
 
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            color: var(--gray);
+        /* Magnetic / Animated Buttons */
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-dark);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        .hero-buttons {
-            display: flex;
-            gap: 15px;
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
         }
 
-        /* Why Be Healthy Section */
-
-        .why-healthy {
-            padding: 100px 0;
-            background-color: white;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-title h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            color: var(--dark);
-            margin-bottom: 15px;
-            position: relative;
-            display: inline-block;
-        }
-
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            width: 80px;
-            height: 4px;
+        .btn-glow {
             background: var(--primary);
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .benefit-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            text-align: center;
+            color: white;
             position: relative;
             overflow: hidden;
             z-index: 1;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
 
-        .benefit-card::before {
+        .btn-glow::before {
             content: '';
             position: absolute;
-            width: 100%;
-            height: 5px;
-            background: var(--primary);
             top: 0;
-            left: 0;
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: var(--transition);
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
             z-index: -1;
         }
 
-        .benefit-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-hover);
+        .btn-glow:hover {
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+            transform: translateY(-3px) scale(1.02);
         }
 
-        .benefit-card:hover::before {
-            transform: scaleX(1);
+        .btn-glow:hover::before {
+            left: 100%;
         }
 
-        .benefit-icon {
-            width: 70px;
-            height: 70px;
-            background: rgba(46, 139, 87, 0.1);
-            border-radius: 50%;
+        /* ================= HERO SECTION ================= */
+        .hero {
+            padding: 220px 0 120px;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-alt);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            animation: fadeUp 1s ease forwards;
+        }
+
+        .hero-text h1 {
+            font-size: 5rem;
+            line-height: 1.05;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+            text-wrap: balance;
+            animation: fadeUp 1s ease forwards 0.1s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .hero-text h1 span {
+            background: linear-gradient(to right, var(--primary), var(--accent-alt));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            max-width: 500px;
+            animation: fadeUp 1s ease forwards 0.2s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            animation: fadeUp 1s ease forwards 0.3s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        /* 3D Tilt Mockup */
+        .mockup-wrapper {
+            perspective: 1500px;
+            position: relative;
+            animation: floatGently 6s infinite ease-in-out;
+        }
+
+        .mockup-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 36px;
+            padding: 4px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+        }
+
+        .mockup-inner {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+            transform: translateZ(30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .mock-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .mh-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mh-ava {
+            width: 50px;
+            height: 50px;
+            background: #f1f5f9;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
             color: var(--primary);
-            font-size: 28px;
+            font-size: 20px;
+            box-shadow: inset 0 0 0 1px #e2e8f0;
         }
 
-        .benefit-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            color: var(--dark);
+        .mh-line1 {
+            width: 120px;
+            height: 14px;
+            background: #cbd5e1;
+            border-radius: 7px;
+            margin-bottom: 8px;
         }
 
-        .benefit-card p {
-            color: var(--gray);
+        .mh-line2 {
+            width: 80px;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
         }
 
-        /* Nutritional Calculator Section */
-
-        .nutrition-calculator {
-            padding: 100px 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-
-        .calculator-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 50px;
-        }
-
-        .calculator-content {
-            flex: 1;
-        }
-
-        .calculator-visual {
-            flex: 1;
-            text-align: center;
-        }
-
-        .calculator-visual img {
-            max-width: 100%;
+        .mock-chart {
+            height: 180px;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
             border-radius: 20px;
-            box-shadow: var(--shadow-hover);
-        }
-
-        .calculator-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--dark);
-        }
-
-        .calculator-content p {
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            color: var(--gray);
-        }
-
-        .goal-options {
+            margin-bottom: 24px;
+            position: relative;
+            border-bottom: 2px solid #e2e8f0;
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            align-items: flex-end;
+            gap: 12px;
+            padding: 0 16px;
         }
 
-        .goal-option {
+        .c-bar {
             flex: 1;
-            text-align: center;
-            padding: 20px 15px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
+            background: var(--primary);
+            border-radius: 8px 8px 0 0;
+            opacity: 0.1;
+            transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: bottom;
+            transform: scaleY(0.1);
         }
 
-        .goal-option:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
+        .mockup-wrapper:hover .c-bar {
+            opacity: 0.9;
         }
 
-        .goal-option.active {
-            border-color: var(--primary);
-            background: rgba(46, 139, 87, 0.05);
+        .mockup-wrapper:hover .c-bar:nth-child(1) {
+            transform: scaleY(0.4);
         }
 
-        .goal-option i {
-            font-size: 32px;
-            color: var(--primary);
-            margin-bottom: 10px;
+        .mockup-wrapper:hover .c-bar:nth-child(2) {
+            transform: scaleY(0.7);
         }
 
-        .goal-option h4 {
-            font-size: 1.1rem;
-            color: var(--dark);
+        .mockup-wrapper:hover .c-bar:nth-child(3) {
+            transform: scaleY(0.5);
         }
 
-        .features-list {
-            list-style: none;
-            margin-top: 30px;
+        .mockup-wrapper:hover .c-bar:nth-child(4) {
+            transform: scaleY(1.0);
+            background: var(--accent-alt);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
         }
 
-        .features-list li {
-            margin-bottom: 15px;
+        .mockup-wrapper:hover .c-bar:nth-child(5) {
+            transform: scaleY(0.6);
+        }
+
+        .data-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .d-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .d-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .d-val {
+            font-size: 24px;
+            font-weight: 900;
+            font-family: 'Outfit';
+            color: var(--text-dark);
+        }
+
+        /* Floating interaction widgets */
+        .float-badge {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 100px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
             display: flex;
             align-items: center;
+            gap: 12px;
+            border: 1px solid #ffffff;
+            z-index: 10;
+            font-size: 14px;
+            animation: floatBadge 4s infinite alternate ease-in-out;
         }
 
-        .features-list i {
-            color: var(--primary);
-            margin-right: 15px;
-            font-size: 18px;
+        .fb-1 {
+            top: 40px;
+            right: -40px;
+            transform: translateZ(60px);
         }
 
-        /* CTA Section */
+        .fb-2 {
+            bottom: 60px;
+            left: -50px;
+            transform: translateZ(80px);
+            animation-delay: -2s;
+        }
 
-        .cta-section {
-            padding: 100px 0;
-            background-color: white;
+        .fb-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        @keyframes floatBadge {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* ================= FEATURES SECTION (REACTABLE) ================= */
+        .section {
+            padding: 140px 0;
+            position: relative;
+        }
+
+        .section-header {
             text-align: center;
+            margin-bottom: 80px;
         }
 
-        .cta-content {
-            max-width: 700px;
+        .section-header h2 {
+            font-size: 3.5rem;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
             margin: 0 auto;
         }
 
-        .cta-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--dark);
-        }
-
-        .cta-content p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            color: var(--gray);
-        }
-
-        /* Footer */
-
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 60px 0 30px;
-        }
-
-        .footer-content {
+        .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
         }
 
-        .footer-column h3 {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+        .feature-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 32px;
+            padding: 40px;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            padding-bottom: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
         }
 
-        .footer-column h3::after {
+        /* Mouse Reactivity via CSS Hover Layer */
+        .feature-card::before {
             content: '';
             position: absolute;
-            width: 40px;
-            height: 3px;
-            background: var(--primary);
-            bottom: 0;
+            top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: 0.5s;
+            z-index: -1;
         }
 
-        .footer-links {
-            list-style: none;
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
         }
 
-        .footer-links li {
-            margin-bottom: 10px;
+        .feature-card:hover::before {
+            opacity: 1;
         }
 
-        .footer-links a {
-            color: #b0b7c3;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: white;
-            padding-left: 5px;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .social-links a {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
+        .f-icon-box {
+            width: 72px;
+            height: 72px;
+            background: #ffffff;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            text-decoration: none;
-            transition: var(--transition);
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            transition: 0.5s;
+            transform-origin: center;
         }
 
-        .social-links a:hover {
+        .feature-card:hover .f-icon-box {
             background: var(--primary);
-            transform: translateY(-3px);
+            color: white;
+            border-radius: 40px;
+            transform: rotate(360deg);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
         }
 
-        .copyright {
+        .feature-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            font-weight: 800;
+        }
+
+        .feature-card p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* ================= DATABASE INFO & BENEFITS (Information Replaced) ================= */
+        .data-showcase {
+            background: var(--text-dark);
+            border-radius: 40px;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
             text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #b0b7c3;
-            font-size: 0.9rem;
+            color: white;
+            box-shadow: 0 40px 100px rgba(15, 23, 42, 0.3);
+            margin: 40px 0;
         }
 
-        /* Animation Classes */
+        .data-showcase::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 60%);
+            pointer-events: none;
+            animation: spinBg 20s linear infinite;
+        }
 
-        .fade-in {
+        @keyframes spinBg {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ds-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            margin-top: 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ds-stat h4 {
+            font-size: 4rem;
+            margin: 0 0 8px 0;
+            color: white;
+        }
+
+        .ds-stat h4 span {
+            color: var(--primary);
+        }
+
+        .ds-stat p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* ================= FOOTER ================= */
+        footer {
+            margin-top: 100px;
+            padding: 80px 0 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .f-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .f-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .f-logo {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Outfit';
+            color: var(--text-dark);
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .f-logo span {
+            color: var(--primary);
+        }
+
+        .f-col h4 {
+            font-size: 1.2rem;
+            margin-bottom: 24px;
+        }
+
+        .f-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .f-col li {
+            margin-bottom: 16px;
+        }
+
+        .f-col a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .f-col a:hover {
+            color: var(--primary);
+            gap: 12px;
+        }
+
+        /* Scroll Reveals */
+        .reveal {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transform: translateY(40px);
+            transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .fade-in.visible {
+        .reveal.active {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .bounce {
-            animation: bounce 2s infinite;
-        }
-
-        /* Feature Box Styles */
-        .feature-box {
-            width: 80%;
-            height: 300px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            transition: var(--transition);
-        }
-
-        .hero-feature-box {
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
-            margin-left: 50px;
-        }
-
-        .calc-feature-box {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            margin-left: 50px;
-            margin-bottom: 160px;
-        }
-
-        .feature-box i {
-            font-size: 4rem;
-            margin-right: 20px;
-        }
-
-        @media (max-width: 991px) {
-            .hero h1 { font-size: 2.8rem; }
-            .hero-content, .calculator-container { flex-direction: column; text-align: center; }
-            .hero-text, .calculator-content { max-width: 100%; margin-bottom: 50px; }
-            .hero-buttons, .goal-options { justify-content: center; }
-            .hero-feature-box, .calc-feature-box { margin-left: 0; margin-top: 30px; }
-        }
-
-        @media (max-width: 768px) {
-            .navbar { padding: 0 5px; }
-            
-            #landingNavToggle { display: flex !important; }
-
-            .nav-links {
-                position: fixed;
-                top: 75px; 
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 75px);
-                background: white;
-                flex-direction: column;
-                align-items: center;
-                padding: 40px 0;
-                transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                z-index: 999;
-                overflow-y: auto;
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
 
-            .nav-links.active { left: 0; }
-
-            .nav-links li { margin: 20px 0; }
-
-            .auth-buttons {
-                display: flex !important;
-                gap: 10px;
-            }
-
-            .btn { padding: 8px 18px; font-size: 14px; }
-
-            .hero { padding: 140px 0 80px; }
-            .hero h1 { font-size: 2.2rem; }
-            .hero p { font-size: 1rem; }
-
-            .section-title h2 { font-size: 2rem; }
-            
-            .feature-box {
-                width: 100% !important;
-                height: 180px !important;
-                margin-left: 0 !important;
-                margin-bottom: 20px !important;
-                font-size: 1.1rem !important;
-                padding: 20px !important;
-                flex-direction: column !important;
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
                 text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 4rem;
+                margin: 0 auto 24px;
+            }
+
+            .hero-text p {
+                margin: 0 auto 40px;
+            }
+
+            .hero-cta {
                 justify-content: center;
             }
 
-            .feature-box i {
-                font-size: 2.5rem !important;
-                margin-right: 0 !important;
-                margin-bottom: 10px !important;
+            .feature-grid,
+            .ds-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
             }
 
-            .calculator-visual { height: auto !important; }
-            .calculator-content h2 { font-size: 2rem; }
-            .goal-options { flex-direction: column; }
-            .goal-option { max-width: 100% !important; }
+            .f-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
         }
 
-        @media (max-width: 480px) {
-            .hero h1 { font-size: 1.8rem; }
-            .hero-buttons .btn, .calculator-content .btn, .cta-content .btn { width: 100%; }
-            .auth-buttons .btn { width: auto; padding: 6px 12px; font-size: 13px; }
-            .logo { font-size: 20px; }
-            .logo i { font-size: 24px; }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        /* Desktop Optimization Constraints */
-        @media (min-width: 1024px) {
-            .hero-text h1, .hero-text p {
-                max-width: 600px;
+        @media (max-width: 768px) {
+            header {
+                padding: 12px 20px;
             }
 
-            .calculator-container {
-                max-width: 1200px;
-                margin: 0 auto;
+            .nav-links {
+                display: none;
             }
 
-            .hero .container, 
-            .why-healthy .container, 
-            .nutrition-calculator .container, 
-            .cta-section .container {
-                padding-left: 40px;
-                padding-right: 40px;
+            .hero-text h1 {
+                font-size: 3rem;
             }
 
-            .why-healthy, 
-            .nutrition-calculator, 
-            .cta-section {
-                padding: 120px 0;
+            .spotlight,
+            .floating-object {
+                display: none;
             }
 
-            .hero-feature-box, .calc-feature-box {
-                max-height: 500px;
-                height: 400px;
+            .data-showcase {
+                padding: 60px 24px;
             }
 
-            .navbar {
-                max-width: 1200px;
-                margin: 0 auto;
-                width: 100%;
-            }
-
-            .goal-option {
-                max-width: 250px;
-            }
-
-            .goal-options {
-                justify-content: flex-start;
-                gap: 30px;
+            .ds-stat h4 {
+                font-size: 3rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
-    <header id="header">
-        <div class="container">
-            <nav class="navbar">
-                <a href="#" class="logo">
-                    <img src="assets/img/logo.png" alt="NutriDeq" class="logo-img" style="height: 60px;"> NutriDeq
-                </a>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#why-healthy">Benefits</a></li>
-                    <li><a href="#calculator">Calculator</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-                <div class="auth-buttons">
-                    <a href="login-logout/NutriDeqN-Login.php" class="btn btn-outline">Sign In</a>
-                </div>
-                <button class="mobile-nav-toggle" id="landingNavToggle"
-                    style="position: static; margin-left: 15px; display: none;">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </nav>
+
+    <!-- Ultra Dynamic Background Wrapper -->
+    <div class="page-wrapper">
+        <div class="gradient-mesh">
+            <div class="mesh-blob mesh-1"></div>
+            <div class="mesh-blob mesh-2"></div>
+            <div class="mesh-blob mesh-3"></div>
         </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-text fade-in">
-                    <h1>Invest in yourself and boost your health, body and confidence</h1>
-                    <p>Good nutrition creates health in all areas of our existence. <br>All of our parts are
-                        interconnected.</p>
-                    <div class="hero-buttons">
-                        <a href="#calculator" class="btn btn-outline">Learn More</a>
-                    </div>
-                </div>
-                <div class="hero-image fade-in">
-                    <!-- Feature box with class instead of inline style -->
-                    <div class="feature-box hero-feature-box">
-                        <i class="fas fa-chart-line bounce"></i> Track Your
-                        Progress
-                    </div>
-                </div>
+        <div class="spotlight" id="spotlight"></div>
+
+        <!-- Floating Objects for Parallax -->
+        <div class="floating-object obj-1 data-parallax" data-speed="-1"><i class="fas fa-apple-alt"></i></div>
+        <div class="floating-object obj-2 data-parallax" data-speed="2"><i class="fas fa-dna"></i></div>
+        <div class="floating-object obj-3 data-parallax" data-speed="-1.5"><i class="fas fa-heartbeat"></i></div>
+        <div class="floating-object obj-4 data-parallax" data-speed="1.2"><i class="fas fa-seedling"></i></div>
+
+        <!-- Header -->
+        <header id="header">
+            <a href="#" class="logo">
+                <img src="assets/img/logo.png" alt="NutriDeq Logo">
+                <div class="logo-text">Nutri<span>Deq</span></div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Capabilities</a></li>
+                <li><a href="#database">Database Integrity</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <a href="login-logout/NutriDeqN-Login.php" class="btn btn-glass">Sign in</a>
             </div>
-        </div>
-    </section>
+        </header>
 
-    <!-- Why Be Healthy Section -->
-    <section class="why-healthy" id="why-healthy">
-        <div class="container">
-            <div class="section-title fade-in">
-                <h2>Why Be Healthy?</h2>
-                <p>Discover the amazing benefits of a healthy lifestyle</p>
-            </div>
-            <div class="benefits-grid">
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-heartbeat"></i>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <div class="badge"><i class="fas fa-bolt"></i> Fast, Smart & Free</div>
+                    <h1>Smarter Nutrition <span>Made Simple</span></h1>
+                    <p>The easiest way to track patient progress, calculate meals, and manage your health clinic. Built
+                        for dietitians who want to save time and get results.</p>
+                    <div class="hero-cta">
+                        <a href="login-logout/NutriDeqN-Signup.php" class="btn btn-glow"><i
+                                class="fas fa-user-plus"></i> Get Started</a>
+                        <a href="#features" class="btn btn-glass"><i class="fas fa-star"></i> See Features</a>
                     </div>
-                    <h3>Improved Physical Health</h3>
-                    <p>Boost your energy levels, strengthen your immune system, and reduce the risk of chronic diseases.
-                    </p>
                 </div>
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3>Better Mental Health</h3>
-                    <p>Enhance your mood, reduce anxiety, and improve cognitive function through proper nutrition.</p>
-                </div>
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-birthday-cake"></i>
-                    </div>
-                    <h3>Increased Longevity</h3>
-                    <p>Add healthy years to your life by making smart nutritional choices and maintaining an active
-                        lifestyle.</p>
-                </div>
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-weight"></i>
-                    </div>
-                    <h3>Weight Management</h3>
-                    <p>Achieve and maintain your ideal weight with personalized nutrition plans and tracking tools.</p>
-                </div>
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <h3>Improved Self-Confidence</h3>
-                    <p>Feel better about yourself as you achieve your health goals and see positive changes in your
-                        body.</p>
-                </div>
-                <div class="benefit-card fade-in">
-                    <div class="benefit-icon">
-                        <i class="fas fa-wind"></i>
-                    </div>
-                    <h3>Reduced Stress</h3>
-                    <p>Proper nutrition helps regulate stress hormones and improves your ability to cope with daily
-                        challenges.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Nutritional Calculator Section -->
-    <section class="nutrition-calculator" id="calculator">
-        <div class="container">
-            <div class="calculator-container">
-                <div class="calculator-content fade-in">
-                    <h2>Nutritional Calculator</h2>
-                    <p>Build healthier habits with personalized lessons tailored to your specific goals and lifestyle.
-                    </p>
+                <!-- 3D Interactive Reactable Mockup -->
+                <div class="mockup-wrapper" id="tilting-mockup">
 
-                    <div class="goal-options">
-                        <div class="goal-option active">
-                            <i class="fas fa-arrow-down"></i>
-                            <h4>Losing Weight</h4>
-                        </div>
-                        <div class="goal-option">
-                            <i class="fas fa-arrow-up"></i>
-                            <h4>Gaining Weight</h4>
-                        </div>
-                        <div class="goal-option">
-                            <i class="fas fa-balance-scale"></i>
-                            <h4>Maintaining Weight</h4>
+                    <div class="float-badge fb-1">
+                        <div class="fb-icon" style="background:#f59e0b;"><i class="fas fa-fire"></i></div>
+                        Macro Sync Active
+                    </div>
+                    <div class="float-badge fb-2">
+                        <div class="fb-icon" style="background:var(--primary);"><i class="fas fa-check"></i></div>
+                        Diet Plan Generated
+                    </div>
+
+                    <div class="mockup-card">
+                        <div class="mockup-inner">
+                            <div class="mock-head">
+                                <div class="mh-group">
+                                    <div class="mh-ava"><i class="fas fa-user-circle"></i></div>
+                                    <div>
+                                        <div class="mh-line1"></div>
+                                        <div class="mh-line2"></div>
+                                    </div>
+                                </div>
+                                <div
+                                    style="background: rgba(16,185,129,0.1); color: var(--primary); padding: 4px 12px; border-radius: 100px; font-size: 13px; font-weight:700;">
+                                    Live Feed</div>
+                            </div>
+
+                            <div style="font-family:'Outfit'; font-size: 20px; font-weight: 800; margin-bottom:16px;">
+                                Formulation Trajectory</div>
+
+                            <div class="mock-chart">
+                                <div class="c-bar"></div>
+                                <div class="c-bar"></div>
+                                <div class="c-bar"></div>
+                                <div class="c-bar"></div>
+                                <div class="c-bar"></div>
+                            </div>
+
+                            <div class="data-cards">
+                                <div class="d-card">
+                                    <div class="d-title">Caloric Threshold</div>
+                                    <div class="d-val">2,150 <span style="font-size:14px;color:#94a3b8;">kcal</span>
+                                    </div>
+                                </div>
+                                <div class="d-card">
+                                    <div class="d-title">Protein Target</div>
+                                    <div class="d-val">160 <span style="font-size:14px;color:#94a3b8;">g</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <h3>What do you need to get healthy?</h3>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check-circle"></i> Diet tracker with detailed analytics</li>
-                        <li><i class="fas fa-check-circle"></i> Best nutrition advice from experts</li>
-                        <li><i class="fas fa-check-circle"></i> Personalized meal planner</li>
-                        <li><i class="fas fa-check-circle"></i> Specific nutrition information for foods</li>
-                        <li><i class="fas fa-check-circle"></i> Comprehensive statistic tracker</li>
-                    </ul>
-
-                    <a href="login-logout/NutriDeqN-Signup.php" class="btn btn-primary" style="margin-top: 20px;">Get
-                        Started Today</a>
                 </div>
-                <div class="calculator-visual fade-in">
-                    <!-- Feature box with class instead of inline style -->
-                    <div class="feature-box calc-feature-box">
-                        <i class="fas fa-calculator bounce"></i> Calculate
-                        Your Nutrition
+            </div>
+        </section>
+
+        <!-- Features Matrix -->
+        <section class="section" id="features">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2>Powerful Tools <span>for Better Health</span></h2>
+                    <p>Everything you need to manage your patients, automatically calculate meals, and track progress
+                        without the headache.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card reveal" style="transition-delay: 0.1s;">
+                        <div class="f-icon-box"><i class="fas fa-calculator"></i></div>
+                        <h3>Auto-Calculate Macros</h3>
+                        <p>No more manual math. Just search our huge food database, and we instantly calculate calories,
+                            protein, carbs, and fats for your patient's meal plan.</p>
+                    </div>
+                    <div class="feature-card reveal" style="transition-delay: 0.2s;">
+                        <div class="f-icon-box"><i class="fas fa-users"></i></div>
+                        <h3>Simple Client Management</h3>
+                        <p>Keep all your patients organized in one place. Track their weight loss, measurements, and
+                            daily habits with easy-to-read charts.</p>
+                    </div>
+                    <div class="feature-card reveal" style="transition-delay: 0.3s;">
+                        <div class="f-icon-box"><i class="fas fa-comments"></i></div>
+                        <h3>Direct Patient Messaging</h3>
+                        <p>Stay connected! Patients can securely message you directly through your dashboard, keeping
+                            them engaged and on track with their goals.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section" id="features">
-        <div class="container">
-            <div class="cta-content fade-in">
-                <h2>Improve Your Lifestyle and Diet</h2>
-                <p>Track your nutrition, know what and how much you need for your daily intake!</p>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <a href="login-logout/NutriDeqN-Signup.php" class="btn btn-primary">Start your health journey
-                        today</a>
-                </div>
-            </div>
-        </div>
-    </section>
+        <!-- Data Infograph -->
+        <section class="section" style="padding-top:0;" id="database">
+            <div class="container">
+                <div class="data-showcase reveal">
+                    <h2 style="font-size: 3.5rem; margin-bottom: 24px; position:relative; z-index:2;">Massive Food
+                        Database</h2>
+                    <p
+                        style="font-size: 1.25rem; max-width: 700px; margin: 0 auto; color: #cbd5e1; position:relative; z-index:2; line-height: 1.8;">
+                        NutriDeq connects to verified, official nutrition databases so you can instantly search for
+                        thousands of real foods and get perfectly accurate nutritional facts without guessing.</p>
 
-    <!-- Footer -->
-    <footer id="contact">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>NutriDeq</h3>
-                    <p>Your personal health and nutrition companion. We help you achieve your wellness goals through
-                        personalized tracking and guidance.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <div class="ds-grid">
+                        <div class="ds-stat">
+                            <h4>0<span>ms</span></h4>
+                            <p>Calculation Latency</p>
+                        </div>
+                        <div class="ds-stat">
+                            <h4>100<span>%</span></h4>
+                            <p>Free for Clinics</p>
+                        </div>
+                        <div class="ds-stat">
+                            <h4>24<span>/7</span></h4>
+                            <p>Real-time Access</p>
+                        </div>
                     </div>
                 </div>
-                <div class="footer-column">
-                    <h3>Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#why-healthy">Benefits</a></li>
-                        <li><a href="#calculator">Calculator</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Features</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Diet Tracker</a></li>
-                        <li><a href="#">Meal Planner</a></li>
-                        <li><a href="#">Nutrition Advice</a></li>
-                        <li><a href="#">Progress Analytics</a></li>
-                        <li><a href="#">Recipe Database</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h3>Contact Us</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> 123 Health Street, Wellness City</li>
-                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
-                        <li><i class="fas fa-envelope"></i> info@nutrideq.com</li>
-                    </ul>
-                </div>
             </div>
-            <div class="copyright">
-                <p>&copy; 2023 NutriDeq. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+        </section>
 
+        <!-- Footer -->
+        <footer>
+            <div class="container f-grid reveal">
+                <div class="f-brand">
+                    <a href="#" class="f-logo">Nutri<span>Deq</span></a>
+                    <p style="color: var(--text-muted); line-height: 1.7; max-width: 300px;">The pinnacle of clinical
+                        dietary formulation. Smooth. Accurate. Free.</p>
+                </div>
+                <div class="f-col">
+                    <h4>Operations</h4>
+                    <ul>
+                        <li><a href="login-logout/NutriDeqN-Signup.php">Sign Up Free <i
+                                    class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="login-logout/NutriDeqN-Login.php">Log In <i class="fas fa-arrow-right"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="f-col">
+                    <h4>Information</h4>
+                    <ul>
+                        <li><a href="#">Privacy Protocol <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="#">Security Integrity <i class="fas fa-arrow-right"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                style="text-align:center; padding: 24px 0; border-top: 1px solid rgba(0,0,0,0.05); color: #94a3b8; font-size: 0.9rem;">
+                &copy; <?php echo date('Y'); ?> NutriDeq Intelligence. All rights reserved.
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- JS for WOW Factor interactions -->
     <script>
-        // Landing Page Mobile Menu Logic
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle = document.getElementById('landingNavToggle');
-            const navLinks = document.querySelector('.nav-links');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Header scroll
             const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) header.classList.add('scrolled');
+                else header.classList.remove('scrolled');
+            });
 
-            if (toggle && navLinks) {
-                toggle.addEventListener('click', function () {
-                    navLinks.classList.toggle('active');
-                    const icon = toggle.querySelector('i');
-                    if (navLinks.classList.contains('active')) {
-                        icon.className = 'fas fa-times';
-                    } else {
-                        icon.className = 'fas fa-bars';
+            // Intersection Observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+            // Mouse interactives
+            const spotlight = document.getElementById('spotlight');
+            const mockup = document.getElementById('tilting-mockup');
+            const parallaxObjs = document.querySelectorAll('.data-parallax');
+
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // Spotlight follow
+                requestAnimationFrame(() => {
+                    spotlight.style.left = mouseX + 'px';
+                    spotlight.style.top = mouseY + 'px';
+
+                    // Center calculations for tilt and parallax
+                    let xOffset = (mouseX - window.innerWidth / 2) / window.innerWidth;
+                    let yOffset = (mouseY - window.innerHeight / 2) / window.innerHeight;
+
+                    // 3D Tilt Mockup Card
+                    if (mockup) {
+                        mockup.style.transform = `rotateY(${-12 + xOffset * 15}deg) rotateX(${8 + -yOffset * 15}deg)`;
                     }
-                });
 
-                // Close menu when link clicked
-                navLinks.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', () => {
-                        navLinks.classList.remove('active');
-                        toggle.querySelector('i').className = 'fas fa-bars';
+                    // 2D Floating Objects Mouse Parallax
+                    parallaxObjs.forEach(obj => {
+                        let speed = parseFloat(obj.getAttribute('data-speed'));
+                        obj.style.transform = `translate(${xOffset * 100 * speed}px, ${yOffset * 100 * speed}px)`;
                     });
                 });
-            }
-        });
-
-        // Header scroll effect
-        window.addEventListener('scroll', function () {
-            const header = document.getElementById('header');
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Fade in animation on scroll
-        const fadeElements = document.querySelectorAll('.fade-in');
-
-        const fadeInOnScroll = function () {
-            fadeElements.forEach(element => {
-                const elementTop = element.getBoundingClientRect().top;
-                const elementVisible = 150;
-
-                if (elementTop < window.innerHeight - elementVisible) {
-                    element.classList.add('visible');
-                }
-            });
-        };
-
-        window.addEventListener('scroll', fadeInOnScroll);
-        // Initial check in case elements are already in view
-        fadeInOnScroll();
-
-        // Goal option selection
-        const goalOptions = document.querySelectorAll('.goal-option');
-
-        goalOptions.forEach(option => {
-            option.addEventListener('click', function () {
-                goalOptions.forEach(opt => opt.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
             });
         });
     </script>
-    <script src="scripts/interactive-effects.js?v=119" defer></script>
 </body>
 
 </html>

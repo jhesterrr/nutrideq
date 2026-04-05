@@ -3,7 +3,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once '../database.php';
+require_once __DIR__ . '/../database.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
@@ -15,16 +15,6 @@ $database = new Database();
 $pdo = $database->getConnection();
 
 try {
-    // 1. Ensure hydration_tracking table exists for the feature to work
-    $pdo->exec("CREATE TABLE IF NOT EXISTS hydration_tracking (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        glasses INT DEFAULT 0,
-        tracking_date DATE NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY user_date (user_id, tracking_date)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
     $response = [
         'success' => true,
         'health_trends' => [],
@@ -37,8 +27,12 @@ try {
             'labels' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
             'logins' => [0, 0, 0, 0, 0, 0, 0],
             'goals_met' => [0, 0, 0, 0, 0, 0, 0]
-        ]
+        ],
+        'recent_activity' => [],
+        'staff_influence' => []
     ];
+
+    // ... (rest of the health trends logic) ...
 
     // Build Staff Filter Clause
     $where_clause = "";
@@ -134,21 +128,23 @@ try {
     ];
 
     // 6. Recent System Activity (REAL DATA)
-    $activity_sql = "
-        SELECT * FROM (
-            (SELECT 'user' as type, name as title, 'New User Registered' as description, created_at, 'success' as status FROM users ORDER BY created_at DESC LIMIT 10)
-            UNION ALL
-            (SELECT 'user' as type, name as title, 'Profile Updated' as description, updated_at as created_at, 'info' as status FROM users WHERE updated_at > created_at ORDER BY updated_at DESC LIMIT 10)
-            UNION ALL
-            (SELECT 'food' as type, food_name as title, CONCAT('Food logged by User ID: ', user_id) as description, created_at, 'info' as status FROM food_tracking ORDER BY created_at DESC LIMIT 10)
-            UNION ALL
-            (SELECT 'message' as type, 'New Message' as title, content as description, created_at, 'warning' as status FROM wellness_messages ORDER BY created_at DESC LIMIT 10)
-        ) combined_activity
-        ORDER BY created_at DESC
-        LIMIT 10
-    ";
-    $act_stmt = $pdo->query($activity_sql);
-    $response['recent_activity'] = $act_stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $activity_sql = "
+            SELECT * FROM (
+                (SELECT 'user' as type, name as title, 'New User Registered' as description, created_at, 'success' as status FROM users ORDER BY created_at DESC LIMIT 5)
+                UNION ALL
+                (SELECT 'food' as type, food_name as title, CONCAT('Food logged: ', calories, ' kcal') as description, created_at, 'info' as status FROM food_tracking ORDER BY created_at DESC LIMIT 5)
+                UNION ALL
+                (SELECT 'message' as type, 'User Update' as title, 'Profile changes detected' as description, updated_at as created_at, 'warning' as status FROM users WHERE updated_at > created_at ORDER BY updated_at DESC LIMIT 5)
+            ) combined_activity
+            ORDER BY created_at DESC
+            LIMIT 10
+        ";
+        $act_stmt = $pdo->query($activity_sql);
+        $response['recent_activity'] = $act_stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        $response['recent_activity'] = []; // Fail gracefully
+    }
 
     // 7. Staff Influence Score (Calculated Influence)
     $response['staff_influence'] = [];

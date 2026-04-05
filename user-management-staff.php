@@ -564,942 +564,580 @@ $nav_links_array = getNavigationLinks($user_role, 'user-management-staff.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>NutriDeq - Client Management</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <title>NutriDeq – Client Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/responsive.css">
-    <link rel="stylesheet" href="css/user-management-staff.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <link rel="stylesheet" href="css/mobile-style.css">
+    <link rel="stylesheet" href="css/premium-management.css">
     <script src="scripts/dashboard.js" defer></script>
     <style>
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #e0e0e0;
-            margin-bottom: 20px;
+        /* Client-specific card colours: clients = emerald */
+        .profile-card.role-client .profile-card-accent { background: linear-gradient(90deg,#064e3b,#34d399); }
+        .profile-avatar.role-client { background: linear-gradient(135deg,#064e3b,#10b981); }
+        .profile-card.role-client::before { background: radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%); }
+        /* BMI badges */
+        .bmi-pill { padding: 2px 9px; border-radius: 50px; font-size: 0.68rem; font-weight: 700; font-family:'Inter',sans-serif; }
+        .bmi-normal      { background:rgba(16,185,129,0.12); color:#059669; }
+        .bmi-underweight { background:rgba(99,102,241,0.12); color:#6366f1; }
+        .bmi-overweight  { background:rgba(245,158,11,0.12); color:#d97706; }
+        .bmi-obese       { background:rgba(244,63,94,0.12);  color:#f43f5e; }
+        /* Restore button */
+        .card-action.restore-client { }
+        .card-action.restore-client:hover { background:#f0fdf4; border-color:#10b981; color:#10b981; }
+        /* Status chip inside card */
+        .status-chip { padding:4px 11px; border-radius:50px; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; font-family:'Inter',sans-serif; }
+        .status-chip.active   { background:rgba(16,185,129,0.12); color:#059669; }
+        .status-chip.inactive { background:rgba(107,114,128,0.1); color:#6b7280; }
+        .status-chip.deleted  { background:rgba(244,63,94,0.1);  color:#f43f5e; }
+        /* Deleted card — rose accent */
+        .deleted-card { border-left-color: #f43f5e !important; }
+        /* Client metric in card */
+        .client-metric-row { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+        .client-metric { display:flex; align-items:center; gap:5px; font-size:0.78rem; color:#6b7280; }
+        .client-metric i { color:#10b981; font-size:0.72rem; }
+    </style>
+    <style>
+        /* ═══ NutriDeq Premium Modal System ═══ */
+
+        /* Backdrop */
+        .premium-modal-overlay { display:none; position:fixed; inset:0; background:rgba(3,26,18,0.55); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+        .premium-modal-overlay.active { display:flex; }
+
+        /* Modal shell */
+        .ndq-modal { background:#fff; border-radius:24px; box-shadow:0 32px 80px rgba(0,0,0,0.22),0 8px 24px rgba(0,0,0,0.1); width:100%; max-height:92vh; height:92vh; display:flex; flex-direction:column; animation:ndqModalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+        @keyframes ndqModalIn { from { opacity:0; transform:scale(0.88) translateY(24px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+        /* Header */
+        .ndq-modal-header { display:flex; align-items:center; gap:16px; padding:24px 28px 20px; background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%); flex-shrink:0; position:relative; overflow:hidden; }
+        .ndq-modal-header::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(167,243,208,0.2) 0%,transparent 70%); border-radius:50%; pointer-events:none; }
+        .ndq-modal-header::after  { content:''; position:absolute; bottom:-40px; left:20%; width:150px; height:150px; background:radial-gradient(circle,rgba(52,211,153,0.15) 0%,transparent 70%); border-radius:50%; pointer-events:none; }
+        .ndq-modal-header-icon { width:52px; height:52px; border-radius:16px; background:rgba(255,255,255,0.15); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#a7f3d0; flex-shrink:0; position:relative; z-index:1; }
+        .ndq-modal-title { font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:#fff; line-height:1.2; position:relative; z-index:1; }
+        .ndq-modal-subtitle { font-size:0.8rem; color:rgba(167,243,208,0.85); font-weight:500; margin-top:2px; position:relative; z-index:1; }
+        .ndq-modal-close { margin-left:auto; width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.7); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.9rem; transition:all 0.2s; flex-shrink:0; position:relative; z-index:1; }
+        .ndq-modal-close:hover { background:rgba(255,255,255,0.2); color:#fff; transform:rotate(90deg); }
+
+        /* Scrollable body */
+        .ndq-modal-body {
+            overflow-y: auto;
+            flex: 1 1 0;
+            min-height: 0;
+            padding: 24px 28px 8px;
+            scroll-behavior: smooth;
+            /* Firefox themed scrollbar */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(5,150,105,0.35) transparent;
         }
+        /* WebKit: Chrome / Safari / Edge */
+        .ndq-modal-body::-webkit-scrollbar              { width: 5px; }
+        .ndq-modal-body::-webkit-scrollbar-track        { background: transparent; margin: 8px 0; }
+        .ndq-modal-body::-webkit-scrollbar-thumb        { background: rgba(5,150,105,0.3); border-radius: 99px; }
+        .ndq-modal-body::-webkit-scrollbar-thumb:hover  { background: rgba(5,150,105,0.55); }
 
-        .tab-btn {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #666;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
+        /* Section headers */
+        .ndq-section { margin-bottom:24px; }
+        .ndq-section-label { display:flex; align-items:center; gap:8px; font-family:'Outfit',sans-serif; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#059669; margin-bottom:14px; padding-bottom:8px; border-bottom:1.5px solid rgba(5,150,105,0.12); }
+        .ndq-section-label i { width:24px; height:24px; background:rgba(5,150,105,0.1); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.72rem; color:#059669; }
 
-        .tab-btn:hover {
-            color: #3498db;
-        }
+        /* Field grid */
+        .ndq-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; }
+        .ndq-field { display:flex; flex-direction:column; gap:5px; }
+        .ndq-field.full { grid-column:span 2; }
+        .ndq-field label { font-size:0.75rem; font-weight:700; color:#374151; font-family:'Inter',sans-serif; text-transform:uppercase; letter-spacing:0.04em; }
+        .ndq-field label .req { color:#f43f5e; margin-left:2px; }
 
-        .tab-btn.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-        }
+        /* Input wrapper with icon */
+        .ndq-input-wrap { position:relative; display:flex; align-items:center; }
+        .ndq-input-wrap > i:first-child { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:0.8rem; pointer-events:none; z-index:1; transition:color 0.2s; }
+        .ndq-input-wrap input,
+        .ndq-input-wrap select { width:100%; padding:11px 14px 11px 38px; border:1.5px solid #e5e7eb; border-radius:11px; font-size:0.88rem; font-family:'Inter',sans-serif; color:#111827; background:#f9fafb; outline:none; transition:all 0.2s; }
+        .ndq-input-wrap input:focus,
+        .ndq-input-wrap select:focus { border-color:#059669; background:#fff; box-shadow:0 0 0 3px rgba(5,150,105,0.1); }
+        .ndq-input-wrap:focus-within > i:first-child { color:#059669; }
 
-        .tab-content {
-            display: none;
-        }
+        /* Unit badge */
+        .ndq-unit { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:#9ca3af; background:#f3f4f6; padding:2px 7px; border-radius:6px; pointer-events:none; }
 
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+        /* Textarea variant */
+        .ndq-textarea-wrap { align-items:flex-start; }
+        .ndq-textarea-wrap > i:first-child { top:13px; transform:none; }
+        .ndq-textarea-wrap textarea { width:100%; padding:11px 14px 11px 38px; border:1.5px solid #e5e7eb; border-radius:11px; font-size:0.88rem; font-family:'Inter',sans-serif; color:#111827; background:#f9fafb; outline:none; transition:all 0.2s; resize:vertical; min-height:64px; }
+        .ndq-textarea-wrap textarea:focus { border-color:#059669; background:#fff; box-shadow:0 0 0 3px rgba(5,150,105,0.1); }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
+        /* Sticky footer */
+        .ndq-modal-footer { display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:16px 28px 22px; border-top:1.5px solid #f3f4f6; flex-shrink:0; background:#fff; border-radius:0 0 24px 24px; }
+        .ndq-btn-cancel { padding:11px 20px; border:1.5px solid #e5e7eb; border-radius:12px; background:transparent; color:#6b7280; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; display:flex; align-items:center; gap:7px; }
+        .ndq-btn-cancel:hover { background:#f3f4f6; color:#374151; border-color:#d1d5db; }
+        .ndq-btn-submit { padding:11px 24px; border:none; border-radius:12px; background:linear-gradient(135deg,#059669,#047857); color:#fff; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; display:flex; align-items:center; gap:7px; box-shadow:0 4px 14px rgba(5,150,105,0.3); }
+        .ndq-btn-submit:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(5,150,105,0.38); }
 
-            to {
-                opacity: 1;
-            }
-        }
-
-        .delete-history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .delete-history-table th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .delete-history-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .delete-history-table tr:hover {
-            background: #f9f9f9;
-        }
-
-        .deleted-by {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .deleted-by-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #3498db;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .restore-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s;
-        }
-
-        .restore-btn:hover {
-            background: #219653;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
+        /* Responsive */
+        @media (max-width:600px) {
+            .ndq-modal-header { padding:18px 20px 16px; }
+            .ndq-modal-body  { padding:18px 20px 8px; }
+            .ndq-modal-footer { padding:14px 20px 18px; }
+            .ndq-field-grid { grid-template-columns:1fr; }
+            .ndq-field.full { grid-column:span 1; }
         }
     </style>
 </head>
-
 <body>
-    <div class="main-layout">
-        <?php include 'includes/sidebar.php'; ?>
+<div class="main-layout">
+    <?php include 'includes/sidebar.php'; ?>
+    <main class="main-content">
+    <div class="page-container mgmt-page">
 
-        <div class="main-content">
-            <div class="header">
-                <div class="page-title">
-                    <h1>Client Management</h1>
-                    <p>Manage your clients and their nutritional profiles</p>
-                </div>
+        <?php if (isset($_SESSION['success'])): ?>
+        <div class="mgmt-alert mgmt-alert-success"><i class="fas fa-check-circle"></i><?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+        <?php endif; ?>
+        <?php if (!empty($error)): ?>
+        <div class="mgmt-alert mgmt-alert-error"><i class="fas fa-exclamation-triangle"></i><?php echo htmlspecialchars($error); ?></div>
+        <?php endif; ?>
 
-                <div class="header-actions">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search clients..." id="searchInput" class="global-search"
-                            data-target=".user-table tbody tr, .client-card">
-                    </div>
-                </div>
+        <!-- Hero -->
+        <div class="mgmt-hero">
+            <div class="mgmt-hero-left">
+                <div class="mgmt-hero-icon"><i class="fas fa-user-injured"></i></div>
+                <h1 class="mgmt-hero-title">Client Management</h1>
+                <p class="mgmt-hero-subtitle">Manage your clients and their nutritional profiles</p>
             </div>
-
-            <!-- Display success messages -->
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="success-message">
-                    <?php echo htmlspecialchars($_SESSION['success']);
-                    unset($_SESSION['success']); ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Display error messages -->
-            <?php if (!empty($error)): ?>
-                <div class="error-message">
-                    <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Stats Overview -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon users">
-                        <i class="fas fa-user-friends"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $stats['total_clients']; ?></h3>
-                        <p>Total Clients</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon staff">
-                        <i class="fas fa-heartbeat"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $stats['active_clients']; ?></h3>
-                        <p>Active Clients</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon admins">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $stats['new_this_month']; ?></h3>
-                        <p>New This Month</p>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #e74c3c;">
-                        <i class="fas fa-trash"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $stats['deleted_clients']; ?></h3>
-                        <p>Deleted Clients</p>
-                    </div>
-                </div>
+            <div class="mgmt-hero-right">
+                <button class="btn-premium-add" id="addClientBtn"><i class="fas fa-user-plus"></i> Add New Client</button>
             </div>
+        </div>
 
-            <!-- Tabs -->
-            <div class="tabs">
-                <a href="?tab=active_clients"
-                    class="tab-btn <?php echo $current_tab === 'active_clients' ? 'active' : ''; ?>">
-                    Active Clients
-                </a>
-                <a href="?tab=delete_history"
-                    class="tab-btn <?php echo $current_tab === 'delete_history' ? 'active' : ''; ?>">
-                    Delete History
-                </a>
+        <!-- Stats -->
+        <div class="mgmt-stats">
+            <div class="mgmt-stat stat-clients"><div class="mgmt-stat-icon"><i class="fas fa-user-friends"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['total_clients']; ?></h4><p>Total Clients</p></div></div>
+            <div class="mgmt-stat stat-active"><div class="mgmt-stat-icon"><i class="fas fa-heartbeat"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['active_clients']; ?></h4><p>Active Clients</p></div></div>
+            <div class="mgmt-stat stat-staff"><div class="mgmt-stat-icon"><i class="fas fa-chart-line"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['new_this_month']; ?></h4><p>New This Month</p></div></div>
+            <div class="mgmt-stat stat-deleted"><div class="mgmt-stat-icon"><i class="fas fa-archive"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['deleted_clients']; ?></h4><p>Archived</p></div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mgmt-tabs">
+            <button class="mgmt-tab-btn <?php echo $current_tab==='active_clients'?'active':''; ?>" onclick="window.location='?tab=active_clients'"><i class="fas fa-users"></i> Active Clients</button>
+            <button class="mgmt-tab-btn <?php echo $current_tab==='delete_history'?'active':''; ?>" onclick="window.location='?tab=delete_history'"><i class="fas fa-history"></i> Archive <?php if($stats['deleted_clients']>0) echo '<span style="background:#f43f5e;color:white;border-radius:50px;padding:1px 8px;font-size:0.72rem;">'.$stats['deleted_clients'].'</span>'; ?></button>
+        </div>
+
+        <!-- ── Active Clients ── -->
+        <div class="mgmt-tab-panel <?php echo $current_tab==='active_clients'?'active':''; ?>">
+            <div class="mgmt-toolbar">
+                <div class="mgmt-section-label"><i class="fas fa-users"></i> My Clients</div>
+                <div class="mgmt-search"><i class="fas fa-search"></i><input type="text" placeholder="Search clients..." oninput="filterCards(this.value,'clientGrid')"></div>
             </div>
-            <!-- Client Management Section -->
-            <div class="management-section">
-                <!-- Active Clients Tab -->
-                <div id="active-clients-tab"
-                    class="tab-content <?php echo $current_tab === 'active_clients' ? 'active' : ''; ?>">
-                    <div class="section-header">
-                        <h2><i class="fas fa-user-injured"></i> My Clients</h2>
-                        <button class="btn btn-primary" id="addClientBtn" onclick="openModal()">
-                            <i class="fas fa-user-plus"></i> Add New Client
-                        </button>
-                    </div>
-
-                    </div>
-
-                    <!-- Desktop View Table -->
-                    <div class="table-container table-responsive desktop-view">
-                        <table class="user-table">
-                            <thead>
-                                <tr>
-                                    <th>Client</th>
-                                    <th>Contact</th>
-                                    <th>Health Metrics</th>
-                                    <th>Health Info</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($clients as $client):
-                                    // Calculate BMI
-                                    $bmi = $client['height'] > 0 ? $client['weight'] / (($client['height'] / 100) * ($client['height'] / 100)) : 0;
-                                    $bmi_category = '';
-                                    if ($bmi < 18.5)
-                                        $bmi_category = 'underweight';
-                                    elseif ($bmi < 25)
-                                        $bmi_category = 'normal';
-                                    elseif ($bmi < 30)
-                                        $bmi_category = 'overweight';
-                                    else
-                                        $bmi_category = 'obese';
-                                    ?>
-                                    <tr>
-                                        <td>
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <div class="user-avatar"
-                                                    style="width: 32px; height: 32px; font-size: 12px;">
-                                                    <?php echo getInitials($client['name']); ?>
-                                                </div>
-                                                <div>
-                                                    <div style="font-weight: 600; font-size: 0.9rem;">
-                                                        <?php echo htmlspecialchars($client['name']); ?>
-                                                    </div>
-                                                    <div style="font-size: 0.75rem; color: var(--gray);">
-                                                        <?php echo $client['age'] ?? 'N/A'; ?>y •
-                                                        <?php echo ucfirst($client['gender'] ?? 'Not set'); ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style="font-size: 0.85rem;">
-                                                <?php echo htmlspecialchars($client['email']); ?>
-                                            </div>
-                                            <div style="font-size: 0.75rem; color: var(--gray);">
-                                                <?php echo $client['phone'] ?: 'No phone'; ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="health-metrics">
-                                                <div class="metric-item">
-                                                    <div class="metric-value"><?php echo $client['weight'] ?? 'N/A'; ?>kg
-                                                    </div>
-                                                    <div class="metric-label">Weight</div>
-                                                </div>
-                                                <div class="metric-item">
-                                                    <div class="metric-value"><?php echo $client['height'] ?? 'N/A'; ?>cm
-                                                    </div>
-                                                    <div class="metric-label">Height</div>
-                                                </div>
-                                                <div class="metric-item">
-                                                    <div class="metric-value"><?php echo number_format($bmi, 1); ?></div>
-                                                    <div class="metric-label">
-                                                        BMI <span class="bmi-indicator bmi-<?php echo $bmi_category; ?>">
-                                                            <?php echo substr(ucfirst($bmi_category), 0, 1); ?>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="client-info-compact">
-                                                <div><strong>C:</strong>
-                                                    <?php echo $client['health_conditions'] ? substr($client['health_conditions'], 0, 20) . '...' : 'None'; ?>
-                                                </div>
-                                                <div><strong>R:</strong>
-                                                    <?php echo $client['dietary_restrictions'] ? substr($client['dietary_restrictions'], 0, 20) . '...' : 'None'; ?>
-                                                </div>
-                                                <div><strong>G:</strong>
-                                                    <?php echo $client['goals'] ? substr($client['goals'], 0, 20) . '...' : 'Not set'; ?>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="action" value="toggle_client_status">
-                                                <input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">
-                                                <button type="submit"
-                                                    class="status-toggle status-<?php echo $client['status']; ?>">
-                                                    <?php echo ucfirst($client['status']); ?>
-                                                </button>
-                                            </form>
-                                        </td>
-                                        <td>
-                                            <div class="user-actions">
-                                                <button class="action-btn edit-btn" title="Edit Client"
-                                                    onclick="openEditModal(<?php echo htmlspecialchars(json_encode($client)); ?>)">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="action-btn view-btn" title="View Health Plan"
-                                                    onclick="viewHealthPlan(<?php echo $client['id']; ?>)">
-                                                    <i class="fas fa-file-medical"></i>
-                                                </button>
-
-                                                <form method="POST" style="display: inline;"
-                                                    onsubmit="return confirmDelete()">
-                                                    <input type="hidden" name="action" value="delete_client">
-                                                    <input type="hidden" name="client_id"
-                                                        value="<?php echo $client['id']; ?>">
-                                                    <button type="submit" class="action-btn delete-btn"
-                                                        title="Delete Client">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Mobile View Card List -->
-                    <div class="mobile-client-cards mobile-view">
-                        <button class="btn btn-primary mobile-add-btn" onclick="document.getElementById('addClientBtn').click();">
-                            <i class="fas fa-plus"></i> Add New Client
-                        </button>
-                        <?php if (empty($clients)): ?>
-                            <div class="empty-state">
-                                <i class="fas fa-user-friends"></i>
-                                <h3>No clients found</h3>
-                                <p>Start by adding your first client</p>
-                            </div>
+            <?php if(empty($clients)): ?>
+            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-user-friends"></i></div><h3>No clients yet</h3><p>Click Add New Client to get started.</p></div>
+            <?php else: ?>
+            <div class="profile-grid" id="clientGrid">
+                <?php foreach($clients as $client):
+                    $bmi = ($client['height']>0) ? $client['weight']/(($client['height']/100)*($client['height']/100)) : 0;
+                    $bmiCat = $bmi<=0?'':($bmi<18.5?'underweight':($bmi<25?'normal':($bmi<30?'overweight':'obese')));
+                    $statusClass = in_array($client['status'],['active','inactive','deleted']) ? $client['status'] : 'inactive';
+                ?>
+                <div class="profile-card role-client status-<?php echo $statusClass; ?>"
+                     data-search="<?php echo strtolower($client['name'].' '.$client['email'].' '.($client['status']??'')); ?>">
+                    <div class="profile-card-accent"></div>
+                    <div class="profile-card-body">
+                        <div class="profile-avatar role-client">
+                            <?php echo getInitials($client['name']); ?>
+                            <span class="status-dot <?php echo $client['status']==='active'?'active-dot':''; ?>"></span>
+                        </div>
+                        <div class="profile-name"><?php echo htmlspecialchars($client['name']); ?></div>
+                        <div class="profile-id">#CLT-<?php echo str_pad($client['id'],4,'0',STR_PAD_LEFT); ?></div>
+                        <div class="profile-email"><i class="fas fa-envelope"></i><?php echo htmlspecialchars($client['email']); ?></div>
+                        <div class="client-metric-row">
+                            <?php if($client['age']): ?><div class="client-metric"><i class="fas fa-birthday-cake"></i><?php echo $client['age']; ?>y</div><?php endif; ?>
+                            <?php if($client['gender']): ?><div class="client-metric"><i class="fas fa-venus-mars"></i><?php echo ucfirst($client['gender']); ?></div><?php endif; ?>
+                            <?php if($bmi>0): ?><div class="client-metric"><i class="fas fa-weight"></i><?php echo number_format($bmi,1); ?> BMI</div><?php endif; ?>
+                        </div>
+                        <div class="profile-badges">
+                            <span class="profile-badge badge-active"><i class="fas fa-user-injured"></i> Client</span>
+                            <span class="status-chip <?php echo $statusClass; ?>"><?php echo ucfirst($statusClass); ?></span>
+                            <?php if($bmi>0): ?><span class="bmi-pill bmi-<?php echo $bmiCat; ?>"><?php echo ucfirst($bmiCat); ?></span><?php endif; ?>
+                        </div>
+                        <?php if($client['goals']): ?>
+                        <div class="profile-meta"><i class="fas fa-bullseye"></i><?php echo htmlspecialchars(mb_strimwidth($client['goals'],0,40,'…')); ?></div>
                         <?php else: ?>
-                            <?php foreach ($clients as $client):
-                                $bmi = $client['height'] > 0 ? $client['weight'] / (($client['height'] / 100) * ($client['height'] / 100)) : 0;
-                                $bmi_category = '';
-                                if ($bmi < 18.5)
-                                    $bmi_category = 'underweight';
-                                elseif ($bmi < 25)
-                                    $bmi_category = 'normal';
-                                elseif ($bmi < 30)
-                                    $bmi_category = 'overweight';
-                                else
-                                    $bmi_category = 'obese';
-                                ?>
-                                <div class="client-card">
-                                    <div class="card-header">
-                                        <div class="user-avatar">
-                                            <?php echo getInitials($client['name']); ?>
-                                        </div>
-                                        <div class="user-info">
-                                            <h3><?php echo htmlspecialchars($client['name']); ?></h3>
-                                            <span class="client-meta"><?php echo $client['age'] ?? 'N/A'; ?>y •
-                                                <?php echo ucfirst($client['gender'] ?? 'Not set'); ?></span>
-                                        </div>
-                                        <div class="card-status">
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="action" value="toggle_client_status">
-                                                <input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">
-                                                <button type="submit" class="mobile-status status-<?php echo $client['status']; ?>">
-                                                    <?php echo ucfirst($client['status']); ?>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-
-                                    <div class="card-metrics">
-                                        <div class="metric-box">
-                                            <span class="value"><?php echo $client['weight'] ?? 'N/A'; ?> <small>kg</small></span>
-                                            <span class="label">Weight</span>
-                                        </div>
-                                        <div class="metric-box">
-                                            <span class="value"><?php echo $client['height'] ?? 'N/A'; ?> <small>cm</small></span>
-                                            <span class="label">Height</span>
-                                        </div>
-                                        <div class="metric-box">
-                                            <span class="value"><?php echo number_format($bmi, 1); ?></span>
-                                            <span class="label">BMI <span
-                                                    class="bmi-tag bmi-<?php echo $bmi_category; ?>"><?php echo substr(ucfirst($bmi_category), 0, 1); ?></span></span>
-                                        </div>
-                                    </div>
-
-                                    <details class="card-details">
-                                        <summary>
-                                            <span><i class="fas fa-info-circle"></i> View Health & Contact Details</span>
-                                            <i class="fas fa-chevron-down toggle-icon"></i>
-                                        </summary>
-                                        <div class="details-content">
-                                            <div class="info-section">
-                                                <h4>Health Profile</h4>
-                                                <div class="detail-row">
-                                                    <strong>Conditions:</strong>
-                                                    <span><?php echo $client['health_conditions'] ?: 'None'; ?></span>
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Restrictions:</strong>
-                                                    <span><?php echo $client['dietary_restrictions'] ?: 'None'; ?></span>
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Goals:</strong>
-                                                    <span><?php echo $client['goals'] ?: 'Not set'; ?></span>
-                                                </div>
-                                            </div>
-                                            <div class="info-section">
-                                                <h4>Contact & Address</h4>
-                                                <div class="detail-row">
-                                                    <strong>Email:</strong>
-                                                    <span><?php echo htmlspecialchars($client['email']); ?></span>
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Phone:</strong>
-                                                    <span><?php echo $client['phone'] ?: 'No phone'; ?></span>
-                                                </div>
-                                                <div class="detail-row">
-                                                    <strong>Address:</strong>
-                                                    <span><?php echo $client['address'] ? "{$client['address']}, {$client['city']}" : 'Not provided'; ?></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </details>
-
-                                    <div class="card-footer">
-                                        <button class="footer-btn edit"
-                                            onclick="openEditModal(<?php echo htmlspecialchars(json_encode($client)); ?>)">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                        <button class="footer-btn plan" onclick="viewHealthPlan(<?php echo $client['id']; ?>)">
-                                            <i class="fas fa-file-medical"></i> Plan
-                                        </button>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirmDelete()">
-                                            <input type="hidden" name="action" value="delete_client">
-                                            <input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">
-                                            <button type="submit" class="footer-btn delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
+                        <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Added <?php echo date('M j, Y',strtotime($client['created_at'])); ?></div>
                         <?php endif; ?>
                     </div>
-                </div>
-
-                <!-- Delete History Tab -->
-                <div id="delete-history-tab"
-                    class="tab-content <?php echo $current_tab === 'delete_history' ? 'active' : ''; ?>">
-                    <div class="section-header">
-                        <h2><i class="fas fa-history"></i> Delete History</h2>
-                        <p>Clients deleted by you. You can restore them here.</p>
-                    </div>
-
-                    <?php if (empty($deleted_clients)): ?>
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>No deleted clients found</h3>
-                            <p>Deleted clients will appear here</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="table-container table-responsive">
-                            <table class="delete-history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Client</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Age/Gender</th>
-                                        <th>Deleted By</th>
-                                        <th>Deleted Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($deleted_clients as $deleted_client): ?>
-                                        <tr>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <div class="user-avatar"
-                                                        style="width: 32px; height: 32px; font-size: 12px;">
-                                                        <?php echo getInitials($deleted_client['name']); ?>
-                                                    </div>
-                                                    <div>
-                                                        <div style="font-weight: 600; font-size: 0.9rem;">
-                                                            <?php echo htmlspecialchars($deleted_client['name']); ?>
-                                                        </div>
-                                                        <div style="font-size: 0.75rem; color: var(--gray);">
-                                                            ID: <?php echo $deleted_client['original_id']; ?>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($deleted_client['email']); ?></td>
-                                            <td><?php echo $deleted_client['phone'] ?: 'N/A'; ?></td>
-                                            <td>
-                                                <?php echo $deleted_client['age'] ?? 'N/A'; ?>y •
-                                                <?php echo ucfirst($deleted_client['gender'] ?? 'N/A'); ?>
-                                            </td>
-                                            <td>
-                                                <div class="deleted-by">
-                                                    <div class="deleted-by-avatar"><?php echo getInitials($user_name); ?></div>
-                                                    <span><?php echo ucfirst($deleted_client['deleted_by']); ?></span>
-                                                </div>
-                                            </td>
-                                            <td><?php echo date('M j, Y H:i', strtotime($deleted_client['deleted_at'])); ?></td>
-                                            <td>
-                                                <form method="POST" style="display: inline;">
-                                                    <input type="hidden" name="action" value="restore_client">
-                                                    <input type="hidden" name="deleted_client_id"
-                                                        value="<?php echo $deleted_client['id']; ?>">
-                                                    <button type="submit" class="restore-btn" onclick="return confirmRestore()">
-                                                        <i class="fas fa-undo"></i> Restore
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Add Client Modal -->
-                <div class="modal" id="addClientModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Add New Client</h2>
-                            <button class="close-btn" onclick="closeModal()">&times;</button>
-                        </div>
-                        <form method="POST" id="addClientForm">
-                            <input type="hidden" name="action" value="add_client">
-
-                            <div class="form-group">
-                                <label for="name">Full Name *</label>
-                                <input type="text" id="name" name="name" class="form-control" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="email">Email *</label>
-                                <input type="email" id="email" name="email" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="account_password">Account Password (optional)</label>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <input type="password" id="account_password" name="account_password"
-                                        class="form-control" placeholder="Set initial account password" style="flex:1;">
-                                    <button type="button" class="btn btn-outline" id="toggle_account_password"
-                                        title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="account_confirm_password">Confirm Password</label>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <input type="password" id="account_confirm_password" name="account_confirm_password"
-                                        class="form-control" placeholder="Re-enter password" style="flex:1;">
-                                    <button type="button" class="btn btn-outline" id="toggle_account_confirm_password"
-                                        title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="phone">Phone</label>
-                                <input type="tel" id="phone" name="phone" class="form-control"
-                                    placeholder="+63 987-654-2100">
-                            </div>
-
-                            <!-- Address Fields -->
-                            <div class="form-group">
-                                <label for="address">Street Address</label>
-                                <input type="text" id="address" name="address" class="form-control"
-                                    placeholder="123 Main Street">
-                            </div>
-
-                            <div class="client-info-grid">
-                                <div class="form-group">
-                                    <label for="city">City</label>
-                                    <input type="text" id="city" name="city" class="form-control"
-                                        placeholder="Los Banos">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="state">State/Province</label>
-                                    <input type="text" id="state" name="state" class="form-control"
-                                        placeholder="Laguna">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="zip_code">ZIP/Postal Code</label>
-                                <input type="text" id="zip_code" name="zip_code" class="form-control"
-                                    placeholder="0000">
-                            </div>
-
-                            <div class="client-info-grid">
-                                <div class="form-group">
-                                    <label for="age">Age</label>
-                                    <input type="number" id="age" name="age" class="form-control" min="1" max="100"
-                                        placeholder="+99">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="gender">Gender</label>
-                                    <select id="gender" name="gender" class="form-control">
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="client-info-grid">
-                                <div class="form-group">
-                                    <label for="weight">Weight (kg)</label>
-                                    <input type="number" id="weight" name="weight" class="form-control" step="0.1"
-                                        min="1">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="height">Height (cm)</label>
-                                    <input type="number" id="height" name="height" class="form-control" step="0.1"
-                                        min="1">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="waist_circumference">Waist Circumference (cm)</label>
-                                <input type="number" class="form-control" id="waist_circumference"
-                                    name="waist_circumference" step="0.1" min="0" placeholder="Enter waist measurement">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="hip_circumference">Hip Circumference (cm)</label>
-                                <input type="number" class="form-control" id="hip_circumference"
-                                    name="hip_circumference" step="0.1" min="0" placeholder="Enter hip measurement">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="health_conditions">Health Conditions</label>
-                                <textarea id="health_conditions" name="health_conditions" class="form-control" rows="2"
-                                    placeholder="e.g., Diabetes, Hypertension"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="dietary_restrictions">Dietary Restrictions</label>
-                                <textarea id="dietary_restrictions" name="dietary_restrictions" class="form-control"
-                                    rows="2" placeholder="e.g., Vegetarian, Gluten-free"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="goals">Health/Nutrition Goals</label>
-                                <textarea id="goals" name="goals" class="form-control" rows="2"
-                                    placeholder="e.g., Weight loss, Muscle gain, Better digestion"></textarea>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Add Client</button>
-                            </div>
+                    <div class="profile-card-footer">
+                        <!-- Status toggle -->
+                        <form method="POST" class="inline-form" style="flex:1;">
+                            <input type="hidden" name="action" value="toggle_client_status">
+                            <input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">
+                            <button type="submit" class="card-status-toggle <?php echo $statusClass; ?>" title="Toggle Status">
+                                <?php echo ucfirst($statusClass); ?>
+                            </button>
+                        </form>
+                        <!-- Edit -->
+                        <button type="button" class="card-action edit edit-client-btn"
+                            data-client='<?php echo htmlspecialchars(json_encode($client),ENT_QUOTES); ?>'
+                            title="Edit Client"><i class="fas fa-pen"></i></button>
+                        <!-- View Health Plan -->
+                        <button type="button" class="card-action"
+                            onclick="window.location.href='anthropometric-information.php?client_id=<?php echo $client['id']; ?>&tab=food-tracker'"
+                            title="View Health Plan"
+                            style="border-color:#6366f1;color:#6366f1;"
+                            onmouseover="this.style.background='#eef2ff'"
+                            onmouseout="this.style.background=''">
+                            <i class="fas fa-file-medical"></i>
+                        </button>
+                        <!-- Archive -->
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Archive this client? They can be restored from the Archive tab.')">
+                            <input type="hidden" name="action" value="delete_client">
+                            <input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">
+                            <button type="submit" class="card-action delete" title="Archive Client"><i class="fas fa-archive"></i></button>
                         </form>
                     </div>
                 </div>
-
-                <!-- Edit Client Modal -->
-                <div class="modal" id="editClientModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2>Edit Client Information</h2>
-                            <button class="close-btn" onclick="closeEditModal()">&times;</button>
-                        </div>
-                        <form method="POST" id="editClientForm">
-                            <input type="hidden" name="action" value="update_client">
-                            <input type="hidden" id="edit_client_id" name="client_id">
-
-                            <!-- Basic Info Section -->
-                            <div class="form-section">
-                                <h4>Basic Information</h4>
-                                <div class="client-info-grid">
-                                    <div class="form-group">
-                                        <label for="edit_name">Full Name</label>
-                                        <input type="text" id="edit_name" name="name" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit_email">Email</label>
-                                        <input type="email" id="edit_email" name="email" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="client-info-grid">
-                                    <div class="form-group">
-                                        <label for="edit_phone">Phone</label>
-                                        <input type="tel" id="edit_phone" name="phone" class="form-control">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit_age">Age</label>
-                                        <input type="number" id="edit_age" name="age" class="form-control" min="1"
-                                            max="120">
-                                    </div>
-                                </div>
-
-                                <div class="client-info-grid">
-                                    <div class="form-group">
-                                        <label for="edit_weight">Weight (kg)</label>
-                                        <input type="number" id="edit_weight" name="weight" class="form-control"
-                                            step="0.1" min="1">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="edit_height">Height (cm)</label>
-                                        <input type="number" id="edit_height" name="height" class="form-control"
-                                            step="0.1" min="1">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Address Section -->
-                            <div class="form-section">
-                                <h4>Address Information</h4>
-                                <div class="form-group">
-                                    <label for="edit_address">Street Address</label>
-                                    <input type="text" id="edit_address" name="address" class="form-control">
-                                </div>
-
-                                <div class="client-info-grid">
-                                    <div class="form-group">
-                                        <label for="edit_city">City</label>
-                                        <input type="text" id="edit_city" name="city" class="form-control">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="edit_state">State/Province</label>
-                                        <input type="text" id="edit_state" name="state" class="form-control">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_zip_code">ZIP/Postal Code</label>
-                                    <input type="text" id="edit_zip_code" name="zip_code" class="form-control">
-                                </div>
-                            </div>
-
-                            <!-- Health fields -->
-                            <div class="form-section">
-                                <h4>Health Information</h4>
-                                <div class="form-group">
-                                    <label for="edit_waist_circumference">Waist Circumference (cm)</label>
-                                    <input type="number" id="edit_waist_circumference" name="waist_circumference"
-                                        class="form-control" step="0.1" min="0">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_hip_circumference">Hip Circumference (cm)</label>
-                                    <input type="number" id="edit_hip_circumference" name="hip_circumference"
-                                        class="form-control" step="0.1" min="0">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_health_conditions">Health Conditions</label>
-                                    <textarea id="edit_health_conditions" name="health_conditions" class="form-control"
-                                        rows="3"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_dietary_restrictions">Dietary Restrictions</label>
-                                    <textarea id="edit_dietary_restrictions" name="dietary_restrictions"
-                                        class="form-control" rows="3"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_goals">Health/Nutrition Goals</label>
-                                    <textarea id="edit_goals" name="goals" class="form-control" rows="3"></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="edit_notes">Dietician Notes</label>
-                                    <textarea id="edit_notes" name="notes" class="form-control" rows="4"
-                                        placeholder="Track progress, recommendations, etc."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-                                <button type="submit" class="btn btn-primary">Update Client</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
+
+        <!-- ── Archive / Delete History ── -->
+        <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
+            <div class="mgmt-section-label"><i class="fas fa-history"></i> Archived Clients</div>
+            <?php if(empty($deleted_clients)): ?>
+            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No archived clients</h3><p>Archived clients will appear here and can be restored.</p></div>
+            <?php else: ?>
+            <div class="deleted-grid">
+                <?php foreach($deleted_clients as $dc): ?>
+                <div class="deleted-card">
+                    <div class="deleted-avatar"><?php echo getInitials($dc['name']); ?></div>
+                    <div class="deleted-info">
+                        <div class="deleted-name"><?php echo htmlspecialchars($dc['name']); ?> <span style="font-size:0.75rem;color:#9ca3af;">#CLT-<?php echo str_pad($dc['original_id'],4,'0',STR_PAD_LEFT); ?></span></div>
+                        <div class="deleted-meta">
+                            <span><?php echo htmlspecialchars($dc['email']); ?></span>
+                            <?php if($dc['age']): ?><span><i class="fas fa-birthday-cake" style="color:#d1d5db;"></i> <?php echo $dc['age']; ?>y</span><?php endif; ?>
+                            <div class="deleted-by-chip"><i class="fas fa-user-times"></i><?php echo htmlspecialchars($dc['deleted_by_name']??ucfirst($dc['deleted_by']??'Staff')); ?></div>
+                            <span><?php echo date('M j, Y',strtotime($dc['deleted_at'])); ?></span>
+                        </div>
+                    </div>
+                    <div class="deleted-actions">
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore this client?')">
+                            <input type="hidden" name="action" value="restore_client">
+                            <input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>">
+                            <button type="submit" class="card-action restore restore-client" title="Restore"><i class="fas fa-undo"></i></button>
+                        </form>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
     </div>
+    </main>
+</div>
 
-    <!-- Essential Scripts for Client Management -->
-    <script>
-        const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';
+<!-- ── Add Client Modal ── -->
+<div class="premium-modal-overlay" id="addClientModal">
+    <div class="premium-modal ndq-modal" style="max-width:640px;padding:0;">
 
-        // Tab Switching Logic
-        function showTab(tabId) {
-            // Update URL without reload
-            const url = new URL(window.location);
-            url.searchParams.set('tab', tabId);
-            window.history.pushState({}, '', url);
+        <!-- Modal Header -->
+        <div class="ndq-modal-header">
+            <div class="ndq-modal-header-icon"><i class="fas fa-user-plus"></i></div>
+            <div>
+                <div class="ndq-modal-title">Add New Client</div>
+                <div class="ndq-modal-subtitle">Fill in the client details below</div>
+            </div>
+            <button class="ndq-modal-close" onclick="document.getElementById('addClientModal').classList.remove('active');document.body.style.overflow='auto'"><i class="fas fa-times"></i></button>
+        </div>
 
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+        <form method="POST" id="addClientForm">
+            <input type="hidden" name="action" value="add_client">
 
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            <div class="ndq-modal-body">
 
-            // Show selected tab
-            document.getElementById(tabId + '-tab').classList.add('active');
-            
-            // Set active button
-            event.currentTarget.classList.add('active');
-        }
+                <!-- Section: Basic Info -->
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-id-card"></i> Basic Information</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field full">
+                            <label>Full Name <span class="req">*</span></label>
+                            <div class="ndq-input-wrap"><i class="fas fa-user"></i><input type="text" name="name" required placeholder="Enter full name"></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Email Address <span class="req">*</span></label>
+                            <div class="ndq-input-wrap"><i class="fas fa-envelope"></i><input type="email" name="email" required placeholder="client@example.com"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Account Password <span style="color:#9ca3af;font-weight:400;font-size:0.75rem;">(optional)</span></label>
+                            <div class="ndq-input-wrap"><i class="fas fa-lock"></i><input type="password" name="account_password" id="account_password" placeholder="Set initial password"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Confirm Password</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-lock"></i><input type="password" name="account_confirm_password" id="account_confirm_password" placeholder="Re-enter password"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Phone</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-phone"></i><input type="tel" name="phone" placeholder="+63 987-654-2100"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Age</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-birthday-cake"></i><input type="number" name="age" min="1" max="100" placeholder="Age in years"></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Gender</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-venus-mars"></i>
+                                <select name="gender">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        // Modal Logic
-        function openModal() {
-            document.getElementById('addClientModal').style.display = 'flex';
-        }
+                <!-- Section: Physical Metrics -->
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-weight"></i> Physical Metrics</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field">
+                            <label>Weight</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-weight-hanging"></i><input type="number" name="weight" step="0.1" min="1" placeholder="kg"><span class="ndq-unit">kg</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Height</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-ruler-vertical"></i><input type="number" name="height" step="0.1" min="1" placeholder="cm"><span class="ndq-unit">cm</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Waist Circumference</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-circle-notch"></i><input type="number" name="waist_circumference" step="0.1" min="0" placeholder="cm"><span class="ndq-unit">cm</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Hip Circumference</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-circle-notch"></i><input type="number" name="hip_circumference" step="0.1" min="0" placeholder="cm"><span class="ndq-unit">cm</span></div>
+                        </div>
+                    </div>
+                </div>
 
-        function closeModal() {
-            document.getElementById('addClientModal').style.display = 'none';
-        }
+                <!-- Section: Address -->
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-map-marker-alt"></i> Address</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field full">
+                            <label>Street Address</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-road"></i><input type="text" name="address" placeholder="123 Main Street"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>City</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-city"></i><input type="text" name="city" placeholder="City"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Province / State</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-map"></i><input type="text" name="state" placeholder="Province"></div>
+                        </div>
+                    </div>
+                </div>
 
-        function openEditModal(client) {
-            document.getElementById('edit_client_id').value = client.id;
-            document.getElementById('edit_name').value = client.name || '';
-            document.getElementById('edit_email').value = client.email || '';
-            document.getElementById('edit_phone').value = client.phone || '';
-            document.getElementById('edit_age').value = client.age || '';
-            document.getElementById('edit_weight').value = client.weight || '';
-            document.getElementById('edit_height').value = client.height || '';
-            document.getElementById('edit_waist_circumference').value = client.waist_circumference || '';
-            document.getElementById('edit_hip_circumference').value = client.hip_circumference || '';
-            document.getElementById('edit_address').value = client.address || '';
-            document.getElementById('edit_city').value = client.city || '';
-            document.getElementById('edit_state').value = client.state || '';
-            document.getElementById('edit_zip_code').value = client.zip_code || '';
-            document.getElementById('edit_health_conditions').value = client.health_conditions || '';
-            document.getElementById('edit_dietary_restrictions').value = client.dietary_restrictions || '';
-            document.getElementById('edit_goals').value = client.goals || '';
-            document.getElementById('edit_notes').value = client.notes || '';
-            
-            document.getElementById('editClientModal').style.display = 'flex';
-        }
+                <!-- Section: Health Profile -->
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-heartbeat"></i> Health Profile</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field full">
+                            <label>Health Conditions</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-notes-medical"></i><textarea name="health_conditions" rows="2" placeholder="e.g. Diabetes, Hypertension, Thyroid issues…"></textarea></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Dietary Restrictions</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-ban"></i><textarea name="dietary_restrictions" rows="2" placeholder="e.g. Vegetarian, Gluten-free, Lactose intolerant…"></textarea></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Health / Nutrition Goals</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-bullseye"></i><textarea name="goals" rows="2" placeholder="e.g. Weight loss, Muscle gain, Better digestion…"></textarea></div>
+                        </div>
+                    </div>
+                </div>
 
-        function closeEditModal() {
-            document.getElementById('editClientModal').style.display = 'none';
-        }
+            </div><!-- /.ndq-modal-body -->
 
-        function viewHealthPlan(clientId) {
-            window.location.href = `anthropometric-information.php?client_id=${clientId}&tab=food-tracker`;
-        }
+            <div class="ndq-modal-footer">
+                <button type="button" class="ndq-btn-cancel" onclick="document.getElementById('addClientModal').classList.remove('active');document.body.style.overflow='auto'"><i class="fas fa-times"></i> Cancel</button>
+                <button type="submit" class="ndq-btn-submit"><i class="fas fa-user-plus"></i> Add Client</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-        function confirmRestore() {
-            return confirm("Are you sure you want to restore this client?");
-        }
+<!-- ── Edit Client Modal ── -->
+<div class="premium-modal-overlay" id="editClientModal">
+    <div class="premium-modal ndq-modal" style="max-width:640px;padding:0;">
 
-        // Close modals on outside click
-        window.onclick = function(event) {
-            const addModal = document.getElementById('addClientModal');
-            const editModal = document.getElementById('editClientModal');
-            if (event.target == addModal) closeModal();
-            if (event.target == editModal) closeEditModal();
-        }
+        <div class="ndq-modal-header">
+            <div class="ndq-modal-header-icon"><i class="fas fa-user-edit"></i></div>
+            <div>
+                <div class="ndq-modal-title">Edit Client</div>
+                <div class="ndq-modal-subtitle">Update the client's information</div>
+            </div>
+            <button class="ndq-modal-close" onclick="document.getElementById('editClientModal').classList.remove('active');document.body.style.overflow='auto'"><i class="fas fa-times"></i></button>
+        </div>
 
-        // Password Toggles
-        document.getElementById('toggle_account_password')?.addEventListener('click', function() {
-            const pwd = document.getElementById('account_password');
-            const icon = this.querySelector('i');
-            if(pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                pwd.type = 'password';
-                icon.className = 'fas fa-eye';
+        <form method="POST" id="editClientForm">
+            <input type="hidden" name="action" value="update_client">
+            <input type="hidden" name="client_id" id="edit_client_id">
+
+            <div class="ndq-modal-body">
+
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-id-card"></i> Basic Information</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field">
+                            <label>Full Name <span class="req">*</span></label>
+                            <div class="ndq-input-wrap"><i class="fas fa-user"></i><input type="text" id="edit_name" name="name" required></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Email <span class="req">*</span></label>
+                            <div class="ndq-input-wrap"><i class="fas fa-envelope"></i><input type="email" id="edit_email" name="email" required></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Phone</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-phone"></i><input type="tel" id="edit_phone" name="phone"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Age</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-birthday-cake"></i><input type="number" id="edit_age" name="age" min="1" max="120"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-weight"></i> Physical Metrics</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field">
+                            <label>Weight</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-weight-hanging"></i><input type="number" id="edit_weight" name="weight" step="0.1" min="1"><span class="ndq-unit">kg</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Height</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-ruler-vertical"></i><input type="number" id="edit_height" name="height" step="0.1" min="1"><span class="ndq-unit">cm</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Waist</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-circle-notch"></i><input type="number" id="edit_waist_circumference" name="waist_circumference" step="0.1" min="0"><span class="ndq-unit">cm</span></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Hip</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-circle-notch"></i><input type="number" id="edit_hip_circumference" name="hip_circumference" step="0.1" min="0"><span class="ndq-unit">cm</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-map-marker-alt"></i> Address</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field full">
+                            <label>Street Address</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-road"></i><input type="text" id="edit_address" name="address"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>City</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-city"></i><input type="text" id="edit_city" name="city"></div>
+                        </div>
+                        <div class="ndq-field">
+                            <label>Province / State</label>
+                            <div class="ndq-input-wrap"><i class="fas fa-map"></i><input type="text" id="edit_state" name="state"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ndq-section">
+                    <div class="ndq-section-label"><i class="fas fa-heartbeat"></i> Health Profile</div>
+                    <div class="ndq-field-grid">
+                        <div class="ndq-field full">
+                            <label>Health Conditions</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-notes-medical"></i><textarea id="edit_health_conditions" name="health_conditions" rows="2" placeholder="e.g. Diabetes, Hypertension…"></textarea></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Dietary Restrictions</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-ban"></i><textarea id="edit_dietary_restrictions" name="dietary_restrictions" rows="2" placeholder="e.g. Gluten-free, Lactose intolerant…"></textarea></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Goals</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-bullseye"></i><textarea id="edit_goals" name="goals" rows="2" placeholder="e.g. Weight loss, Muscle gain…"></textarea></div>
+                        </div>
+                        <div class="ndq-field full">
+                            <label>Dietician Notes</label>
+                            <div class="ndq-input-wrap ndq-textarea-wrap"><i class="fas fa-sticky-note"></i><textarea id="edit_notes" name="notes" rows="3" placeholder="Progress notes, recommendations…"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.ndq-modal-body -->
+
+            <div class="ndq-modal-footer">
+                <button type="button" class="ndq-btn-cancel" onclick="document.getElementById('editClientModal').classList.remove('active');document.body.style.overflow='auto'"><i class="fas fa-times"></i> Cancel</button>
+                <button type="submit" class="ndq-btn-submit"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const BASE_URL = '<?= rtrim(dirname($_SERVER["PHP_SELF"]), "/") ?>/';
+
+function filterCards(term, gridId) {
+    term = term.toLowerCase();
+    document.querySelectorAll('#'+gridId+' .profile-card').forEach(c => {
+        c.style.display = (c.dataset.search||'').includes(term) ? '' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Open Add modal
+    document.getElementById('addClientBtn')?.addEventListener('click', () => {
+        document.getElementById('addClientModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    // Open Edit modal
+    document.querySelectorAll('.edit-client-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const c = JSON.parse(this.dataset.client || '{}');
+            document.getElementById('edit_client_id').value       = c.id || '';
+            document.getElementById('edit_name').value            = c.name || '';
+            document.getElementById('edit_email').value           = c.email || '';
+            document.getElementById('edit_phone').value           = c.phone || '';
+            document.getElementById('edit_age').value             = c.age || '';
+            document.getElementById('edit_weight').value          = c.weight || '';
+            document.getElementById('edit_height').value          = c.height || '';
+            document.getElementById('edit_waist_circumference').value = c.waist_circumference || '';
+            document.getElementById('edit_hip_circumference').value   = c.hip_circumference  || '';
+            document.getElementById('edit_address').value         = c.address || '';
+            document.getElementById('edit_city').value            = c.city || '';
+            document.getElementById('edit_state').value           = c.state || '';
+            document.getElementById('edit_health_conditions').value   = c.health_conditions || '';
+            document.getElementById('edit_dietary_restrictions').value= c.dietary_restrictions || '';
+            document.getElementById('edit_goals').value           = c.goals || '';
+            document.getElementById('edit_notes').value           = c.notes || '';
+            document.getElementById('editClientModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Close modals on backdrop click
+    ['addClientModal','editClientModal'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', e => {
+            if(e.target === document.getElementById(id)) {
+                document.getElementById(id).classList.remove('active');
+                document.body.style.overflow = 'auto';
             }
         });
-
-        document.getElementById('toggle_account_confirm_password')?.addEventListener('click', function() {
-            const pwd = document.getElementById('account_confirm_password');
-            const icon = this.querySelector('i');
-            if(pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                pwd.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        });
-    </script>
+    });
+});
+</script>
 </body>
-
 </html>

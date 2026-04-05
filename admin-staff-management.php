@@ -35,14 +35,12 @@ require_once 'database.php';
 $database = new Database();
 $conn = $database->getConnection();
 
-$users = [];
-$deleted_users = [];
+$staff_members = [];
+$deleted_staff = [];
 $stats = [
-    'total_users' => 0,
-    'staff_count' => 0,
-    'admin_count' => 0,
-    'regular_count' => 0,
-    'deleted_users' => 0
+    'total_staff' => 0,
+    'active_staff' => 0,
+    'deleted_staff' => 0
 ];
 $error = '';
 
@@ -56,8 +54,8 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
-            case 'delete_user':
-                $user_id = $_POST['user_id'];
+            case 'delete_staff':
+                $user_id = $_POST['staff_id'];
 
                 try {
                     $conn->beginTransaction();
@@ -74,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $admin = $admin_stmt->fetch();
                         $admin_name = $admin['name'] ?? 'Admin';
 
-                        // Insert into deleted_users table with proper tracking
+                        // Insert into deleted_users table
                         $insert_stmt = $conn->prepare("
                             INSERT INTO deleted_users (
                                 original_id, deleted_by, deleted_by_user_id, deleted_by_name,
@@ -87,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $user['id'],
                             $deleted_by, // 'admin'
                             $deleted_by_id, // $admin_id
-                            $admin_name, // Admin's actual name
+                            $admin_name,
                             $user['name'],
                             $user['email'],
                             $user['password'],
@@ -102,9 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $delete_stmt->execute([$user_id]);
 
                         $conn->commit();
-                        $_SESSION['success'] = "User moved to delete history successfully";
+                        $_SESSION['success'] = "Staff member moved to delete history successfully";
                     } else {
-                        $error = "User not found";
+                        $error = "Staff member not found";
                     }
 
                     header("Location: admin-staff-management.php");
@@ -115,8 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
-            case 'restore_user':
-                $deleted_user_id = $_POST['deleted_user_id'];
+            case 'restore_staff':
+                $deleted_user_id = $_POST['deleted_staff_id'];
 
                 try {
                     $conn->beginTransaction();
@@ -132,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $check_stmt->execute([$user['email']]);
 
                         if ($check_stmt->fetch()) {
-                            $_SESSION['error'] = "A user with this email already exists. Cannot restore.";
+                            $_SESSION['error'] = "A staff member with this email already exists. Cannot restore.";
                         } else {
                             // Insert back into users table
                             $insert_stmt = $conn->prepare("
@@ -158,10 +156,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $delete_stmt->execute([$deleted_user_id]);
 
                             $conn->commit();
-                            $_SESSION['success'] = "User restored successfully";
+                            $_SESSION['success'] = "Staff member restored successfully";
                         }
                     } else {
-                        $_SESSION['error'] = "User not found in delete history";
+                        $_SESSION['error'] = "Staff member not found in delete history";
                     }
 
                     header("Location: admin-staff-management.php?tab=delete_history");
@@ -185,22 +183,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'toggle_status':
-                $user_id = $_POST['user_id'];
+                $user_id = $_POST['staff_id'];
                 $stmt = $conn->prepare("UPDATE users SET status = IF(status = 'active', 'inactive', 'active') WHERE id = ?");
                 $stmt->execute([$user_id]);
-                $_SESSION['success'] = "User status updated successfully";
+                $_SESSION['success'] = "Staff status updated successfully";
                 header("Location: admin-staff-management.php");
                 exit();
                 break;
 
-            case 'edit_user':
-                $user_id = $_POST['user_id'];
+            case 'edit_staff':
+                $user_id = $_POST['staff_id'];
                 $name = trim($_POST['name']);
                 $email = trim($_POST['email']);
                 $role = 'staff';
-                $status = $_POST['status'];
+                $status = 'active'; // Default for staff edit
                 $new_password = $_POST['password'] ?? '';
-                $confirm_password = $_POST['confirm_password'] ?? '';
 
                 try {
                     $check_stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id <> ?");
@@ -211,17 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit();
                     }
 
-                    $role = 'staff';
-                    if (!in_array($status, ['active', 'inactive'])) {
-                        $status = 'active';
-                    }
-
                     if (!empty($new_password)) {
-                        if ($new_password !== $confirm_password) {
-                            $_SESSION['error'] = "New password and confirm password do not match";
-                            header("Location: admin-staff-management.php");
-                            exit();
-                        }
                         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                         $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, role = ?, status = ?, password = ?, updated_at = NOW() WHERE id = ?");
                         $stmt->execute([$name, $email, $role, $status, $hashed_password, $user_id]);
@@ -230,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt->execute([$name, $email, $role, $status, $user_id]);
                     }
 
-                    $_SESSION['success'] = "User updated successfully";
+                    $_SESSION['success'] = "Staff member updated successfully";
                     header("Location: admin-staff-management.php");
                     exit();
                 } catch (PDOException $e) {
@@ -239,14 +226,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 }
                 break;
-            case 'permanent_delete':
-                $deleted_user_id = $_POST['deleted_user_id'];
+            case 'add_staff':
+                $name = trim($_POST['name']);
+                $email = trim($_POST['email']);
+                $password = $_POST['password'];
+                $confirm_password = $_POST['confirm_password'];
+
+                if ($password !== $confirm_password) {
+                    $_SESSION['error'] = "Passwords do not match";
+                    header("Location: admin-staff-management.php");
+                    exit();
+                }
+
+                try {
+                    $check_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+                    $check_stmt->execute([$email]);
+                    if ($check_stmt->fetch()) {
+                        $_SESSION['error'] = "Email already exists";
+                        header("Location: admin-staff-management.php");
+                        exit();
+                    }
+
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt = $conn->prepare("INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, 'staff', 'active', NOW(), NOW())");
+                    $stmt->execute([$name, $email, $hashed_password]);
+
+                    $_SESSION['success'] = "Staff member added successfully";
+                    header("Location: admin-staff-management.php");
+                    exit();
+                } catch (PDOException $e) {
+                    $_SESSION['error'] = "Database error: " . $e->getMessage();
+                    header("Location: admin-staff-management.php");
+                    exit();
+                }
+                break;
+            case 'permanent_delete_staff':
+                $deleted_user_id = $_POST['deleted_staff_id'];
                 try {
                     $stmt = $conn->prepare("SELECT deleted_at FROM deleted_users WHERE id = ?");
                     $stmt->execute([$deleted_user_id]);
                     $row = $stmt->fetch();
                     if (!$row) {
-                        $_SESSION['error'] = "Staff not found in delete history";
+                        $_SESSION['error'] = "Staff member not found in delete history";
                         header("Location: admin-staff-management.php?tab=delete_history");
                         exit();
                     }
@@ -259,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     $del = $conn->prepare("DELETE FROM deleted_users WHERE id = ?");
                     $del->execute([$deleted_user_id]);
-                    $_SESSION['success'] = "Staff permanently deleted";
+                    $_SESSION['success'] = "Staff member permanently deleted";
                     header("Location: admin-staff-management.php?tab=delete_history");
                     exit();
                 } catch (PDOException $e) {
@@ -276,39 +297,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_users';
 
 try {
-    // Get user statistics
+    // Get staff statistics
     $stats_sql = "SELECT 
-        COUNT(*) as total_users,
-        SUM(role = 'admin') as admin_count,
-        SUM(role = 'staff') as staff_count,
-        SUM(role = 'regular') as regular_count,
-        SUM(status = 'active') as active_users
-        FROM users";
+        COUNT(*) as total_staff,
+        SUM(status = 'active') as active_staff
+        FROM users WHERE role = 'staff'";
     $stats_stmt = $conn->prepare($stats_sql);
     $stats_stmt->execute();
     $stats_data = $stats_stmt->fetch();
-    $stats['total_users'] = $stats_data['total_users'] ?? 0;
-    $stats['staff_count'] = $stats_data['staff_count'] ?? 0;
-    $stats['admin_count'] = $stats_data['admin_count'] ?? 0;
-    $stats['regular_count'] = $stats_data['regular_count'] ?? 0;
+    $stats['total_staff'] = $stats_data['total_staff'] ?? 0;
+    $stats['active_staff'] = $stats_data['active_staff'] ?? 0;
 
-    // Get deleted users count
-    $deleted_stats_stmt = $conn->prepare("SELECT COUNT(*) as deleted_count FROM deleted_users");
+    // Get deleted staff count
+    $deleted_stats_stmt = $conn->prepare("SELECT COUNT(*) as deleted_count FROM deleted_users WHERE role = 'staff'");
     $deleted_stats_stmt->execute();
     $deleted_stats = $deleted_stats_stmt->fetch();
-    $stats['deleted_users'] = $deleted_stats['deleted_count'] ?? 0;
+    $stats['deleted_staff'] = $deleted_stats['deleted_count'] ?? 0;
 
-    // Get all active users
+    // Get all active staff
     $users_sql = "SELECT * FROM users WHERE role = 'staff' ORDER BY created_at DESC";
     $users_stmt = $conn->prepare($users_sql);
     $users_stmt->execute();
-    $users = $users_stmt->fetchAll();
+    $staff_members = $users_stmt->fetchAll();
 
-    // Get all deleted users
+    // Get all deleted staff
     $deleted_users_sql = "SELECT * FROM deleted_users WHERE role = 'staff' ORDER BY deleted_at DESC";
     $deleted_users_stmt = $conn->prepare($deleted_users_sql);
     $deleted_users_stmt->execute();
-    $deleted_users = $deleted_users_stmt->fetchAll();
+    $deleted_staff = $deleted_users_stmt->fetchAll();
 
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
@@ -316,752 +332,194 @@ try {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>NutriDeq - User Management</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <title>NutriDeq - Staff Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- External CSS Files -->
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/staff-management.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <link rel="stylesheet" href="css/mobile-style.css">
+    <link rel="stylesheet" href="css/premium-management.css">
     <script src="scripts/dashboard.js" defer></script>
-    <style>
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #e0e0e0;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #666;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn:hover {
-            color: #3498db;
-        }
-
-        .tab-btn.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .delete-history-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .delete-history-table th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .delete-history-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .delete-history-table tr:hover {
-            background: #f9f9f9;
-        }
-
-        .deleted-by {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .deleted-by-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #3498db;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .restore-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.3s;
-        }
-
-        .restore-btn:hover {
-            background: #219653;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .stat-card.stat-deleted {
-            background: #f5f7fa;
-            color: #333;
-        }
-
-        .stat-deleted .stat-icon {
-            background: #95a5a6;
-            color: white;
-        }
-    </style>
 </head>
-
 <body>
-    <div class="main-layout">
-        <?php include 'includes/sidebar.php'; ?>
-        <div class="main-content">
-            <div class="header">
-                    <div class="page-title">
-                        <h1>Staff Management</h1>
-                        <p>Manage staff accounts and permissions</p>
-                    </div>
+<div class="main-layout">
+    <?php include 'includes/sidebar.php'; ?>
+    <main class="main-content">
+    <div class="page-container mgmt-page">
 
-                    <div class="header-actions">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="searchInput" placeholder="Search users by name, email..."
-                                class="global-search" data-target=".user-table tbody tr">
-                        </div>
-                    </div>
-                </div>
+        <?php if(isset($_SESSION['success'])): ?><div class="mgmt-alert mgmt-alert-success"><i class="fas fa-check-circle"></i><?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div><?php endif; ?>
+        <?php if(!empty($error)): ?><div class="mgmt-alert mgmt-alert-error"><i class="fas fa-exclamation-triangle"></i><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
 
-                <!-- Display success messages -->
-                <?php if (isset($_SESSION['success'])): ?>
-                    <div class="success-message">
-                        <?php echo htmlspecialchars($_SESSION['success']);
-                        unset($_SESSION['success']); ?>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Display error messages -->
-                <?php if (!empty($error)): ?>
-                    <div class="error-message">
-                        <?php echo htmlspecialchars($error); ?>
-                    </div>
-                <?php endif; ?>
-                <?php if (isset($_SESSION['add_user_errors']) && is_array($_SESSION['add_user_errors']) && count($_SESSION['add_user_errors']) > 0): ?>
-                    <div class="error-message">
-                        <?php foreach ($_SESSION['add_user_errors'] as $e) {
-                            echo htmlspecialchars($e) . '<br>';
-                        } ?>
-                    </div>
-                    <?php unset($_SESSION['add_user_errors']); ?>
-                <?php endif; ?>
-
-                <!-- Stats Overview -->
-                <div class="dashboard-grid admin-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon staff">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3><?php echo $stats['staff_count'] ?? 0; ?></h3>
-                            <p>Staff Members</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabs -->
-                <div class="tabs">
-                    <button class="tab-btn <?php echo $current_tab === 'active_users' ? 'active' : ''; ?>"
-                        onclick="switchTab('active_users')">
-                        Active Users
-                    </button>
-                    <button class="tab-btn <?php echo $current_tab === 'delete_history' ? 'active' : ''; ?>"
-                        onclick="switchTab('delete_history')">
-                        Delete History
-                    </button>
-                </div>
-
-                <!-- User Management Section -->
-                <div class="management-section">
-                    <!-- Active Users Tab -->
-                    <div id="active-users-tab"
-                        class="tab-content <?php echo $current_tab === 'active_users' ? 'active' : ''; ?>">
-                        <div class="section-header">
-                            <h2><i class="fas fa-users-cog"></i> User Accounts</h2>
-                            <button class="btn btn-primary" id="addUserBtn">
-                                <i class="fas fa-user-plus"></i> Add New User
-                            </button>
-                        </div>
-
-                        <div class="table-container table-responsive">
-                            <table class="user-table">
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Join Date</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($users as $user): ?>
-                                        <tr>
-                                            <td data-label="User">
-                                                <div class="user-info-cell">
-                                                    <div class="user-avatar-small">
-                                                        <?php echo getInitials($user['name']); ?>
-                                                    </div>
-                                                    <div class="user-details">
-                                                        <div class="user-name">
-                                                            <?php echo htmlspecialchars($user['name']); ?></div>
-                                                        <div class="user-id">
-                                                            #USR-<?php echo str_pad($user['id'], 3, '0', STR_PAD_LEFT); ?>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td data-label="Email" class="user-email"><?php echo htmlspecialchars($user['email']); ?></td>
-                                            <td data-label="Role">
-                                                <span class="role-badge role-staff">Staff</span>
-                                            </td>
-                                            <td data-label="Join Date" class="join-date">
-                                                <?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
-                                            <td data-label="Status">
-                                                <form method="POST" class="inline-form">
-                                                    <input type="hidden" name="action" value="toggle_status">
-                                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                    <button type="submit"
-                                                        class="status-toggle status-<?php echo $user['status']; ?>">
-                                                        <?php echo ucfirst($user['status']); ?>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            <td data-label="Actions">
-                                                <div class="user-actions">
-                                                    <button type="button" class="action-btn edit-btn"
-                                                        data-user-id="<?php echo $user['id']; ?>"
-                                                        data-name="<?php echo htmlspecialchars($user['name']); ?>"
-                                                        data-email="<?php echo htmlspecialchars($user['email']); ?>"
-                                                        data-role="<?php echo $user['role']; ?>"
-                                                        data-status="<?php echo $user['status']; ?>" title="Edit User">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <form method="POST" class="inline-form">
-                                                        <input type="hidden" name="action" value="delete_user">
-                                                        <input type="hidden" name="user_id"
-                                                            value="<?php echo $user['id']; ?>">
-                                                        <button type="submit" class="action-btn delete-btn"
-                                                            title="Delete User"
-                                                            onclick="return confirm('Are you sure you want to delete this user? The user will be moved to delete history.')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Delete History Tab -->
-                    <div id="delete-history-tab"
-                        class="tab-content <?php echo $current_tab === 'delete_history' ? 'active' : ''; ?>">
-                        <div class="section-header">
-                            <h2><i class="fas fa-history"></i> Delete History</h2>
-                            <p>All deleted users by administrators. You can restore them here.</p>
-                        </div>
-
-                        <?php if (empty($deleted_users)): ?>
-                            <div class="empty-state">
-                                <i class="fas fa-history"></i>
-                                <h3>No deleted users found</h3>
-                                <p>Deleted users will appear here</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-container table-responsive">
-                                <table class="delete-history-table">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Deleted By</th>
-                                            <th>Deleted Date</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($deleted_users as $deleted_user):
-                                            $deleter_name = $deleted_user['deleted_by_name'];
-                                            ?>
-                                            <tr>
-                                                <td>
-                                                    <div class="user-info-cell">
-                                                        <div class="user-avatar-small">
-                                                            <?php echo getInitials($deleted_user['name']); ?>
-                                                        </div>
-                                                        <div class="user-details">
-                                                            <div class="user-name">
-                                                                <?php echo htmlspecialchars($deleted_user['name']); ?>
-                                                            </div>
-                                                            <div class="user-id">
-                                                                #USR-<?php echo str_pad($deleted_user['original_id'], 3, '0', STR_PAD_LEFT); ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><?php echo htmlspecialchars($deleted_user['email']); ?></td>
-                                                <td>
-                                                    <span class="role-badge role-<?php echo $deleted_user['role']; ?>">
-                                                        <?php echo ucfirst($deleted_user['role']); ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="status-toggle status-<?php echo $deleted_user['status']; ?>">
-                                                        <?php echo ucfirst($deleted_user['status']); ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="deleted-by">
-                                                        <div class="deleted-by-avatar"><?php echo getInitials($deleter_name); ?>
-                                                        </div>
-                                                        <span><?php echo htmlspecialchars($deleter_name); ?></span>
-                                                    </div>
-                                                </td>
-                                                <td><?php echo date('M j, Y H:i', strtotime($deleted_user['deleted_at'])); ?>
-                                                </td>
-                                                <td>
-                                                    <form method="POST" style="display: inline;">
-                                                        <input type="hidden" name="action" value="restore_user">
-                                                        <input type="hidden" name="deleted_user_id"
-                                                            value="<?php echo $deleted_user['id']; ?>">
-                                                        <button type="submit" class="restore-btn"
-                                                            onclick="return confirmRestore()">
-                                                            <i class="fas fa-undo"></i> Restore
-                                                        </button>
-                                                    </form>
-                                                    <?php
-                                                    $age_days = floor((time() - strtotime($deleted_user['deleted_at'])) / 86400);
-                                                    $can_perm_delete = $age_days >= 10;
-                                                    ?>
-                                                    <form method="POST" style="display: inline;">
-                                                        <input type="hidden" name="action" value="permanent_delete">
-                                                        <input type="hidden" name="deleted_user_id"
-                                                            value="<?php echo $deleted_user['id']; ?>">
-                                                        <button type="submit" class="restore-btn perm-delete-btn"
-                                                            data-deleted-at="<?php echo $deleted_user['deleted_at']; ?>"
-                                                            data-min-days="10" style="background:#e74c3c" <?php echo $can_perm_delete ? '' : 'disabled'; ?>
-                                                            onclick="return confirm('Permanently delete this staff? This cannot be undone.')">
-                                                            <i class="fas fa-trash"></i> Delete Permanently
-                                                        </button>
-                                                        <span class="perm-countdown"
-                                                            data-deleted-at="<?php echo $deleted_user['deleted_at']; ?>"
-                                                            data-min-days="10" style="margin-left:8px;color:#888"></span>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Role Permissions Section -->
-                <div class="management-section">
-                    <div class="section-header">
-                        <h2><i class="fas fa-user-lock"></i> Role Permissions</h2>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-card permission-staff">
-                            <div class="permission-header">
-                                <div class="permission-icon">
-                                    <i class="fas fa-user-shield"></i>
-                                </div>
-                                <div class="permission-title">Staff</div>
-                            </div>
-                            <ul class="permission-list">
-                                <li><i class="fas fa-check"></i> All Regular User Features</li>
-                                <li><i class="fas fa-check"></i> Client Management</li>
-                                <li><i class="fas fa-check"></i> Health Progress Tracking</li>
-                                <li><i class="fas fa-times"></i> System Settings</li>
-                                <li><i class="fas fa-times"></i> User Role Management</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+        <!-- Hero -->
+        <div class="mgmt-hero">
+            <div class="mgmt-hero-left">
+                <div class="mgmt-hero-icon"><i class="fas fa-user-md"></i></div>
+                <h1 class="mgmt-hero-title">Staff Management</h1>
+                <p class="mgmt-hero-subtitle">Manage NutriDeq clinical staff, their accounts, and permissions</p>
             </div>
-
-            <!-- Add User Modal -->
-            <div class="modal" id="addUserModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Add New User</h2>
-                        <button class="close-btn" onclick="closeModal()">&times;</button>
-                    </div>
-                    <form method="POST" action="process_admin_add_user.php" id="addUserForm">
-                        <input type="hidden" name="origin" value="admin-staff-management.php">
-                        <div class="form-group">
-                            <label for="name">Full Name</label>
-                            <input type="text" id="name" name="name" class="form-control" required
-                                placeholder="Enter full name"
-                                value="<?php echo isset($_SESSION['add_user_data']['name']) ? htmlspecialchars($_SESSION['add_user_data']['name']) : '' ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" class="form-control" required
-                                placeholder="Enter email address"
-                                value="<?php echo isset($_SESSION['add_user_data']['email']) ? htmlspecialchars($_SESSION['add_user_data']['email']) : '' ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <input type="password" id="password" name="password" class="form-control" required
-                                    placeholder="Enter password" style="flex:1;">
-                                <button type="button" class="btn btn-outline" id="toggle_password"
-                                    title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm_password">Confirm Password</label>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <input type="password" id="confirm_password" name="confirm_password"
-                                    class="form-control" required placeholder="Confirm password" style="flex:1;">
-                                <button type="button" class="btn btn-outline" id="toggle_confirm_password"
-                                    title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="role">Role</label>
-                            <select id="role" name="role" class="form-control" required>
-                                <option value="staff" selected>Staff Member</option>
-                            </select>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Add User</button>
-                        </div>
-                    </form>
-                </div>
+            <div class="mgmt-hero-right">
+                <button class="btn-premium-add" id="addStaffBtn"><i class="fas fa-user-plus"></i> Add Staff Member</button>
             </div>
+        </div>
 
-            <!-- Edit User Modal -->
-            <div class="modal" id="editUserModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Edit User</h2>
-                        <button class="close-btn" onclick="closeEditModal()">&times;</button>
-                    </div>
-                    <form method="POST" id="editUserForm">
-                        <input type="hidden" name="action" value="edit_user">
-                        <input type="hidden" name="user_id" id="edit_user_id">
-                        <div class="form-group">
-                            <label for="edit_name">Full Name</label>
-                            <input type="text" id="edit_name" name="name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_email">Email</label>
-                            <input type="email" id="edit_email" name="email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_role">Role</label>
-                            <select id="edit_role" name="role" class="form-control" required>
-                                <option value="staff" selected>Staff Member</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_status">Status</label>
-                            <select id="edit_status" name="status" class="form-control" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_password">New Password (optional)</label>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <input type="password" id="edit_password" name="password" class="form-control"
-                                    placeholder="Leave blank to keep current password" style="flex:1;">
-                                <button type="button" class="btn btn-outline" id="toggle_edit_password"
-                                    title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_confirm_password">Confirm New Password</label>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <input type="password" id="edit_confirm_password" name="confirm_password"
-                                    class="form-control" placeholder="Re-enter new password" style="flex:1;">
-                                <button type="button" class="btn btn-outline" id="toggle_edit_confirm_password"
-                                    title="Show/Hide Password"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
+        <!-- Stats -->
+        <div class="mgmt-stats">
+            <div class="mgmt-stat stat-total"><div class="mgmt-stat-icon"><i class="fas fa-user-shield"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['total_staff']??0; ?></h4><p>Total Staff</p></div></div>
+            <div class="mgmt-stat stat-active"><div class="mgmt-stat-icon"><i class="fas fa-check-circle"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['active_staff']??0; ?></h4><p>Active</p></div></div>
+            <div class="mgmt-stat stat-deleted"><div class="mgmt-stat-icon"><i class="fas fa-user-times"></i></div><div class="mgmt-stat-info"><h4><?php echo $stats['deleted_staff']??0; ?></h4><p>Deleted</p></div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mgmt-tabs">
+            <button class="mgmt-tab-btn <?php echo $current_tab==='active_staff'?'active':''; ?>" onclick="window.location='?tab=active_staff'"><i class="fas fa-user-shield"></i> Active Staff</button>
+            <button class="mgmt-tab-btn <?php echo $current_tab==='delete_history'?'active':''; ?>" onclick="window.location='?tab=delete_history'"><i class="fas fa-history"></i> Delete History</button>
+        </div>
+
+        <!-- Active Staff -->
+        <div class="mgmt-tab-panel <?php echo $current_tab==='active_staff'?'active':''; ?>">
+            <div class="mgmt-toolbar">
+                <div class="mgmt-section-label"><i class="fas fa-user-shield"></i> Staff Accounts</div>
+                <div class="mgmt-search"><i class="fas fa-search"></i><input type="text" placeholder="Search staff..." oninput="filterCards(this.value,'staffGrid')"></div>
             </div>
-
-            <!-- Logout Modal -->
-            <div id="logoutModal" class="logout-modal">
-                <div class="logout-modal-content">
-                    <div class="logout-modal-header">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <h3>Confirm Logout</h3>
+            <?php if(empty($staff_members)): ?>
+            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-user-shield"></i></div><h3>No staff members</h3><p>Add your first staff member to get started.</p></div>
+            <?php else: ?>
+            <div class="profile-grid" id="staffGrid">
+                <?php foreach($staff_members as $staff): ?>
+                <div class="profile-card role-staff status-<?php echo $staff['status']; ?>" data-search="<?php echo strtolower($staff['name'].' '.$staff['email']); ?>">
+                    <div class="profile-card-accent"></div>
+                    <div class="profile-card-body">
+                        <div class="profile-avatar role-staff"><?php echo getInitials($staff['name']); ?><span class="status-dot <?php echo $staff['status']==='active'?'active-dot':''; ?>"></span></div>
+                        <div class="profile-name"><?php echo htmlspecialchars($staff['name']); ?></div>
+                        <div class="profile-id">#STF-<?php echo str_pad($staff['id'],3,'0',STR_PAD_LEFT); ?></div>
+                        <div class="profile-email"><i class="fas fa-envelope"></i><?php echo htmlspecialchars($staff['email']); ?></div>
+                        <div class="profile-badges">
+                            <span class="profile-badge badge-role-staff"><i class="fas fa-user-shield"></i> Staff</span>
+                            <span class="profile-badge badge-<?php echo $staff['status']; ?>"><i class="fas fa-circle"></i> <?php echo ucfirst($staff['status']); ?></span>
+                        </div>
+                        <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($staff['created_at'])); ?></div>
                     </div>
-                    <div class="logout-modal-body">
-                        <p>Are you sure you want to log out of your session? Any unsaved changes may be lost.</p>
-                    </div>
-                    <div class="logout-modal-footer">
-                        <button type="button" class="btn btn-outline" id="cancelLogout">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmLogout">Logout</button>
+                    <div class="profile-card-footer">
+                        <form method="POST" class="inline-form" style="flex:1;"><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>"><button type="submit" class="card-action toggle" style="width:100%;display:flex;justify-content:center;align-items:center;gap:6px;font-size:0.8rem;padding:8px 14px;border-radius:10px;" title="Toggle Status"><i class="fas fa-power-off"></i> <?php echo $staff['status']==='active'?'Deactivate':'Activate'; ?></button></form>
+                        <button type="button" class="card-action edit edit-staff-btn" data-staff-id="<?php echo $staff['id']; ?>" data-name="<?php echo htmlspecialchars($staff['name']); ?>" data-email="<?php echo htmlspecialchars($staff['email']); ?>" data-status="<?php echo $staff['status']; ?>" title="Edit"><i class="fas fa-pen"></i></button>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this staff member?')"><input type="hidden" name="action" value="delete_staff"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>"><button type="submit" class="card-action delete" title="Delete"><i class="fas fa-trash"></i></button></form>
                     </div>
                 </div>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
+        </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Password visibility toggles
-                    const togglePassword = document.getElementById('toggle_password');
-                    if (togglePassword) {
-                        togglePassword.addEventListener('click', function () {
-                            const input = document.getElementById('password');
-                            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                            input.setAttribute('type', type);
-                            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-                        });
-                    }
-                    const toggleConfirmPassword = document.getElementById('toggle_confirm_password');
-                    if (toggleConfirmPassword) {
-                        toggleConfirmPassword.addEventListener('click', function () {
-                            const input = document.getElementById('confirm_password');
-                            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                            input.setAttribute('type', type);
-                            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-                        });
-                    }
-                    const toggleEditPassword = document.getElementById('toggle_edit_password');
-                    if (toggleEditPassword) {
-                        toggleEditPassword.addEventListener('click', function () {
-                            const input = document.getElementById('edit_password');
-                            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                            input.setAttribute('type', type);
-                            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-                        });
-                    }
-                    const toggleEditConfirmPassword = document.getElementById('toggle_edit_confirm_password');
-                    if (toggleEditConfirmPassword) {
-                        toggleEditConfirmPassword.addEventListener('click', function () {
-                            const input = document.getElementById('edit_confirm_password');
-                            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-                            input.setAttribute('type', type);
-                            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-                        });
-                    }
+        <!-- Delete History -->
+        <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
+            <div class="mgmt-section-label" style="margin-bottom:20px;"><i class="fas fa-history"></i> Deleted Staff Archive</div>
+            <?php if(empty($deleted_staff)): ?>
+            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted staff</h3><p>Deleted staff will appear here.</p></div>
+            <?php else: ?>
+            <div class="deleted-grid">
+                <?php foreach($deleted_staff as $ds): $age=floor((time()-strtotime($ds['deleted_at']))/86400); $canPerm=$age>=10; ?>
+                <div class="deleted-card">
+                    <div class="deleted-avatar"><?php echo getInitials($ds['name']); ?></div>
+                    <div class="deleted-info">
+                        <div class="deleted-name"><?php echo htmlspecialchars($ds['name']); ?></div>
+                        <div class="deleted-meta">
+                            <span><?php echo htmlspecialchars($ds['email']); ?></span>
+                            <div class="deleted-by-chip"><i class="fas fa-user-times"></i><?php echo htmlspecialchars($ds['deleted_by_name']??'Admin'); ?></div>
+                            <span><?php echo date('M j, Y',strtotime($ds['deleted_at'])); ?></span>
+                        </div>
+                    </div>
+                    <div class="deleted-actions">
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')"><input type="hidden" name="action" value="restore_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action restore" title="Restore"><i class="fas fa-undo"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete? Cannot be undone.')"><input type="hidden" name="action" value="permanent_delete_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $ds['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?> title="Permanent Delete"><i class="fas fa-skull"></i></button></form>
+                        <span class="countdown-chip perm-countdown" data-deleted-at="<?php echo $ds['deleted_at']; ?>" data-min-days="10"></span>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
 
-                    // Add User Modal
-                    const addUserBtn = document.getElementById('addUserBtn');
-                    if (addUserBtn) {
-                        addUserBtn.addEventListener('click', function () {
-                            document.getElementById('addUserModal').style.display = 'flex';
-                            document.body.style.overflow = 'hidden';
-                        });
-                    }
+    </div>
+    </main>
+</div>
 
-                    // Edit Buttons
-                    const editButtons = document.querySelectorAll('.edit-btn');
-                    const editModal = document.getElementById('editUserModal');
-                    if (editButtons && editModal) {
-                        editButtons.forEach(btn => {
-                            btn.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                const id = this.getAttribute('data-user-id');
-                                const name = this.getAttribute('data-name');
-                                const email = this.getAttribute('data-email');
-                                const role = this.getAttribute('data-role');
-                                const status = this.getAttribute('data-status');
-                                
-                                document.getElementById('edit_user_id').value = id;
-                                document.getElementById('edit_name').value = name;
-                                document.getElementById('edit_email').value = email;
-                                document.getElementById('edit_role').value = role || 'staff';
-                                document.getElementById('edit_status').value = status || 'active';
-                                
-                                document.getElementById('edit_password').value = '';
-                                document.getElementById('edit_confirm_password').value = '';
-                                
-                                editModal.style.display = 'flex';
-                                document.body.style.overflow = 'hidden';
-                            });
-                        });
-                    }
+<!-- Add Staff Modal -->
+<div class="premium-modal-overlay" id="addStaffModal">
+    <div class="premium-modal">
+        <div class="premium-modal-title"><i class="fas fa-user-plus"></i> Add Staff Member</div>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_staff">
+            <div class="premium-form-group"><label>Full Name</label><input type="text" name="name" required placeholder="Enter full name"></div>
+            <div class="premium-form-group"><label>Email Address</label><input type="email" name="email" required placeholder="Enter email"></div>
+            <div class="premium-form-group"><label>Password</label><input type="password" name="password" required placeholder="Enter password"></div>
+            <div class="premium-form-group"><label>Confirm Password</label><input type="password" name="confirm_password" required placeholder="Confirm password"></div>
+            <div class="premium-modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="document.getElementById('addStaffModal').classList.remove('active');document.body.style.overflow='auto'">Cancel</button>
+                <button type="submit" class="btn-modal-submit">Add Staff</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-                    // Search Functionality
-                    const searchInput = document.getElementById('searchInput');
-                    if (searchInput) {
-                        searchInput.addEventListener('input', function (e) {
-                            const searchTerm = e.target.value.toLowerCase();
-                            const currentTab = document.querySelector('.tab-content.active');
-                            if (currentTab) {
-                                const rows = currentTab.querySelectorAll('tbody tr');
-                                rows.forEach(row => {
-                                    const text = row.textContent.toLowerCase();
-                                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                                });
-                            }
-                        });
-                    }
+<!-- Edit Staff Modal -->
+<div class="premium-modal-overlay" id="editStaffModal">
+    <div class="premium-modal">
+        <div class="premium-modal-title"><i class="fas fa-user-edit"></i> Edit Staff</div>
+        <form method="POST" id="editStaffForm">
+            <input type="hidden" name="action" value="edit_staff">
+            <input type="hidden" name="staff_id" id="edit_staff_id">
+            <div class="premium-form-group"><label>Full Name</label><input type="text" id="edit_staff_name" name="name" required></div>
+            <div class="premium-form-group"><label>Email</label><input type="email" id="edit_staff_email" name="email" required></div>
+            <div class="premium-form-group"><label>New Password <span style="color:#9ca3af;font-weight:400;text-transform:none;">(optional)</span></label><input type="password" name="password" placeholder="Leave blank to keep current"></div>
+            <div class="premium-modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="document.getElementById('editStaffModal').classList.remove('active');document.body.style.overflow='auto'">Cancel</button>
+                <button type="submit" class="btn-modal-submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-                    // Logout Logic
-                    const logoutBtn = document.getElementById('logoutBtn');
-                    const logoutModal = document.getElementById('logoutModal');
-                    const cancelLogout = document.getElementById('cancelLogout');
-                    const confirmLogout = document.getElementById('confirmLogout');
-
-                    if (logoutBtn) {
-                        logoutBtn.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            logoutModal.classList.add('active');
-                        });
-                    }
-                    if (cancelLogout) {
-                        cancelLogout.addEventListener('click', function () {
-                            logoutModal.classList.remove('active');
-                        });
-                    }
-                    if (confirmLogout) {
-                        confirmLogout.addEventListener('click', function () {
-                            window.location.href = 'login-logout/logout.php';
-                        });
-                    }
-
-                    // Handle session-based auto-open for Add User
-                    if (<?php echo isset($_SESSION['add_user_data']) ? 'true' : 'false'; ?>) {
-                        document.getElementById('addUserModal').style.display = 'flex';
-                        document.body.style.overflow = 'hidden';
-                        <?php unset($_SESSION['add_user_data']); ?>
-                    }
-
-                    // Countdown for Permanent Delete
-                    setupPermDeleteCountdown();
-                });
-
-                function switchTab(tabName) {
-                    window.location.href = `?tab=${tabName}`;
-                }
-
-                function closeModal() {
-                    document.getElementById('addUserModal').style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                    document.getElementById('addUserForm').reset();
-                }
-
-                function closeEditModal() {
-                    document.getElementById('editUserModal').style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                    document.getElementById('editUserForm').reset();
-                }
-
-                function confirmRestore() {
-                    return confirm('Are you sure you want to restore this user?');
-                }
-
-                function setupPermDeleteCountdown() {
-                    const buttons = document.querySelectorAll('.perm-delete-btn');
-                    buttons.forEach(btn => {
-                        const deletedAtStr = btn.getAttribute('data-deleted-at');
-                        const countdownSpan = btn.parentElement.querySelector('.perm-countdown');
-                        if (!deletedAtStr || !countdownSpan) return;
-                        
-                        const deletedMs = Date.parse(deletedAtStr.replace(' ', 'T'));
-                        const minMs = 10 * 86400 * 1000;
-
-                        function update() {
-                            const leftMs = Math.max(0, minMs - (Date.now() - deletedMs));
-                            if (leftMs <= 0) {
-                                btn.removeAttribute('disabled');
-                                countdownSpan.textContent = '';
-                                return true;
-                            } else {
-                                const s = Math.floor(leftMs / 1000);
-                                const d = Math.floor(s / 86400);
-                                const h = Math.floor((s % 86400) / 3600);
-                                const m = Math.floor((s % 3600) / 60);
-                                countdownSpan.textContent = `Available in ${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-                                return false;
-                            }
-                        }
-                        update();
-                        const iv = setInterval(() => { if (update()) clearInterval(iv); }, 1000);
-                    });
-                }
-
-                // Close modals on outside click
-                window.addEventListener('click', function (event) {
-                    const addUserM = document.getElementById('addUserModal');
-                    const editUserM = document.getElementById('editUserModal');
-                    const logoutM = document.getElementById('logoutModal');
-                    if (event.target === addUserM) closeModal();
-                    if (event.target === editUserM) closeEditModal();
-                    if (event.target === logoutM) logoutM.classList.remove('active');
-                });
-
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') {
-                        closeModal();
-                        closeEditModal();
-                        document.getElementById('logoutModal').classList.remove('active');
-                    }
-                });
-            </script>
-        </div> <!-- end main-content -->
-    </div> <!-- end main-layout -->
+<script>
+function filterCards(term, gridId) {
+    term = term.toLowerCase();
+    document.querySelectorAll('#'+gridId+' .profile-card').forEach(c => {
+        c.style.display = (c.dataset.search||'').includes(term) ? '' : 'none';
+    });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('addStaffBtn')?.addEventListener('click', ()=>{ document.getElementById('addStaffModal').classList.add('active'); document.body.style.overflow='hidden'; });
+    document.querySelectorAll('.edit-staff-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('edit_staff_id').value=this.dataset.staffId;
+            document.getElementById('edit_staff_name').value=this.dataset.name;
+            document.getElementById('edit_staff_email').value=this.dataset.email;
+            document.getElementById('editStaffModal').classList.add('active');
+            document.body.style.overflow='hidden';
+        });
+    });
+    ['addStaffModal','editStaffModal'].forEach(id => {
+        document.getElementById(id)?.addEventListener('click', e=>{ if(e.target===document.getElementById(id)){document.getElementById(id).classList.remove('active');document.body.style.overflow='auto';} });
+    });
+    function fmt(s){const d=Math.floor(s/86400);s-=d*86400;const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);const sec=Math.floor(s-m*60);return `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;}
+    document.querySelectorAll('.perm-delete-btn').forEach(btn=>{
+        const dMs=Date.parse((btn.dataset.deletedAt||'').replace(' ','T'));
+        const min=parseInt(btn.dataset.minDays||'10',10);
+        const chip=btn.closest('.deleted-actions')?.querySelector('.perm-countdown');
+        function upd(){const l=Math.max(0,min*86400000-(Date.now()-dMs));if(l<=0){btn.removeAttribute('disabled');if(chip)chip.textContent='';return true;}btn.setAttribute('disabled','disabled');if(chip)chip.textContent='Available in '+fmt(Math.floor(l/1000));return false;}
+        upd(); const iv=setInterval(()=>{if(upd())clearInterval(iv);},1000);
+    });
+    document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();document.getElementById('logoutModal')?.classList.add('active');});
+    document.getElementById('cancelLogout')?.addEventListener('click',()=>document.getElementById('logoutModal')?.classList.remove('active'));
+    document.getElementById('confirmLogout')?.addEventListener('click',()=>window.location.href='logout.php');
+    window.addEventListener('click',e=>{if(e.target===document.getElementById('logoutModal'))document.getElementById('logoutModal').classList.remove('active');});
+});
+</script>
 </body>
 </html>

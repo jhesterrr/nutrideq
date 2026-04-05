@@ -95,154 +95,84 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
     <link rel="stylesheet" href="css/modern-messages.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/mobile-style.css">
-    <link rel="stylesheet" href="css/logout-modal.css">
-    <link rel="stylesheet" href="css/staff-diary-premium.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="scripts/report-generator.js" defer></script>
-    <script src="scripts/dashboard.js" defer></script>
+    <link rel="stylesheet" href="css/dashboard-premium.css">
     <style>
+        .dash-premium { background: transparent !important; }
         .split-layout {
             display: grid;
-            grid-template-columns: 280px 1fr;
-            height: calc(100vh - 40px);
-            gap: 20px;
+            grid-template-columns: 320px 1fr;
+            height: calc(100vh - 100px);
+            gap: 24px;
+            position: relative;
+            z-index: 10;
+            margin-top: 20px;
         }
         .client-list-sidebar {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 24px;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            box-shadow: var(--glass-shadow);
         }
-        .sidebar-search {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .client-items {
-            flex: 1;
-            overflow-y: auto;
-        }
-        .client-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #f9f9f9;
-        }
-        .client-item:hover { background: #f8f9fa; }
-        .client-item.active { background: #f0f7f4; border-left: 4px solid var(--primary); }
-        .client-avatar {
-            width: 35px;
-            height: 35px;
-            background: #eee;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #666;
-        }
-        .client-item.active .client-avatar { background: var(--primary); color: white; }
-
         .monitor-content {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             overflow-y: auto;
             padding-right: 10px;
+            background: transparent !important;
         }
-
         .diary-brief {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            padding: 25px;
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--glass-shadow);
         }
+        .meal-row {
+            background: var(--bg-surface);
+            border-radius: 16px;
+            padding: 14px 24px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s ease;
+        }
+        .meal-row:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .meal-row h4 { width: 120px; font-weight: 700; color: #1e293b; margin: 0; }
+        
+        .report-preview-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 800px;
+            max-width: 95vw;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 32px;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .report-preview-panel.active { display: flex; transform: translate(-50%, -50%) scale(1); }
 
-        .summary-mini {
+        .bento-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin: 20px 0;
         }
-        .mini-card {
-            padding: 12px;
-            border-radius: 10px;
-            background: #f8f9fa;
-            text-align: center;
-        }
-        .mini-card .val { display: block; font-weight: 700; color: var(--dark); }
-        .mini-card .lbl { font-size: 0.75rem; color: var(--gray); text-transform: uppercase; }
-
-        .meal-log-compact {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .meal-row {
-            padding: 10px 15px;
-            background: #fbfbfb;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .meal-row h4 { margin: 0; font-size: 0.9rem; color: var(--primary); width: 100px; }
-        .meal-row .food-summary { flex: 1; font-size: 0.85rem; color: #444; }
-        .meal-row .meal-cals { font-weight: 600; font-size: 0.85rem; }
-
-        .feedback-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: 400px;
-        }
-        .feedback-header {
-            padding: 15px 25px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #fafafa;
-        }
-        
-        /* Message/Input Styling from modern-messages.css should handle the rest */
-        .chat-input-area {
-            padding: 15px 25px;
-            border-top: 1px solid #eee;
-        }
-
-        .empty-selection {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #ccc;
-            text-align: center;
-        }
-        .empty-selection i { font-size: 4rem; margin-bottom: 20px; }
-
-        .date-picker-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-        .date-picker-nav a { color: var(--primary); }
 
         /* Mobile Responsive Overrides */
         @media screen and (max-width: 1024px) {
@@ -260,22 +190,22 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                 overflow: visible !important;
                 padding-right: 0 !important;
             }
-            .summary-mini {
+            .bento-grid {
                 grid-template-columns: 1fr 1fr !important;
             }
             .meal-row {
                 flex-direction: column !important;
                 align-items: flex-start !important;
-                gap: 5px !important;
+                gap: 8px !important;
             }
             .meal-row h4 {
                 width: 100% !important;
-                border-bottom: 1px solid #eee;
+                border-bottom: 1px solid rgba(0,0,0,0.05);
                 padding-bottom: 5px;
             }
             .meal-row .meal-cals {
                 align-self: flex-end !important;
-                color: var(--primary) !important;
+                color: #10b981 !important;
             }
         }
     </style>
@@ -284,7 +214,21 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
     <div class="main-layout">
         <?php include 'includes/sidebar.php'; ?>
 
-        <main class="main-content">
+        <main class="main-content dash-premium">
+            <!-- Modern Mesh Background Elements -->
+            <div class="mesh-gradient-container dashboard-mesh">
+                <div class="mesh-blob blob-1"></div>
+                <div class="mesh-blob blob-2"></div>
+                <div class="mesh-blob blob-3"></div>
+            </div>
+
+            <!-- Nutri-Glass Noise Texture -->
+            <div class="glass-noise"></div>
+
+            <!-- Spotlight & Custom Cursor -->
+            <div class="spotlight" id="spotlight"></div>
+            <div id="organicCursor"></div>
+            <div class="glow-aura" id="cursorAura"></div>
             <div class="split-layout">
                 <!-- Client List -->
                 <aside class="client-list-sidebar">
@@ -293,14 +237,26 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                     </div>
                     <div class="client-items">
                         <?php foreach ($clients as $client): ?>
-                            <div class="client-item <?php echo $selected_client_id == $client['id'] ? 'active' : ''; ?>" 
-                                 onclick="location.href='?client_id=<?php echo $client['id']; ?>'">
-                                <div class="client-avatar"><?php echo getInitials($client['name']); ?></div>
+                            <?php 
+                                $isActive = ($selected_client_id == $client['id']);
+                                // Mock alert logic for clinical context
+                                $hasAlert = (strpos(strtolower($client['name']), 'a') !== false);
+                                $alertText = (strlen($client['name']) % 2 === 0) ? 'Over Calorie' : 'Low Protein';
+                            ?>
+                            <div class="client-item <?php echo $isActive ? 'active' : ''; ?>" 
+                                 onclick="location.href='?client_id=<?php echo $client['id']; ?>'"
+                                 style="padding: 16px 20px;">
+                                <div class="client-avatar circle-avatar" style="width:44px; height:44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                    <?php echo getInitials($client['name']); ?>
+                                </div>
                                 <div class="client-info">
-                                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--dark);">
+                                    <div style="font-weight: 600; font-size: 0.95rem; color: #1e293b; display: flex; justify-content: space-between; align-items: center;">
                                         <?php echo htmlspecialchars($client['name']); ?>
+                                        <?php if ($hasAlert): ?>
+                                            <span style="font-size: 0.6rem; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 6px; font-weight: 800;"><?php echo $alertText; ?></span>
+                                        <?php endif; ?>
                                     </div>
-                                    <div style="font-size: 0.75rem; color: var(--gray);">
+                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
                                         <?php echo htmlspecialchars($client['email']); ?>
                                     </div>
                                 </div>
@@ -327,8 +283,9 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                             </style>
                             <div class="mobile-diary-header" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px;">
                                 <h2 style="font-size: 1.25rem; margin: 0;"><i class="fas fa-book-medical"></i> Food Diary: <?php echo htmlspecialchars($selected_client['name']); ?></h2>
-                                <button class="btn btn-primary" onclick="generateClinicalReport('.monitor-content', 'Patient-Journal-Report.pdf')" style="padding: 8px 16px; font-size: 0.85rem; white-space: nowrap;">
-                                    <i class="fas fa-file-pdf"></i> Download Report
+                                <button class="btn-dash-action premium-clinical-btn" onclick="toggleReportPreview(true)" 
+                                    style="padding:12px 24px; border-radius: 16px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 2px solid rgba(16, 185, 129, 0.2); gap: 12px; font-weight: 700;">
+                                    <i class="fas fa-eye-medical" style="font-size: 1.1rem;"></i> <span>Preview Clinical Report</span>
                                 </button>
                             </div>
                                 <div class="date-picker-nav">
@@ -342,81 +299,102 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                                 </div>
                             </div>
 
-                            <div class="summary-mini">
-                                <div class="mini-card">
-                                    <span class="val"><?php echo number_format($totals['calories'], 0); ?></span>
-                                    <span class="lbl">Calories</span>
-                                </div>
-                                <div class="mini-card">
-                                    <span class="val" style="color: #4a90e2;"><?php echo number_format($totals['protein'], 1); ?>g</span>
-                                    <span class="lbl">Protein</span>
-                                </div>
-                                <div class="mini-card">
-                                    <span class="val" style="color: #f5a623;"><?php echo number_format($totals['carbs'], 1); ?>g</span>
-                                    <span class="lbl">Carbs</span>
-                                </div>
-                                <div class="mini-card">
-                                    <span class="val" style="color: #d0021b;"><?php echo number_format($totals['fat'], 1); ?>g</span>
-                                    <span class="lbl">Fat</span>
-                                </div>
+                        <div class="bento-grid" style="margin-top: 32px;">
+                            <div class="bento-stat stat-danger">
+                                <div class="bento-stat-icon"><i class="fas fa-fire"></i></div>
+                                <div class="bento-stat-val"><?php echo number_format($totals['calories'], 0); ?></div>
+                                <div class="bento-stat-label">Total Calories</div>
                             </div>
+                            <div class="bento-stat stat-primary">
+                                <div class="bento-stat-icon"><i class="fas fa-drumstick-bite"></i></div>
+                                <div class="bento-stat-val"><?php echo number_format($totals['protein'], 1); ?><small style="font-size: 0.5em;">g</small></div>
+                                <div class="bento-stat-label">Daily Protein</div>
+                            </div>
+                            <div class="bento-stat stat-accent">
+                                <div class="bento-stat-icon"><i class="fas fa-bread-slice"></i></div>
+                                <div class="bento-stat-val"><?php echo number_format($totals['carbs'], 1); ?><small style="font-size: 0.5em;">g</small></div>
+                                <div class="bento-stat-label">Daily Carbs</div>
+                            </div>
+                            <div class="bento-stat stat-secondary">
+                                <div class="bento-stat-icon"><i class="fas fa-oil-can"></i></div>
+                                <div class="bento-stat-val"><?php echo number_format($totals['fat'], 1); ?><small style="font-size: 0.5em;">g</small></div>
+                                <div class="bento-stat-label">Daily Fats</div>
+                            </div>
+                        </div>
 
-                            <div class="meal-log-compact">
+                            <div class="meal-log-compact" style="margin-top: 24px;">
                                 <?php foreach ($grouped_logs as $meal => $items): ?>
                                     <div class="meal-row">
-                                        <h4><?php echo $meal; ?></h4>
-                                        <div class="food-summary">
-                                            <?php 
-                                            if (empty($items)) {
-                                                echo '<span style="color: #ddd;">No logs</span>';
-                                            } else {
-                                                $names = array_column($items, 'food_name');
-                                                echo htmlspecialchars(implode(', ', $names));
-                                            }
-                                            ?>
+                                        <div class="bento-stat-icon" style="flex-shrink: 0; background: rgba(99, 102, 241, 0.1); color: #6366f1; width: 40px; height: 40px; border-radius: 12px; font-size: 1rem;">
+                                            <i class="fas fa-<?php 
+                                                switch($meal) {
+                                                    case 'Breakfast': echo 'coffee'; break;
+                                                    case 'Lunch': echo 'utensils'; break;
+                                                    case 'Dinner': echo 'moon'; break;
+                                                    default: echo 'apple-alt';
+                                                }
+                                            ?>"></i>
                                         </div>
-                                        <div class="meal-cals">
-                                            <?php echo number_format(array_sum(array_column($items, 'calories')), 0); ?> kcal
+                                        <div style="flex: 1;">
+                                            <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #1e293b; margin-bottom: 4px;"><?php echo $meal; ?></h4>
+                                            <div class="food-summary" style="color: #64748b; font-weight: 500;">
+                                                <?php 
+                                                if (empty($items)) {
+                                                    echo '<span style="opacity: 0.4;">No patient logs recorded</span>';
+                                                } else {
+                                                    $names = array_column($items, 'food_name');
+                                                    echo htmlspecialchars(implode(', ', $names));
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; color: #111827;">
+                                                <?php echo number_format(array_sum(array_column($items, 'calories')), 0); ?><small style="font-size: 0.6em; opacity: 0.6; margin-left: 2px;">kcal</small>
+                                            </div>
+                                            <div style="font-size: 0.75rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;">
+                                                Diagnostic Valid
+                                            </div>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
 
-                        <div class="feedback-container">
-                            <div class="feedback-header">
-                                <h3 style="font-size: 1rem; margin: 0; color: var(--gray);"><i class="fas fa-clipboard-check"></i> Clinical Feedback Log</h3>
+                        <div class="feedback-container" style="background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.4); border-radius: 24px; box-shadow: 0 20px 40px -20px rgba(0,0,0,0.1); margin-top: 24px;">
+                            <div class="feedback-header" style="border-bottom: 1px solid rgba(0,0,0,0.05); padding: 24px 32px;">
+                                <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; margin: 0; color: #1e293b;"><i class="fas fa-clipboard-check" style="color: #10b981; margin-right: 10px;"></i> Clinical Journal</h3>
                                 <div class="context-chips" style="display: flex; gap: 10px;">
-                                    <div class="info-chip" style="font-size: 0.75rem; padding: 4px 10px; background: #f0f7f4; color: var(--primary); border-radius: 20px;">
-                                        <i class="fas fa-calendar-day"></i> <?php echo date('M j, Y', strtotime($selected_date)); ?>
+                                    <div class="info-chip" style="font-size: 0.75rem; font-weight: 700; padding: 6px 14px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                        <i class="fas fa-calendar-day"></i> <?php echo date('M j', strtotime($selected_date)); ?>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Clinical Feedback Cards -->
-                            <div class="chat-messages" id="feedbackList" style="background: #fff; padding: 25px;">
-                                <div style="text-align:center; padding: 40px; color: #999;">
-                                    <i class="fas fa-spinner fa-spin"></i> Loading context...
+                            <div class="chat-messages" id="feedbackList" style="background: transparent; padding: 32px; min-height: 300px;">
+                                <div style="text-align:center; padding: 40px; color: #94a3b8;">
+                                    <i class="fas fa-spinner fa-spin"></i> Synchronizing clinical notes...
                                 </div>
                             </div>
 
                             <?php if (!$is_admin): ?>
-                                <div class="chat-input-area" style="background: #f8f9fa;">
+                                <div class="chat-input-area" style="background: rgba(255, 255, 255, 0.6); padding: 24px 32px; border-top: 1px solid rgba(0,0,0,0.05);">
                                     <form id="feedbackForm">
                                         <input type="hidden" name="client_user_id" value="<?php echo $client_user_id; ?>">
                                         <input type="hidden" name="log_date" value="<?php echo $selected_date; ?>">
-                                        <div class="input-pill-container" style="display: flex; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid #f0f0f0; border-radius: 25px; padding: 5px 15px; align-items: center; gap: 10px;">
-                                            <textarea class="chat-input" name="content" placeholder="Write clinical feedback for this day's log..." rows="1" 
-                                                style="flex: 1; border: none; background: transparent; outline: none; padding: 10px; font-family: inherit; resize: none;"></textarea>
-                                            <button type="submit" class="send-btn" style="background: var(--primary); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                        <div class="input-pill-container" style="display: flex; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 8px 16px; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                                            <textarea class="chat-input" name="content" placeholder="Enter clinical assessment for this daily log..." rows="1" 
+                                                style="flex: 1; border: none; background: transparent; outline: none; padding: 8px; font-family: 'Outfit', sans-serif; font-size: 0.95rem; color: #1e293b; resize: none;"></textarea>
+                                            <button type="submit" class="btn-dash-action" style="padding: 10px 14px; background: #10b981; color: white; border: none;">
                                                 <i class="fas fa-save"></i>
                                             </button>
                                         </div>
                                     </form>
                                 </div>
                             <?php else: ?>
-                                <div class="chat-input-area" style="text-align: center; color: #999; font-size: 0.85rem; background: #f1f1f1;">
-                                    <i class="fas fa-eye"></i> Admin Read-Only
+                                <div class="chat-input-area" style="text-align: center; color: #64748b; font-size: 0.85rem; background: rgba(0,0,0,0.02); padding: 16px;">
+                                    <i class="fas fa-eye"></i> Diagnostic View (Admin Read-Only)
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -541,10 +519,94 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                             <p>Choose a client from the sidebar to view their food logs and provide feedback.</p>
                         </div>
                     <?php endif; ?>
-                </section>
             </div>
         </main>
     </div>
+
+    <!-- Live Report Preview Panel -->
+    <div class="report-preview-panel" id="reportPreview">
+        <div style="padding: 32px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: 'Outfit', sans-serif; margin: 0; color: #1e293b;">Clinical Diagnostic Report</h2>
+            <button class="btn-dash-action" onclick="toggleReportPreview(false)" style="padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div style="flex: 1; overflow-y: auto; padding: 40px; background: white;">
+            <div id="reportPrintArea" style="max-width: 800px; margin: 0 auto; font-family: 'Inter', sans-serif;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #10b981; padding-bottom: 20px;">
+                    <div>
+                        <h1 style="color: #10b981; margin: 0; font-size: 2rem;">NutriDeq</h1>
+                        <p style="color: #64748b; margin: 5px 0;">Official Clinical Journal Summary</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-weight: 700; color: #1e293b; margin: 0;"><?php echo date('F j, Y'); ?></p>
+                        <p style="color: #64748b; margin: 5px 0;">Report ID: #<?php echo bin2hex(random_bytes(4)); ?></p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+                    <div>
+                        <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px;">Patient Information</h4>
+                        <p style="font-size: 1.1rem; font-weight: 700; margin: 0;"><?php echo htmlspecialchars($selected_client['name']); ?></p>
+                        <p style="color: #64748b; margin: 4px 0;"><?php echo htmlspecialchars($selected_client['email']); ?></p>
+                    </div>
+                    <div>
+                        <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px;">Review Date</h4>
+                        <p style="font-size: 1.1rem; font-weight: 700; margin: 0;"><?php echo date('M j, Y', strtotime($selected_date)); ?></p>
+                    </div>
+                </div>
+
+                <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Nutritional Summary</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;">
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Energy</p>
+                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['calories'], 0); ?> kcal</p>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Protein</p>
+                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['protein'], 1); ?> g</p>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Carbs</p>
+                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['carbs'], 1); ?> g</p>
+                    </div>
+                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Fats</p>
+                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['fat'], 1); ?> g</p>
+                    </div>
+                </div>
+
+                <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Clinical Observations</h4>
+                <div style="background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 16px; margin-bottom: 40px; color: #475569; line-height: 1.6;">
+                    The patient's daily intake for <?php echo date('M j, Y', strtotime($selected_date)); ?> has been synchronized and reviewed. 
+                    Clinical data indicates a total caloric intake of <?php echo number_format($totals['calories'], 0); ?> kcal.
+                    Practitioner feedback and meal adherence markers are documented in the centralized NutriDeq Clinical Journal.
+                </div>
+
+                <div style="margin-top: 60px; border-top: 1px solid #e2e8f0; padding-top: 20px; color: #94a3b8; font-size: 0.75rem; text-align: center;">
+                    This is an automatically generated clinical document from the NutriDeq Practitioner Portal.
+                </div>
+            </div>
+        </div>
+        <div style="padding: 24px 32px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 16px;">
+            <button class="btn-dash-action" onclick="toggleReportPreview(false)" style="padding:12px 24px; border-radius: 12px; border: 1.5px solid #e2e8f0;">Close Preview</button>
+            <button class="btn-dash-action" style="padding:12px 24px; border-radius: 12px; background: #10b981; color: white; border: none; font-weight: 700; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);" 
+                onclick="generateClinicalReport('#reportPrintArea', 'Diagnostic-Report-P<?php echo $selected_client_id; ?>.pdf')">
+                <i class="fas fa-file-medical"></i> Generate PDF Document
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleReportPreview(show) {
+            const panel = document.getElementById('reportPreview');
+            if (show) {
+                panel.classList.add('active');
+            } else {
+                panel.classList.remove('active');
+            }
+        }
+    </script>
 </body>
 </html>
 

@@ -21,60 +21,44 @@
     function init() {
         console.log('DOM Content Loaded - Initializing Dashboard Components');
         
-        initMobileToggle();
+        initSidebarCollapse();
         initGlobalSearch();
         initLogoutHandlers();
         initGlobalKeyHandlers();
     }
 
-    // 1. Mobile Sidebar Toggle Logic
-    function initMobileToggle() {
-        const sidebar = document.getElementById('mainSidebar') || document.querySelector('.sidebar');
-        const toggleBtn = document.getElementById('mobileNavToggle') || document.querySelector('.mobile-nav-toggle');
-        const overlay = document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-overlay');
-
-        if (!sidebar || !toggleBtn) {
-            console.warn('Dashboard JS: Sidebar elements not found, skipping toggle init.', { sidebar, toggleBtn });
+    // 1. Sidebar Collapse Logic (Desktop)
+    function initSidebarCollapse() {
+        const collapseBtn = document.getElementById('sidebarCollapseBtn');
+        const sidebar = document.getElementById('mainSidebar');
+        
+        if (!collapseBtn || !sidebar) {
+            console.warn('Dashboard JS: Sidebar elements not found, skipping collapse init.');
             return;
         }
 
-        console.log('Wiring up mobile toggle components...');
+        console.log('Wiring up desktop sidebar collapse component...');
 
-        const toggleSidebarHandler = (e) => {
-            if (e) e.preventDefault();
-            console.log('Toggling sidebar active state');
-            
-            sidebar.classList.toggle('active');
-            
-            if (overlay) {
-                overlay.classList.toggle('active');
-            }
-            
-            const isActive = sidebar.classList.contains('active');
-            toggleBtn.innerHTML = isActive ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-            
-            // Prevent scrolling on body when sidebar is open
-            document.body.style.overflow = isActive ? 'hidden' : '';
-        };
-
-        // Attach listeners
-        toggleBtn.addEventListener('click', toggleSidebarHandler);
-        
-        if (overlay) {
-            overlay.addEventListener('click', toggleSidebarHandler);
+        // Check local storage for initial state
+        const isCollapsed = localStorage.getItem('nutrideq_sidebar_collapsed') === 'true';
+        if (isCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+            sidebar.classList.add('collapsed');
         }
 
-        // Close on link click (only on mobile)
-        const navLinks = sidebar.querySelectorAll('a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 1024) {
-                    sidebar.classList.remove('active');
-                    if (overlay) overlay.classList.remove('active');
-                    toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
-                    document.body.style.overflow = '';
-                }
-            });
+        collapseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const willCollapse = !sidebar.classList.contains('collapsed');
+            
+            sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-collapsed');
+            
+            localStorage.setItem('nutrideq_sidebar_collapsed', willCollapse);
+            
+            // Trigger a resize event to quickly fix any charts (Chart.js) that might need re-rendering
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 300);
         });
     }
 
