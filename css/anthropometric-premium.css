@@ -564,4 +564,66 @@
     .ai-tab-wrap { padding: 16px; }
     .ai-tab-rail { flex-direction: column; }
     .ai-food-stats { grid-template-columns: 1fr; }
+    
+    /* ══ Meal Planner Mobile Card Layout ══ */
+    .ai-table-wrap {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    .ai-exchange-table thead { display: none !important; }
+    .ai-exchange-table, .ai-exchange-table tbody, .ai-exchange-table tr, .ai-exchange-table td {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    
+    /* Group Header -> Card Header */
+    .ai-exchange-table .group-header td {
+        background: var(--light-green) !important;
+        color: var(--primary-green) !important;
+        padding: 14px 18px !important;
+        font-weight: 800 !important;
+        border-radius: 16px 16px 0 0 !important;
+        margin-top: 24px;
+        border: 1.5px solid var(--accent-green) !important;
+        border-bottom: none !important;
+    }
+    
+    /* Food Item Row -> Card Body */
+    .ai-exchange-table .food-item {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 16px 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+    .ai-exchange-table .food-item td:first-child {
+        margin-bottom: 20px;
+        padding: 0 !important;
+        border-bottom: 1px dashed #e2e8f0 !important;
+        padding-bottom: 20px !important;
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Macro Rows with Artificial Headers */
+    .ai-exchange-table .food-item td:not(:first-child) {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 10px 0 !important;
+        border: none !important;
+        font-size: 0.95rem !important;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .ai-exchange-table .food-item td:nth-child(2)::before { content: 'Exchange'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ai-exchange-table .food-item td:nth-child(3)::before { content: 'Weight (g)'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ai-exchange-table .food-item td:nth-child(4)::before { content: 'Energy (kcal)'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ai-exchange-table .food-item td:nth-child(5)::before { content: 'Protein (g)'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ai-exchange-table .food-item td:nth-child(6)::before { content: 'Fat (g)'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .ai-exchange-table .food-item td:nth-child(7)::before { content: 'CHO (g)'; font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
 }
+
