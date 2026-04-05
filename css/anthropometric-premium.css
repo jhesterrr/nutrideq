@@ -188,6 +188,9 @@
     padding: 6px;
     border-radius: 18px;
     margin-bottom: 30px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
 }
 .ai-tab-btn {
     flex: 1;
@@ -205,6 +208,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 .ai-tab-btn.active {
     background: white;
@@ -549,6 +553,7 @@
 
 @media (max-width: 1200px) {
     .ai-stat-ribbon { grid-template-columns: repeat(2, 1fr); }
+    .ai-food-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -556,4 +561,7 @@
     .ai-hero-badges { justify-content: center; }
     .ai-form-grid { grid-template-columns: 1fr; }
     .ai-field-full { grid-column: auto; }
+    .ai-tab-wrap { padding: 16px; }
+    .ai-tab-rail { flex-direction: column; }
+    .ai-food-stats { grid-template-columns: 1fr; }
 }

@@ -97,6 +97,7 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
     <!-- Platform Specific Styles -->
     <link rel="stylesheet" href="css/desktop-style.css" media="all and (min-width: 1025px)">
     <link rel="stylesheet" href="css/mobile-style.css" media="all and (max-width: 1024px)">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="css/dashboard-premium.css">
     <style>
         .dash-premium { background: transparent !important; }
@@ -119,6 +120,14 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
             flex-direction: column;
             box-shadow: var(--glass-shadow);
         }
+        .client-items {
+            flex: 1;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
+        }
+        .client-items::-webkit-scrollbar { width: 4px; }
+        .client-items::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }
         .monitor-content {
             display: flex;
             flex-direction: column;
@@ -262,8 +271,8 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
             <div class="split-layout">
                 <!-- Client List -->
                 <aside class="client-list-sidebar">
-                    <div class="sidebar-search">
-                        <input type="text" placeholder="Search clients..." class="form-control" style="font-size: 0.85rem;">
+                    <div class="sidebar-search" style="padding: 16px;">
+                        <input type="text" id="clientSearchInput" placeholder="Search clients..." class="form-control" style="font-size: 0.85rem; width: 100%; box-sizing: border-box; border-radius: 12px;">
                     </div>
                     <div class="client-items">
                         <?php foreach ($clients as $client): ?>
@@ -635,6 +644,66 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
             } else {
                 panel.classList.remove('active');
             }
+        }
+        
+        // Client Search Filtering Engine
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('clientSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const filter = this.value.toLowerCase();
+                    const items = document.querySelectorAll('.client-item');
+                    items.forEach(item => {
+                        const nameEl = item.querySelector('.client-info');
+                        const name = nameEl ? nameEl.textContent.toLowerCase() : '';
+                        if (name.includes(filter)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+
+        // PDF Generation Engine
+        function generateClinicalReport(targetSelector, filename) {
+            const element = document.querySelector(targetSelector);
+            if (!element) return alert("Error: Report content not found.");
+            
+            // Show loading state on button
+            const btn = event.currentTarget || document.activeElement;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+
+            const opt = {
+                margin:       10,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Document Saved';
+                btn.style.backgroundColor = '#059669';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.backgroundColor = '#10b981';
+                }, 3000);
+            }).catch(err => {
+                console.error("PDF generation error: ", err);
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Generation Failed';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                }, 3000);
+            });
         }
     </script>
 </body>
