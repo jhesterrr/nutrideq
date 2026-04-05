@@ -13,12 +13,24 @@ class Database
 
     public function __construct()
     {
-        // Use Railway MySQL environment variables, fallback to local settings
-        $this->host = getenv('MYSQLHOST') ?: 'localhost';
-        $this->dbname = getenv('MYSQLDATABASE') ?: 'nutrideq';
-        $this->username = getenv('MYSQLUSER') ?: 'root';
-        $this->password = getenv('MYSQLPASSWORD') ?: '';
-        $this->port = getenv('MYSQLPORT') ?: '3306';
+        // Try to get the connection string first (Railway standard)
+        $urlString = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQLURL');
+        
+        if ($urlString) {
+            $url = parse_url($urlString);
+            $this->host = $url['host'] ?? 'localhost';
+            $this->dbname = ltrim($url['path'] ?? 'nutrideq', '/');
+            $this->username = $url['user'] ?? 'root';
+            $this->password = $url['pass'] ?? '';
+            $this->port = $url['port'] ?? '3306';
+        } else {
+            // Fallback to individual Railway MySQL environment variables, then local settings
+            $this->host = getenv('MYSQLHOST') ?: 'localhost';
+            $this->dbname = getenv('MYSQLDATABASE') ?: 'nutrideq';
+            $this->username = getenv('MYSQLUSER') ?: 'root';
+            $this->password = getenv('MYSQLPASSWORD') ?: '';
+            $this->port = getenv('MYSQLPORT') ?: '3306';
+        }
     }
 
     public function getConnection()
