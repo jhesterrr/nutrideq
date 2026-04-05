@@ -95,7 +95,7 @@ if ($selected_thread_id) {
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/dashboard-premium.css">
-    <link rel="stylesheet" href="css/mobile-style.css">
+    <link rel="stylesheet" href="css/interactive-animations.css">
     <style>
         .dash-premium {
             background: transparent !important;
