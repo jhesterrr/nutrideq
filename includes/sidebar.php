@@ -25,6 +25,22 @@ $sidebar_user_initials = getSidebarInitials($sidebar_user_name);
 // Get navigation links from standardized navigation file
 require_once 'navigation.php';
 $sidebar_nav_links = getNavigationLinks($sidebar_user_role, $current_page);
+
+// Update last activity for real-time monitoring
+if (isset($_SESSION['user_id'])) {
+    try {
+        // Find PDO if not already available in parent scope
+        if (!isset($pdo)) {
+            require_once 'database.php';
+            $sidebar_db = new Database();
+            $pdo = $sidebar_db->getConnection();
+        }
+        $update_activity = $pdo->prepare("UPDATE users SET last_active = NOW(), online_status = 1 WHERE id = ?");
+        $update_activity->execute([$_SESSION['user_id']]);
+    } catch (Exception $e) {
+        error_log("Sidebar status update failed: " . $e->getMessage());
+    }
+}
 ?>
 
 <!-- Mobile Top Header -->

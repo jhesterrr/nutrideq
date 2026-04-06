@@ -194,7 +194,15 @@ $pdo = $database->getConnection();
                 $staff_month_diff = 0;
 
                 try {
-                    $stmt = $pdo->prepare("SELECT COUNT(*) as total_users, SUM(role='admin') as admin_count, SUM(role='staff') as staff_count, SUM(status='active') as active_users, SUM(role='staff' AND status='active') as staff_active FROM users");
+                    $stmt = $pdo->prepare("
+                        SELECT 
+                            COUNT(*) as total_users, 
+                            SUM(role='admin') as admin_count, 
+                            SUM(role='staff') as staff_count, 
+                            SUM(status='active') as active_users, 
+                            SUM((role='staff' OR role='admin') AND online_status=1 AND last_active > DATE_SUB(NOW(), INTERVAL 5 MINUTE)) as staff_active 
+                        FROM users
+                    ");
                     $stmt->execute();
                     $row = $stmt->fetch();
                     if ($row) {
@@ -491,29 +499,71 @@ $pdo = $database->getConnection();
                     <div class="dash-panel nutri-glass" style="min-height: auto; padding: 25px;">
                         <div class="dash-panel-header" style="margin-bottom: 20px;">
                             <h2 class="dash-panel-title"><i class="fas fa-user-tie"></i> Active Staff Members</h2>
+                            <div class="status-legend" style="display: flex; gap: 15px; font-size: 0.75rem; font-weight: 700;">
+                                <span><i class="fas fa-circle" style="color: #10b981; font-size: 8px;"></i> Online</span>
+                                <span><i class="fas fa-circle" style="color: #94a3b8; font-size: 8px;"></i> Offline</span>
+                            </div>
                         </div>
                         <div class="activity-feed">
                             <?php 
                                 try {
-                                    $stmt = $pdo->prepare("SELECT name, specialization FROM staff LIMIT 5");
+                                    // Fetch staff and admins from users table
+                                    $stmt = $pdo->prepare("SELECT id, name, role, last_active, online_status FROM users WHERE role IN ('staff', 'admin') ORDER BY last_active DESC LIMIT 6");
                                     $stmt->execute();
+                                    
                                     while($row = $stmt->fetch()) {
+                                        // Precise online check: within 5 minutes AND not explicitly logged out
+                                        $last_active = strtotime($row['last_active'] ?? '0');
+                                        $is_online = (time() - $last_active < 300) && ($row['online_status'] == 1);
+                                        $status_color = $is_online ? '#10b981' : '#94a3b8';
+                                        $status_pulse = $is_online ? 'online-pulse' : '';
+                                        $role_badge = $row['role'] === 'admin' ? '#f59e0b' : '#3b82f6';
+                                        
                                         echo "
-                                        <div class='activity-item' style='padding: 12px 0; border: none; align-items: center;'>
-                                            <div class='activity-icon' style='background: rgba(45, 138, 86, 0.1); color: var(--primary);'>
-                                                ".strtoupper($row['name'][0])."
+                                        <div class='activity-item' style='padding: 12px 14px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 18px; margin-bottom: 12px; background: rgba(255,255,255,0.3); align-items: center; display: flex; gap: 15px;'>
+                                            <div class='activity-icon' style='background: white; color: #1e293b; font-weight: 800; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative;'>
+                                                ".strtoupper(($row['name'] ?? 'U')[0])."
+                                                <span class='status-dot ".$status_pulse."' style='background: ".$status_color.";'></span>
                                             </div>
-                                            <div class='activity-details'>
-                                                <div style='font-weight: 700; font-size: 0.9rem; color: #1e293b;'>".htmlspecialchars($row['name'])."</div>
-                                                <div style='font-size: 0.75rem; color: #64748b;'>".htmlspecialchars($row['specialization'])."</div>
+                                            <div class='activity-details' style='flex: 1;'>
+                                                <div style='font-weight: 800; font-size: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 8px;'>
+                                                    ".htmlspecialchars($row['name'])."
+                                                    <span style='font-size: 0.65rem; padding: 2px 8px; border-radius: 6px; background: ".$role_badge."22; color: ".$role_badge."; border: 1px solid ".$role_badge."44; text-transform: uppercase;'>".htmlspecialchars($row['role'])."</span>
+                                                </div>
+                                                <div style='font-size: 0.72rem; color: #64748b; margin-top: 2px;'>
+                                                    ".($is_online ? 'Active now' : 'Last seen ' . date('M j, H:i', $last_active))."
+                                                </div>
                                             </div>
                                         </div>";
                                     }
-                                } catch(Exception $e) {}
+                                } catch(Exception $e) {
+                                    echo "<div class='dash-empty-alert'>Error loading staff activity.</div>";
+                                }
                             ?>
                         </div>
                     </div>
                 </div>
+
+                <style>
+                    .status-dot {
+                        position: absolute;
+                        bottom: -2px;
+                        right: -2px;
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 50%;
+                        border: 2.5px solid white;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .online-pulse {
+                        animation: pulse-green 2s infinite;
+                    }
+                    @keyframes pulse-green {
+                        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+                        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+                    }
+                </style>
 
             <?php elseif ($user_role === 'staff'): ?>
                 <?php
