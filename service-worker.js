@@ -1,19 +1,20 @@
 // service-worker.js
-// NutriDeq PWA Engine v2 - Elite Role-Aware Dynamic Caching
-const CACHE_NAME = 'nutrideq-v2';
+// NutriDeq PWA Engine v3 - Offline Resilience & Dynamic Caching
+const CACHE_NAME = 'nutrideq-v3';
 const STATIC_ASSETS = [
-    'css/base.css',
-    'css/dashboard.css',
-    'css/user-premium.css',
-    'scripts/user-realtime.js',
-    'assets/icon-512x512.png'
+    '/css/base.css',
+    '/css/dashboard.css',
+    '/css/user-premium.css',
+    '/scripts/user-realtime.js',
+    '/assets/img/logo.png',
+    '/offline.html'
 ];
 
 // 1. Install Event - Cache static assets only
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            console.log('NutriDeq - Static Assets Primed');
+            console.log('NutriDeq - Static Assets & Fallback Primed');
             return cache.addAll(STATIC_ASSETS);
         })
     );
@@ -23,14 +24,19 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
     const isPhp = url.pathname.endsWith('.php');
+    const isHtml = url.pathname.endsWith('.html');
+    const isNav = event.request.mode === 'navigate';
 
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
 
-    if (isPhp) {
-        // Dynamic PHP: NETWORK-FIRST (Always ask server for roll check)
+    if (isPhp || isHtml || isNav) {
+        // Dynamic routes: NETWORK-FIRST with OFFLINE FALLBACK
         event.respondWith(
-            fetch(event.request).catch(() => caches.match(event.request))
+            fetch(event.request).catch(() => {
+                // Return custom offline page if the network fails
+                return caches.match('/offline.html');
+            })
         );
     } else {
         // Static Assets: CACHE-FIRST (Faster performance)

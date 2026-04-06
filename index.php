@@ -10,6 +10,10 @@ header("Pragma: no-cache");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>NutriDeq - Next-Gen Clinical Intelligence</title>
 
     <link rel="stylesheet" href="css/base.css?v=205">
@@ -924,6 +928,20 @@ header("Pragma: no-cache");
 </head>
 
 <body>
+    <!-- PWA Preamble Intro Splash -->
+    <div id="pwa-intro-splash" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(248, 250, 252, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 999999; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease;">
+        <div style="text-align: center; animation: introPulse 2s ease-in-out infinite;">
+            <img src="assets/img/logo.png" alt="NutriDeq Start" style="width: 120px; height: 120px; border-radius: 28px; box-shadow: 0 20px 50px rgba(16, 185, 129, 0.2);">
+            <div style="margin-top: 20px; font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; color: #0f172a; letter-spacing: -1px;">Nutri<span style="color: #10b981;">Deq</span></div>
+            <div style="font-family: 'Inter', sans-serif; color: #64748b; font-size: 14px; margin-top: 5px; font-weight: 500;">Initializing Clinical Environment...</div>
+        </div>
+    </div>
+    <style>
+        @keyframes introPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
 
     <!-- Ultra Dynamic Background Wrapper -->
     <div class="page-wrapper">
@@ -1170,6 +1188,31 @@ header("Pragma: no-cache");
                 });
             });
         });
+
+        // PWA Splash Screen Logic
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('pwa-intro-splash');
+            if (splash) {
+                // If it's the very first visit this session, show the animation longer
+                const isFirstVisit = !sessionStorage.getItem('nutrideq_splash_shown');
+                const delay = isFirstVisit ? 1500 : 300;
+                
+                setTimeout(() => {
+                    splash.style.opacity = '0';
+                    splash.style.visibility = 'hidden';
+                    sessionStorage.setItem('nutrideq_splash_shown', 'true');
+                }, delay);
+            }
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js?v=3')
+                    .then(reg => console.log('NutriDeq PWA Engine Registered', reg.scope))
+                    .catch(err => console.error('PWA Engine failure:', err));
+            });
+        }
     </script>
 </body>
 

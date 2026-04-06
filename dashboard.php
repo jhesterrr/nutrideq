@@ -1543,7 +1543,7 @@ $pdo = $database->getConnection();
             <script>
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('service-worker.js?v=2').catch(() => {});
+                        navigator.serviceWorker.register('service-worker.js?v=3').catch(() => {});
                     });
                 }
             </script>

@@ -108,7 +108,7 @@ $pdo = $database->getConnection();
     <script src="scripts/info-system.js" defer></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#2e8b57">
+    <meta name="theme-color" content="#10b981">
     <style>
         /* Dashboard-specific refined mobile metrics */
         @media screen and (max-width: 768px) {
@@ -1821,7 +1821,7 @@ $pdo = $database->getConnection();
             <script>
                 if ('serviceWorker' in navigator) {
                     window.addEventListener('load', () => {
-                        navigator.serviceWorker.register('service-worker.js?v=2').catch(() => {});
+                        navigator.serviceWorker.register('service-worker.js?v=3').catch(() => {});
                     });
                 }
             </script>

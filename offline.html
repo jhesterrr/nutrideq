@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#10b981">
+    <title>NutriDeq - Offline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #047857;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* Ambient animated background mimicking the landing page */
+        .ambient-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(135deg, #f0fdf4 0%, #f1f5f9 100%);
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.6;
+            animation: floatBlob 15s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            width: 50vw;
+            height: 50vw;
+            background: rgba(16, 185, 129, 0.2);
+            top: -10%;
+            left: -10%;
+        }
+
+        .blob-2 {
+            width: 40vw;
+            height: 40vw;
+            background: rgba(148, 163, 184, 0.15); /* Grayish for offline mood */
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(5%, -5%); }
+        }
+
+        /* Glassmorphic Card */
+        .offline-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 32px;
+            padding: 50px 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.05);
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Orbiting Animation around the logo */
+        .logo-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            filter: grayscale(100%) opacity(0.8);
+            z-index: 5;
+            transition: 0.3s;
+        }
+
+        /* Orbiting Rings */
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px dashed rgba(16, 185, 129, 0.4);
+            animation: spin 10s linear infinite;
+        }
+
+        .orbit-1 {
+            width: 110px;
+            height: 110px;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            animation-duration: 8s;
+        }
+
+        .orbit-2 {
+            width: 140px;
+            height: 140px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-left-color: var(--primary);
+            border-right-color: var(--primary);
+            animation-direction: reverse;
+            animation-duration: 12s;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin: 0 0 10px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0 0 35px 0;
+            font-size: 1.05rem;
+        }
+
+        /* Interactive Retry Button */
+        .retry-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 100px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .retry-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+
+        .retry-btn:hover::after {
+            left: 100%;
+        }
+
+        .retry-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-mesh">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="offline-card">
+        <div class="logo-container">
+            <div class="orbit orbit-1"></div>
+            <div class="orbit orbit-2"></div>
+            <img src="assets/img/logo.png" alt="NutriDeq Logo" class="logo-img">
+        </div>
+        
+        <h1>Connection Lost</h1>
+        <p>It looks like you've lost connection to the NutriDeq clinical servers. Please check your network and try again.</p>
+        
+        <button class="retry-btn" onclick="window.location.reload()">
+            Retry Connection
+        </button>
+    </div>
+</body>
+</html>
