@@ -267,6 +267,7 @@ if (isset($_SESSION['error'])) {
         <div class="tilt-wrapper" id="tilt-wrapper">
             <div class="auth-card" id="auth-card">
                 <div class="auth-card-inner">
+                    <a href="../index.php" class="back-home-btn stagger d-1" style="display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-weight: 600; margin-bottom: 20px; font-size: 0.9rem; transition: 0.3s;"><i class="fas fa-arrow-left"></i> Back to Home</a>
                     <div class="auth-header">
                         <a href="../index.php" class="logo-link stagger d-1">
                             <img src="../assets/img/logo.png" alt="NutriDeq Logo">

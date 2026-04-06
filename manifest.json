@@ -2,7 +2,7 @@
   "name": "Nutrideq Nutrition Platform",
   "short_name": "Nutrideq",
   "description": "Premium Clinical Nutrition & Diet Management Platform",
-  "start_url": "/dashboard.php",
+  "start_url": "./index.php",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2e8b57",
