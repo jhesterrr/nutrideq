@@ -512,13 +512,20 @@ header("Pragma: no-cache");
 
         .c-bar {
             flex: 1;
+            height: 100%;
             background: var(--primary);
             border-radius: 8px 8px 0 0;
-            opacity: 0.1;
+            opacity: 0.3;
             transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
             transform-origin: bottom;
-            transform: scaleY(0.1);
+            transform: scaleY(0.2);
         }
+
+        .c-bar:nth-child(1) { transform: scaleY(0.3); }
+        .c-bar:nth-child(2) { transform: scaleY(0.5); }
+        .c-bar:nth-child(3) { transform: scaleY(0.4); }
+        .c-bar:nth-child(4) { transform: scaleY(0.7); background: #94a3b8; }
+        .c-bar:nth-child(5) { transform: scaleY(0.4); }
 
         .mockup-wrapper:hover .c-bar {
             opacity: 0.9;
