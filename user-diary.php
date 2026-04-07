@@ -399,9 +399,14 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                 ?>
 
                 <section class="remarks-section">
-                    <div class="remarks-header">
-                        <i class="fas fa-user-md"></i>
-                        <span>Dietitian's Remarks</span>
+                    <div class="remarks-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:10px; color:var(--primary); font-weight:600;">
+                            <i class="fas fa-user-md"></i>
+                            <span>Dietitian's Remarks</span>
+                        </div>
+                        <button onclick="toggleUserReport(true)" style="background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3);">
+                            <i class="fas fa-file-medical"></i> My Health Report
+                        </button>
                     </div>
                     <?php if (empty($feedbacks)): ?>
                         <p style="color: #ccc; font-style: italic; font-size: 0.9rem;">No remarks for this day yet.</p>
@@ -421,6 +426,177 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
         </main>
     </div>
 
+    <!-- User Personal Report Modal -->
+    <div id="userReportOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.5); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; width:90%; max-width:860px; max-height:90vh; border-radius:24px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 30px 60px rgba(0,0,0,0.2);">
+            <div style="padding:20px 28px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+                <h3 style="margin:0; font-size:1rem; color:#1e293b;"><i class="fas fa-file-medical" style="color:#10b981; margin-right:8px;"></i>My Personal Health Report</h3>
+                <button onclick="toggleUserReport(false)" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:#94a3b8;"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="flex:1; overflow-y:auto; padding:32px; background:#f8fafc;">
+                <div id="userReportPrintArea" style="max-width:780px; margin:0 auto; background:white; border-radius:18px; padding:40px; box-shadow:0 4px 24px rgba(0,0,0,0.06); font-family:'Inter',sans-serif;">
+                    <!-- Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; border-bottom:3px solid #10b981; padding-bottom:20px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+                                <img src="assets/img/logo.png" style="width:36px; height:36px; border-radius:8px;" alt="NutriDeq">
+                                <h2 style="color:#10b981; margin:0; font-size:1.5rem; font-family:'Outfit',sans-serif;">NutriDeq</h2>
+                            </div>
+                            <p style="color:#64748b; margin:0; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Personal Health & Nutrition Report</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p style="font-weight:700; margin:0; color:#1e293b;"><?php echo date('F j, Y'); ?></p>
+                            <p style="color:#94a3b8; margin:4px 0; font-size:0.78rem;"><?php echo date('M j, Y', strtotime($selected_date)); ?> — Daily Review</p>
+                        </div>
+                    </div>
+
+                    <!-- Patient Info -->
+                    <div style="background:#f8fafc; border-radius:12px; padding:16px 20px; margin-bottom:28px; display:flex; gap:40px;">
+                        <div>
+                            <p style="color:#10b981; font-size:0.68rem; font-weight:700; text-transform:uppercase; margin:0 0 4px;">Patient</p>
+                            <p style="font-weight:700; margin:0; color:#1e293b;"><?php echo htmlspecialchars($_SESSION['name'] ?? $_SESSION['user_name'] ?? 'NutriDeq User'); ?></p>
+                        </div>
+                        <div>
+                            <p style="color:#10b981; font-size:0.68rem; font-weight:700; text-transform:uppercase; margin:0 0 4px;">Review Date</p>
+                            <p style="font-weight:700; margin:0; color:#1e293b;"><?php echo date('D, M j, Y', strtotime($selected_date)); ?></p>
+                        </div>
+                    </div>
+
+                    <!-- Macro Summary Cards -->
+                    <h4 style="color:#1e293b; font-size:0.82rem; font-weight:700; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">📊 Nutritional Summary</h4>
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px;">
+                        <?php
+                        $dri = ['calories'=>2000,'protein'=>50,'carbs'=>275,'fat'=>78];
+                        $mcol = ['calories'=>'#ef4444','protein'=>'#3b82f6','carbs'=>'#f59e0b','fat'=>'#8b5cf6'];
+                        $mlab = ['calories'=>['Energy','kcal'],'protein'=>['Protein','g'],'carbs'=>['Carbs','g'],'fat'=>['Fat','g']];
+                        foreach ($mlab as $k=>[$l,$u]):
+                            $p = min(100, round($totals[$k]/$dri[$k]*100));
+                            $v = $k==='calories' ? number_format($totals[$k],0) : number_format($totals[$k],1);
+                            $c = $mcol[$k];
+                            $fl = $p>110?'⚠ High':($p<50?'↓ Low':'✓ OK');
+                            $fc = $p>110?'#ef4444':($p<50?'#f59e0b':'#10b981');
+                        ?>
+                        <div style="background:#f8fafc; padding:14px; border-radius:12px; border-top:3px solid <?php echo $c; ?>; text-align:center;">
+                            <p style="color:#64748b; font-size:0.65rem; margin:0 0 4px; text-transform:uppercase; font-weight:600;"><?php echo $l; ?></p>
+                            <p style="font-weight:900; font-size:1.2rem; margin:0; color:#1e293b;"><?php echo $v; ?><small style="font-size:0.5em; color:#94a3b8; margin-left:2px;"><?php echo $u; ?></small></p>
+                            <div style="margin-top:6px; height:4px; background:#e2e8f0; border-radius:4px; overflow:hidden;"><div style="height:100%; width:<?php echo $p; ?>%; background:<?php echo $c; ?>; border-radius:4px;"></div></div>
+                            <p style="margin:4px 0 0; font-size:0.62rem; font-weight:700; color:<?php echo $fc; ?>;"><?php echo $fl; ?> (<?php echo $p; ?>% DRI)</p>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Meal breakdown -->
+                    <h4 style="color:#1e293b; font-size:0.82rem; font-weight:700; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">🍽 What I Ate Today</h4>
+                    <?php
+                    $uicons = ['Breakfast'=>'☀️','Lunch'=>'🥗','Dinner'=>'🌙','Snack'=>'🍎'];
+                    foreach ($grouped_logs as $meal => $items):
+                        $mc = array_sum(array_column($items,'calories'));
+                        $mp = array_sum(array_column($items,'protein'));
+                        $mca = array_sum(array_column($items,'carbs'));
+                        $mf = array_sum(array_column($items,'fat'));
+                    ?>
+                    <div style="margin-bottom:18px; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+                        <div style="background:#f1fdf7; padding:10px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #d1fae5;">
+                            <span style="font-weight:700; color:#1e293b; font-size:0.9rem;"><?php echo ($uicons[$meal]??'🍽').' '.$meal; ?></span>
+                            <?php if (!empty($items)): ?>
+                            <span style="font-size:0.75rem; color:#10b981; font-weight:700; background:white; padding:2px 10px; border-radius:20px; border:1px solid #d1fae5;">
+                                <?php echo number_format($mc,0); ?> kcal | P:<?php echo number_format($mp,1); ?>g C:<?php echo number_format($mca,1); ?>g F:<?php echo number_format($mf,1); ?>g
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if(empty($items)): ?>
+                        <div style="padding:14px; text-align:center; color:#cbd5e1; font-size:0.82rem; font-style:italic;">Nothing logged.</div>
+                        <?php else: ?>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                            <thead><tr style="background:#f8fafc; color:#64748b; font-weight:600; font-size:0.68rem; text-transform:uppercase;">
+                                <th style="padding:7px 14px; text-align:left;">Food</th>
+                                <th style="padding:7px; text-align:center;">Serving</th>
+                                <th style="padding:7px; text-align:center;">kcal</th>
+                                <th style="padding:7px; text-align:center;">Protein</th>
+                                <th style="padding:7px; text-align:center;">Carbs</th>
+                                <th style="padding:7px; text-align:center;">Fat</th>
+                            </tr></thead>
+                            <tbody>
+                            <?php foreach($items as $it): ?>
+                            <tr style="border-top:1px solid #f1f5f9;">
+                                <td style="padding:9px 14px; font-weight:600; color:#1e293b;"><?php echo htmlspecialchars($it['food_name']); ?></td>
+                                <td style="padding:9px; text-align:center; color:#64748b;"><?php echo number_format($it['serving_size']??100,0); ?>g</td>
+                                <td style="padding:9px; text-align:center; font-weight:700; color:#ef4444;"><?php echo number_format($it['calories'],0); ?></td>
+                                <td style="padding:9px; text-align:center; color:#3b82f6;"><?php echo number_format($it['protein'],1); ?>g</td>
+                                <td style="padding:9px; text-align:center; color:#f59e0b;"><?php echo number_format($it['carbs'],1); ?>g</td>
+                                <td style="padding:9px; text-align:center; color:#8b5cf6;"><?php echo number_format($it['fat'],1); ?>g</td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <!-- Dietitian Remarks inside user report -->
+                    <?php if (!empty($feedbacks)): ?>
+                    <h4 style="color:#1e293b; font-size:0.82rem; font-weight:700; margin:24px 0 12px; text-transform:uppercase; letter-spacing:0.5px;">📝 Dietitian Notes For You</h4>
+                    <?php foreach ($feedbacks as $fb): ?>
+                    <div style="background:#f8fafc; border-left:4px solid #10b981; padding:12px 16px; border-radius:10px; margin-bottom:10px;">
+                        <p style="font-size:0.72rem; color:#94a3b8; margin:0 0 4px;"><strong style="color:#1e293b;"><?php echo htmlspecialchars($fb['staff_name']); ?></strong> · <?php echo date('M j, Y g:i A', strtotime($fb['created_at'])); ?></p>
+                        <p style="color:#1e293b; margin:0; font-size:0.875rem; line-height:1.6;"><?php echo nl2br(htmlspecialchars($fb['content'])); ?></p>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <!-- Footer -->
+                    <div style="margin-top:32px; padding-top:20px; border-top:1px solid #e2e8f0; text-align:center; color:#cbd5e1; font-size:0.7rem; line-height:1.7;">
+                        Personal Health Report — NutriDeq Clinical Platform · Confidential · <?php echo date('F j, Y g:i A'); ?>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:16px 28px; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end; gap:12px; background:white;">
+                <button onclick="toggleUserReport(false)" style="padding:10px 20px; border-radius:10px; border:1.5px solid #e2e8f0; background:white; cursor:pointer; font-weight:600; color:#475569;">Close</button>
+                <button onclick="generateClinicalReport('#userReportPrintArea','My-NutriDeq-Report-<?php echo $selected_date; ?>.pdf')" style="padding:10px 24px; border-radius:10px; background:#10b981; color:white; border:none; font-weight:700; cursor:pointer; box-shadow:0 4px 15px rgba(16,185,129,0.25);">
+                    <i class="fas fa-file-medical"></i> Download PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FCT Library Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function toggleUserReport(show) {
+            const overlay = document.getElementById('userReportOverlay');
+            overlay.style.display = show ? 'flex' : 'none';
+        }
+        function generateClinicalReport(targetSelector, filename) {
+            const element = document.querySelector(targetSelector);
+            if (!element) return alert('Report content not found.');
+            const btn = event.currentTarget || document.activeElement;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+            html2pdf().set({
+                margin: 10,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(element).save().then(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                btn.style.backgroundColor = '#059669';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.backgroundColor = '#10b981';
+                }, 3000);
+            }).catch(err => {
+                console.error(err);
+                btn.innerHTML = orig;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            });
+        }
+    </script>
     <!-- FCT Library Modal -->
     <div id="fctModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; overflow-y: auto;">
         <div class="modal-container" style="background: white; width: 95%; max-width: 1000px; margin: 30px auto; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: calc(100vh - 60px);">

@@ -564,72 +564,186 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
 
     <!-- Live Report Preview Panel -->
     <div class="report-preview-panel" id="reportPreview">
-        <div style="padding: 32px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-family: 'Outfit', sans-serif; margin: 0; color: #1e293b;">Clinical Diagnostic Report</h2>
+        <div style="padding: 24px 32px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);">
+            <h2 style="font-family: 'Outfit', sans-serif; margin: 0; color: #1e293b; font-size: 1.2rem;"><i class="fas fa-file-medical" style="color: #10b981; margin-right: 10px;"></i>Clinical Diagnostic Report</h2>
             <button class="btn-dash-action" onclick="toggleReportPreview(false)" style="padding: 10px; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div style="flex: 1; overflow-y: auto; padding: 40px; background: white;">
-            <div id="reportPrintArea" style="max-width: 800px; margin: 0 auto; font-family: 'Inter', sans-serif;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #10b981; padding-bottom: 20px;">
+        <div style="flex: 1; overflow-y: auto; padding: 40px; background: #f8fafc;">
+            <div id="reportPrintArea" style="max-width: 820px; margin: 0 auto; font-family: 'Inter', sans-serif; background: white; border-radius: 20px; padding: 48px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);">
+
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px; border-bottom: 3px solid #10b981; padding-bottom: 24px;">
                     <div>
-                        <h1 style="color: #10b981; margin: 0; font-size: 2rem;">NutriDeq</h1>
-                        <p style="color: #64748b; margin: 5px 0;">Official Clinical Journal Summary</p>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                            <img src="assets/img/logo.png" style="width: 40px; height: 40px; border-radius: 10px;" alt="NutriDeq">
+                            <h1 style="color: #10b981; margin: 0; font-size: 1.8rem; font-family: 'Outfit', sans-serif;">NutriDeq</h1>
+                        </div>
+                        <p style="color: #64748b; margin: 0; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Official Clinical Diagnostic Report</p>
                     </div>
                     <div style="text-align: right;">
-                        <p style="font-weight: 700; color: #1e293b; margin: 0;"><?php echo date('F j, Y'); ?></p>
-                        <p style="color: #64748b; margin: 5px 0;">Report ID: #<?php echo bin2hex(random_bytes(4)); ?></p>
+                        <p style="font-weight: 700; color: #1e293b; margin: 0; font-size: 1rem;"><?php echo date('F j, Y'); ?></p>
+                        <p style="color: #94a3b8; margin: 4px 0; font-size: 0.8rem;">Report ID: #<?php echo bin2hex(random_bytes(4)); ?></p>
+                        <div style="margin-top: 8px; background: #ecfdf5; color: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block;">✓ Clinically Verified</div>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+                <!-- Patient + Date Info -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 36px; background: #f8fafc; border-radius: 14px; padding: 20px;">
                     <div>
-                        <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px;">Patient Information</h4>
-                        <p style="font-size: 1.1rem; font-weight: 700; margin: 0;"><?php echo htmlspecialchars($selected_client['name'] ?? 'N/A'); ?></p>
-                        <p style="color: #64748b; margin: 4px 0;"><?php echo htmlspecialchars($selected_client['email'] ?? 'N/A'); ?></p>
+                        <p style="color: #10b981; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; margin: 0 0 6px; letter-spacing: 0.5px;">Patient Name</p>
+                        <p style="font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b;"><?php echo htmlspecialchars($selected_client['name'] ?? 'N/A'); ?></p>
                     </div>
                     <div>
-                        <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 10px;">Review Date</h4>
-                        <p style="font-size: 1.1rem; font-weight: 700; margin: 0;"><?php echo date('M j, Y', strtotime($selected_date)); ?></p>
+                        <p style="color: #10b981; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; margin: 0 0 6px; letter-spacing: 0.5px;">Patient Email</p>
+                        <p style="font-size: 0.9rem; color: #64748b; margin: 0;"><?php echo htmlspecialchars($selected_client['email'] ?? 'N/A'); ?></p>
+                    </div>
+                    <div>
+                        <p style="color: #10b981; text-transform: uppercase; font-size: 0.7rem; font-weight: 700; margin: 0 0 6px; letter-spacing: 0.5px;">Review Date</p>
+                        <p style="font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b;"><?php echo date('M j, Y', strtotime($selected_date)); ?></p>
                     </div>
                 </div>
 
-                <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Nutritional Summary</h4>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;">
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
-                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Energy</p>
-                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['calories'], 0); ?> kcal</p>
+                <!-- Macro Summary -->
+                <h4 style="color: #1e293b; font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📊 Daily Nutritional Summary</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px;">
+                    <?php
+                    $dailyRef = ['calories' => 2000, 'protein' => 50, 'carbs' => 275, 'fat' => 78];
+                    $macroColors = ['calories' => '#ef4444', 'protein' => '#3b82f6', 'carbs' => '#f59e0b', 'fat' => '#8b5cf6'];
+                    $macroLabels = ['calories' => ['Energy', 'kcal'], 'protein' => ['Protein', 'g'], 'carbs' => ['Carbohydrates', 'g'], 'fat' => ['Total Fat', 'g']];
+                    foreach ($macroLabels as $key => [$label, $unit]):
+                        $pct = min(100, round($totals[$key] / $dailyRef[$key] * 100));
+                        $val = $key === 'calories' ? number_format($totals[$key], 0) : number_format($totals[$key], 1);
+                        $color = $macroColors[$key];
+                        $flag = $pct > 110 ? '⚠ High' : ($pct < 50 ? '↓ Low' : '✓ OK');
+                        $flagColor = $pct > 110 ? '#ef4444' : ($pct < 50 ? '#f59e0b' : '#10b981');
+                    ?>
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 14px; border-top: 3px solid <?php echo $color; ?>; text-align: center;">
+                        <p style="color: #64748b; font-size: 0.7rem; margin: 0 0 6px; text-transform: uppercase; font-weight: 600;"><?php echo $label; ?></p>
+                        <p style="font-weight: 900; font-size: 1.3rem; margin: 0; color: #1e293b;"><?php echo $val; ?><small style="font-size: 0.55em; color: #94a3b8; margin-left: 2px;"><?php echo $unit; ?></small></p>
+                        <div style="margin-top: 8px; height: 5px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: <?php echo $pct; ?>%; background: <?php echo $color; ?>; border-radius: 4px;"></div>
+                        </div>
+                        <p style="margin: 5px 0 0; font-size: 0.65rem; font-weight: 700; color: <?php echo $flagColor; ?>;"><?php echo $flag; ?> (<?php echo $pct; ?>% DRI)</p>
                     </div>
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
-                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Protein</p>
-                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['protein'], 1); ?> g</p>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Meal-by-Meal Breakdown -->
+                <h4 style="color: #1e293b; font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px;">🍽 Meal-by-Meal Dietary Intake</h4>
+                <?php
+                $mealIcons = ['Breakfast' => '☀️', 'Lunch' => '🥗', 'Dinner' => '🌙', 'Snack' => '🍎'];
+                foreach ($grouped_logs as $meal => $items):
+                    $mealCals = array_sum(array_column($items, 'calories'));
+                    $mealProtein = array_sum(array_column($items, 'protein'));
+                    $mealCarbs = array_sum(array_column($items, 'carbs'));
+                    $mealFat = array_sum(array_column($items, 'fat'));
+                    $icon = $mealIcons[$meal] ?? '🍽';
+                ?>
+                <div style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden;">
+                    <div style="background: #f1fdf7; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #d1fae5;">
+                        <span style="font-weight: 700; color: #1e293b; font-size: 0.95rem;"><?php echo $icon . ' ' . $meal; ?></span>
+                        <?php if (!empty($items)): ?>
+                        <span style="font-size: 0.8rem; color: #10b981; font-weight: 700; background: white; padding: 3px 12px; border-radius: 20px; border: 1px solid #d1fae5;">
+                            <?php echo number_format($mealCals, 0); ?> kcal &nbsp;|&nbsp; P: <?php echo number_format($mealProtein, 1); ?>g &nbsp;|&nbsp; C: <?php echo number_format($mealCarbs, 1); ?>g &nbsp;|&nbsp; F: <?php echo number_format($mealFat, 1); ?>g
+                        </span>
+                        <?php endif; ?>
                     </div>
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
-                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Carbs</p>
-                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['carbs'], 1); ?> g</p>
+                    <?php if (empty($items)): ?>
+                    <div style="padding: 18px; text-align: center; color: #cbd5e1; font-size: 0.85rem; font-style: italic;">No foods logged for this meal.</div>
+                    <?php else: ?>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+                        <thead>
+                            <tr style="background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.3px;">
+                                <th style="padding: 8px 16px; text-align: left;">Food Item</th>
+                                <th style="padding: 8px; text-align: center;">Serving</th>
+                                <th style="padding: 8px; text-align: center;">Calories</th>
+                                <th style="padding: 8px; text-align: center;">Protein</th>
+                                <th style="padding: 8px; text-align: center;">Carbs</th>
+                                <th style="padding: 8px; text-align: center;">Fat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $item): ?>
+                            <tr style="border-top: 1px solid #f1f5f9;">
+                                <td style="padding: 10px 16px; font-weight: 600; color: #1e293b;"><?php echo htmlspecialchars($item['food_name']); ?></td>
+                                <td style="padding: 10px; text-align: center; color: #64748b;"><?php echo number_format($item['serving_size'] ?? 100, 0); ?>g</td>
+                                <td style="padding: 10px; text-align: center; font-weight: 700; color: #ef4444;"><?php echo number_format($item['calories'], 0); ?></td>
+                                <td style="padding: 10px; text-align: center; color: #3b82f6;"><?php echo number_format($item['protein'], 1); ?>g</td>
+                                <td style="padding: 10px; text-align: center; color: #f59e0b;"><?php echo number_format($item['carbs'], 1); ?>g</td>
+                                <td style="padding: 10px; text-align: center; color: #8b5cf6;"><?php echo number_format($item['fat'], 1); ?>g</td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+
+                <!-- Clinical Flags -->
+                <?php
+                $flags = [];
+                if ($totals['calories'] > 2200) $flags[] = ['⚠️ Caloric Excess', 'Patient exceeded recommended daily caloric threshold (>2,200 kcal). Consider reviewing portion sizes.', '#fef2f2', '#ef4444'];
+                if ($totals['calories'] < 900 && !empty($logs)) $flags[] = ['⚠️ Very Low Intake', 'Patient caloric intake is critically below minimum daily requirements. Risk of nutritional deficiency.', '#fff7ed', '#f59e0b'];
+                if ($totals['protein'] < 40 && !empty($logs)) $flags[] = ['⚠️ Low Protein', 'Patient protein intake (' . number_format($totals['protein'],1) . 'g) is below the recommended 50g/day.', '#fff7ed', '#f59e0b'];
+                if (empty($logs)) $flags[] = ['ℹ️ No Intake Recorded', 'No food logs were recorded for this date. Patient may have missed entries.', '#f8fafc', '#94a3b8'];
+                if (!empty($flags)):
+                ?>
+                <h4 style="color: #1e293b; font-size: 0.85rem; font-weight: 700; margin: 32px 0 14px; text-transform: uppercase; letter-spacing: 0.5px;">🚩 Clinical Flags & Alerts</h4>
+                <?php foreach ($flags as [$title, $msg, $bg, $border]): ?>
+                <div style="background: <?php echo $bg; ?>; border-left: 4px solid <?php echo $border; ?>; padding: 14px 18px; border-radius: 10px; margin-bottom: 12px;">
+                    <p style="font-weight: 700; color: <?php echo $border; ?>; margin: 0 0 4px; font-size: 0.85rem;"><?php echo $title; ?></p>
+                    <p style="color: #475569; margin: 0; font-size: 0.82rem; line-height: 1.5;"><?php echo $msg; ?></p>
+                </div>
+                <?php endforeach; endif; ?>
+
+                <!-- Dietitian Notes -->
+                <?php
+                $notes_sql = "SELECT df.content, df.created_at, u.name as staff_name FROM diary_feedback df JOIN users u ON df.staff_id = u.id WHERE df.user_id = ? AND df.log_date = ? ORDER BY df.created_at ASC";
+                $n_stmt = $conn->prepare($notes_sql);
+                $n_stmt->execute([$client_user_id, $selected_date]);
+                $notes = $n_stmt->fetchAll(PDO::FETCH_ASSOC);
+                ?>
+                <h4 style="color: #1e293b; font-size: 0.85rem; font-weight: 700; margin: 32px 0 14px; text-transform: uppercase; letter-spacing: 0.5px;">📝 Dietitian Clinical Notes</h4>
+                <?php if (empty($notes)): ?>
+                <div style="padding: 18px; text-align: center; color: #cbd5e1; font-size: 0.85rem; font-style: italic; border: 1px dashed #e2e8f0; border-radius: 12px;">No clinical notes recorded for this date.</div>
+                <?php else: ?>
+                <?php foreach ($notes as $note): ?>
+                <div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 10px; margin-bottom: 12px;">
+                    <p style="font-size: 0.75rem; color: #94a3b8; margin: 0 0 6px;">
+                        <strong style="color: #1e293b;"><?php echo htmlspecialchars($note['staff_name']); ?></strong> &nbsp;·&nbsp;
+                        <?php echo date('M j, Y g:i A', strtotime($note['created_at'])); ?>
+                    </p>
+                    <p style="color: #1e293b; margin: 0; font-size: 0.9rem; line-height: 1.6;"><?php echo nl2br(htmlspecialchars($note['content'])); ?></p>
+                </div>
+                <?php endforeach; endif; ?>
+
+                <!-- Signature Block -->
+                <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 50px;">Reviewed & Prepared By</p>
+                        <div style="border-top: 1px solid #1e293b; padding-top: 8px;">
+                            <p style="font-size: 0.8rem; color: #1e293b; font-weight: 600; margin: 0;">Licensed Dietitian / Practitioner</p>
+                        </div>
                     </div>
-                    <div style="background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center;">
-                        <p style="color: #64748b; font-size: 0.75rem; margin-bottom: 5px;">Fats</p>
-                        <p style="font-weight: 800; font-size: 1.2rem; margin: 0;"><?php echo number_format($totals['fat'], 1); ?> g</p>
+                    <div>
+                        <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 50px;">Acknowledged By Patient</p>
+                        <div style="border-top: 1px solid #1e293b; padding-top: 8px;">
+                            <p style="font-size: 0.8rem; color: #1e293b; font-weight: 600; margin: 0;"><?php echo htmlspecialchars($selected_client['name'] ?? ''); ?></p>
+                        </div>
                     </div>
                 </div>
 
-                <h4 style="color: #10b981; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Clinical Observations</h4>
-                <div style="background: #fff; border: 1px solid #e2e8f0; padding: 25px; border-radius: 16px; margin-bottom: 40px; color: #475569; line-height: 1.6;">
-                    The patient's daily intake for <?php echo date('M j, Y', strtotime($selected_date)); ?> has been synchronized and reviewed. 
-                    Clinical data indicates a total caloric intake of <?php echo number_format($totals['calories'], 0); ?> kcal.
-                    Practitioner feedback and meal adherence markers are documented in the centralized NutriDeq Clinical Journal.
-                </div>
-
-                <div style="margin-top: 60px; border-top: 1px solid #e2e8f0; padding-top: 20px; color: #94a3b8; font-size: 0.75rem; text-align: center;">
-                    This is an automatically generated clinical document from the NutriDeq Practitioner Portal.
+                <!-- Footer -->
+                <div style="margin-top: 32px; text-align: center; color: #cbd5e1; font-size: 0.72rem; line-height: 1.7;">
+                    This document was automatically generated by the NutriDeq Clinical Platform &nbsp;·&nbsp; Confidential Patient Record &nbsp;·&nbsp; <?php echo date('F j, Y g:i A'); ?>
                 </div>
             </div>
         </div>
-        <div style="padding: 24px 32px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 16px;">
+        <div style="padding: 20px 32px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 16px; background: rgba(255,255,255,0.9);">
             <button class="btn-dash-action" onclick="toggleReportPreview(false)" style="padding:12px 24px; border-radius: 12px; border: 1.5px solid #e2e8f0;">Close Preview</button>
-            <button class="btn-dash-action" style="padding:12px 24px; border-radius: 12px; background: #10b981; color: white; border: none; font-weight: 700; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);" 
+            <button class="btn-dash-action" style="padding:12px 24px; border-radius: 12px; background: #10b981; color: white; border: none; font-weight: 700; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);"
                 onclick="generateClinicalReport('#reportPrintArea', 'Diagnostic-Report-P<?php echo $selected_client_id; ?>.pdf')">
                 <i class="fas fa-file-medical"></i> Generate PDF Document
             </button>
