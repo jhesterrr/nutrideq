@@ -56,19 +56,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Try sending real email if PHPMailer is loaded and SMTP is configured
             $mailSent = false;
-            if (class_exists('PHPMailer\PHPMailer\PHPMailer') && getenv('SMTP_HOST')) {
+            
+            // Debug variables (internal)
+            $hasPHPMailer = class_exists('PHPMailer\PHPMailer\PHPMailer');
+            $smtpHost = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? null);
+            $smtpUser = getenv('SMTP_USER') ?: ($_ENV['SMTP_USER'] ?? null);
+            $smtpPass = getenv('SMTP_PASS') ?: ($_ENV['SMTP_PASS'] ?? null);
+            $smtpPort = getenv('SMTP_PORT') ?: ($_ENV['SMTP_PORT'] ?? 587);
+
+            if ($hasPHPMailer && $smtpHost) {
                 try {
                     $mail = new PHPMailer(true);
+                    
+                    // Server settings
                     $mail->isSMTP();
-                    $mail->Host       = getenv('SMTP_HOST');
+                    $mail->Host       = $smtpHost;
                     $mail->SMTPAuth   = true;
-                    $mail->Username   = getenv('SMTP_USER');
-                    $mail->Password   = getenv('SMTP_PASS');
+                    $mail->Username   = $smtpUser;
+                    $mail->Password   = $smtpPass;
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = getenv('SMTP_PORT') ?: 587;
+                    $mail->Port       = $smtpPort;
 
-                    $mail->setFrom(getenv('SMTP_FROM') ?: 'support@nutrideq.com', 'NutriDeq Support');
+                    // Recipients
+                    $mail->setFrom($smtpUser ?: 'support@nutrideq.com', 'NutriDeq Support');
                     $mail->addAddress($email, $user['name']);
+                    
+                    // Content
                     $mail->isHTML(true);
                     $mail->Subject = 'NutriDeq - Password Reset Request';
                     $mail->Body    = "
@@ -84,23 +97,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
                         </div>
                     ";
+                    
                     $mail->send();
                     $mailSent = true;
                 } catch (Exception $e) {
-                    // Fallback to simulation if email fails
-                    error_log("Mail Error: " . $mail->ErrorInfo);
+                    $error = "Mail Error: " . $mail->ErrorInfo;
                 }
             }
 
             if ($mailSent) {
                 $message = "A secure reset link has been sent to your Gmail address. Please check your inbox (and spam folder).";
-            } else {
-                // Simulation fallback for local development
+            } elseif ($hasPHPMailer && !$smtpHost) {
+                // SMTP not configured on Railway yet
                 $message = "If an account exists for <strong>$email</strong>, a reset link has been generated.<br><br>
                             <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
                                 <strong>DEVELOPMENT SIMULATION:</strong><br>
                                 Click here to reset: <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
                             </div>";
+            } else {
+                // PHPMailer missing or other fatal error
+                $message = "A reset link has been generated. [Note: Email service not initialized]";
+                $message .= "<br><br><a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>";
             }
         } else {
             // Security: Generic message
