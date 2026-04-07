@@ -557,7 +557,7 @@ try {
         </div>
 
         <!-- Delete History -->
-        <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ">
+        <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
             <div class="mgmt-section-label" style="margin-bottom:20px;"><i class="fas fa-history"></i> Deleted User Archive</div>
             <?php if(empty($deleted_users)): ?>
             <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted users</h3><p>Deleted users are kept for 30 days before being purged.</p></div>
