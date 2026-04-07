@@ -75,12 +75,13 @@ if (isset($_GET['code'])) {
             // We use a random password since they login via Google
             $random_password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
             
-            $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, 'user', 'active', NOW(), NOW())";
+            // Fix: Use 'regular' role instead of 'user' to match DB ENUM
+            $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, 'regular', 'active', NOW(), NOW())";
             $insert_stmt = $conn->prepare($insert_sql);
             $insert_stmt->execute([$name, $email, $random_password]);
             
             $user_id = $conn->lastInsertId();
-            $role = 'user';
+            $role = 'user'; // Still treat as 'user' in session for app logic
 
             // Link to clients table (same logic as process_register.php)
             $attach_stmt = $conn->prepare("SELECT id FROM clients WHERE email = ? LIMIT 1");
