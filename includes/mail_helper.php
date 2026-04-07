@@ -28,8 +28,7 @@ function sendEmail($to, $subject, $body, $altBody = '') {
         $mail->Password   = $smtpPass;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = $smtpPort;
-        $mail->Timeout    = 10; // Set a 10-second timeout to prevent hangs
-        $mail->SMTPConnectTimeout = 10;
+        $mail->Timeout    = 5; // Reduced to 5 seconds to prevent long hangs
 
         $mail->setFrom($smtpUser, 'NutriDeq Support');
         $mail->addAddress($to);
