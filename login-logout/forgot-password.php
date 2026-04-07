@@ -5,7 +5,7 @@ require_once __DIR__ . '/../database.php';
 $message = '';
 $error = '';
 $email = '';
-$step = 1; // 1: Email entry, 2: Choose Method, 3: Recovery Key Entry, 4: Reset Password
+$step = 1; // 1: Email entry, 2: Recovery Key Entry, 3: Reset Password
 
 try {
     $db = new Database();
@@ -31,35 +31,7 @@ try {
             }
         }
 
-        // Step 2: Handle Method Choice
-        elseif ($action === 'use_key') {
-            $step = 3;
-        } 
-        
-        elseif ($action === 'request_admin') {
-            $user_id = $_SESSION['reset_user_id'];
-            
-            // Check for existing pending request
-            $check = $conn->prepare("SELECT id FROM password_reset_requests WHERE user_id = ? AND status = 'pending'");
-            $check->execute([$user_id]);
-            
-            if ($check->fetch()) {
-                $message = "You already have a pending reset request. Please contact your Admin or Staff member.";
-            } else {
-                // Try to find assigned staff
-                $staff_stmt = $conn->prepare("SELECT staff_id FROM clients WHERE user_id = ? LIMIT 1");
-                $staff_stmt->execute([$user_id]);
-                $client = $staff_stmt->fetch();
-                $staff_id = $client['staff_id'] ?? null;
-
-                $ins = $conn->prepare("INSERT INTO password_reset_requests (user_id, staff_id) VALUES (?, ?)");
-                $ins->execute([$user_id, $staff_id]);
-                $message = "Your reset request has been sent to the Admin/Staff. Please contact them for your temporary password.";
-            }
-            $step = 1;
-        }
-
-        // Step 3: Verify Recovery Key
+        // Step 2: Verify Recovery Key
         elseif ($action === 'verify_key') {
             $key = trim($_POST['recovery_key'] ?? '');
             $user_id = $_SESSION['reset_user_id'];
@@ -68,14 +40,14 @@ try {
             $stmt->execute([$user_id, $key]);
             
             if ($stmt->fetch()) {
-                $step = 4;
-            } else {
-                $error = "Invalid recovery key. Please try again or request an Admin reset.";
                 $step = 3;
+            } else {
+                $error = "Invalid recovery key. Please try again.";
+                $step = 2;
             }
         }
 
-        // Step 4: Final Password Reset
+        // Step 3: Final Password Reset
         elseif ($action === 'reset_password') {
             $pass = $_POST['new_password'] ?? '';
             $conf = $_POST['confirm_password'] ?? '';
@@ -83,19 +55,15 @@ try {
 
             if (strlen($pass) < 8) {
                 $error = "Password must be at least 8 characters long.";
-                $step = 4;
+                $step = 3;
             } elseif ($pass !== $conf) {
                 $error = "Passwords do not match.";
-                $step = 4;
+                $step = 3;
             } else {
                 $hashed = password_hash($pass, PASSWORD_DEFAULT);
                 $stmt = $conn->prepare("UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?");
                 $stmt->execute([$hashed, $user_id]);
                 
-                // Clear reset requests for this user
-                $clear = $conn->prepare("UPDATE password_reset_requests SET status = 'completed' WHERE user_id = ? AND status = 'pending'");
-                $clear->execute([$user_id]);
-
                 $_SESSION['success_message'] = "Password reset successfully! You can now log in.";
                 header("Location: NutriDeqN-Login.php");
                 exit();
@@ -127,8 +95,6 @@ try {
         .form-control:focus { outline: none; border-color: var(--primary); }
         .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
         .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
-        .btn-outline { width: 100%; padding: 16px; background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
-        .btn-outline:hover { background: rgba(16, 185, 129, 0.05); }
         .back-link { display: block; margin-top: 20px; color: #64748b; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
     </style>
 </head>
@@ -148,16 +114,8 @@ try {
             </form>
 
         <?php elseif ($step == 2): ?>
-            <h1>Hi, <?php echo htmlspecialchars($_SESSION['reset_user_name']); ?></h1>
-            <p>How would you like to recover your account?</p>
-            <form method="POST">
-                <button type="submit" name="action" value="use_key" class="btn-submit"><i class="fas fa-key"></i> Use Recovery Key</button>
-                <button type="submit" name="action" value="request_admin" class="btn-outline"><i class="fas fa-user-shield"></i> Request Admin Reset</button>
-            </form>
-
-        <?php elseif ($step == 3): ?>
             <h1>Recovery Key</h1>
-            <p>Please enter your 12-character recovery key (e.g., ND-XXXX-XXXX).</p>
+            <p>Hi, <strong><?php echo htmlspecialchars($_SESSION['reset_user_name']); ?></strong>. Please enter your 12-character recovery key (e.g., ND-XXXX-XXXX).</p>
             <?php if ($error): ?><div class="alert alert-error"><?php echo $error; ?></div><?php endif; ?>
             <form method="POST">
                 <input type="hidden" name="action" value="verify_key">
@@ -165,7 +123,7 @@ try {
                 <button type="submit" class="btn-submit">Verify Key</button>
             </form>
 
-        <?php elseif ($step == 4): ?>
+        <?php elseif ($step == 3): ?>
             <h1>Reset Password</h1>
             <p>Create a new secure password for your account.</p>
             <?php if ($error): ?><div class="alert alert-error"><?php echo $error; ?></div><?php endif; ?>
