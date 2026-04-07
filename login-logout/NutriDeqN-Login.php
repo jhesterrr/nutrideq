@@ -10,22 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
 
-    $email = strtolower(trim($_POST['email']));
+    $email = trim($_POST['email']);
     $input_password = $_POST['password'];
-
-    // GMAIL ONLY RESTRICTION
-    if (!preg_match('/@gmail\.com$/i', $email)) {
-        $_SESSION['error'] = "Only Gmail accounts are allowed to log in.";
-        $_SESSION['login_email'] = $email;
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
     
     try {
         $database = new Database();
         $pdo = $database->getConnection();
         
-        $stmt = $pdo->prepare("SELECT id, name, email, password, role, status, is_verified FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, name, email, password, role, status FROM users WHERE email = ?");
         $stmt->execute([$email]);
         
         if ($stmt->rowCount() == 1) {
@@ -37,15 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             }
-
-            if ($user['is_verified'] != 1) {
-                 $_SESSION['error'] = "Please verify your email address before logging in. Check your inbox for the verification link.";
-                 $_SESSION['login_email'] = $email;
-                 header("Location: " . $_SERVER['PHP_SELF']);
-                 exit();
-             }
-             
-             if (password_verify($input_password, $user['password'])) {
+            
+            if (password_verify($input_password, $user['password'])) {
                 if ($user['role'] === 'regular') {
                     $user['role'] = 'user';
                 }
@@ -383,13 +368,6 @@ if (isset($_SESSION['error'])) {
                             <button type="submit" class="btn-submit">Authenticate Portal</button>
                         </div>
                     </form>
-
-                    <div class="google-auth-separator stagger d-4">OR</div>
-
-                    <a href="google-callback.php" class="btn-google stagger d-4">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-                        Continue with Google
-                    </a>
 
                     <div class="auth-footer stagger d-4">
                         Don't have an account? <a href="NutriDeqN-Signup.php">Create an Account</a>

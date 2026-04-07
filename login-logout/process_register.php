@@ -4,13 +4,12 @@ session_start();
 
 // require the Database class from project root
 require_once __DIR__ . '/../database.php';
-require_once __DIR__ . '/../includes/mail_helper.php';
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get form data
     $name = trim($_POST['name']);
-    $email = strtolower(trim($_POST['email']));
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
@@ -24,11 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Please enter a valid email address";
-    }
-
-    // GMAIL ONLY RESTRICTION
-    if (!preg_match('/@gmail\.com$/i', $email)) {
-        $errors[] = "Only Gmail accounts are allowed to register";
     }
 
     if (strlen($password) < 8) {
@@ -59,37 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Hash password
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $verification_token = bin2hex(random_bytes(32));
 
                 // Insert user into database - automatically set as 'user' role
-                $insert_sql = "INSERT INTO users (name, email, password, role, status, is_verified, verification_token, created_at, updated_at) VALUES (?, ?, ?, 'regular', 'active', 0, ?, NOW(), NOW())";
+                $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, 'regular', 'active', NOW(), NOW())";
                 $insert_stmt = $conn->prepare($insert_sql);
 
-                if ($insert_stmt->execute([$name, $email, $hashed_password, $verification_token])) {
+                if ($insert_stmt->execute([$name, $email, $hashed_password])) {
                     $user_id = $conn->lastInsertId();
-
-                    // Verification Link
-                    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-                    $host = $_SERVER['HTTP_HOST'];
-                    $verifyLink = $protocol . "://" . $host . "/login-logout/verify-email.php?token=" . $verification_token;
-
-                    // Send verification email
-                    $subject = "Verify Your NutriDeq Account";
-                    $body = "
-                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
-                            <h2 style='color: #10b981; text-align: center;'>Welcome to NutriDeq!</h2>
-                            <p>Hello <strong>{$name}</strong>,</p>
-                            <p>Thank you for registering with NutriDeq. To complete your registration and access the dashboard, please verify your email address by clicking the button below.</p>
-                            <div style='text-align: center; margin: 30px 0;'>
-                                <a href='$verifyLink' style='background-color: #10b981; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Verify Email Address</a>
-                            </div>
-                            <p style='color: #666; font-size: 0.9rem;'>If you didn't create an account, you can safely ignore this email.</p>
-                            <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
-                            <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
-                        </div>
-                    ";
-
-                    sendEmail($email, $subject, $body);
 
                     // If a clients row already exists for this email (imported/unlinked), attach it to the new user
                     $attach_stmt = $conn->prepare("SELECT id FROM clients WHERE email = ? LIMIT 1");
@@ -107,8 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $client_stmt->execute([$user_id, $name, $email]);
                     }
 
-                    // DO NOT Log user in yet. Instead, redirect to a success page.
-                    header("Location: verification_sent.php?email=" . urlencode($email));
+                    // Log user in
+                    $_SESSION['user_id'] = (int)$user_id;
+                    $_SESSION['user_name'] = $name;
+                    $_SESSION['user_email'] = $email;
+                    $_SESSION['user_role'] = 'user';
+                    $_SESSION['role'] = 'user';
+                    $_SESSION['logged_in'] = true;
+
+                    // Redirect to dashboard
+                    header("Location: ../dashboard.php");
                     exit();
                 } else {
                     $errors[] = "Error creating account. Please try again.";

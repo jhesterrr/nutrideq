@@ -1557,60 +1557,6 @@ $pdo = $database->getConnection();
         <?php endif; ?>
         
         <script src="scripts/premium-effects.js"></script>
-
-        <!-- Google Password Creation Modal -->
-        <?php if (isset($_SESSION['has_password']) && $_SESSION['has_password'] == 0): ?>
-        <div id="googlePasswordModal" class="modal-overlay" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-            <div class="modal-content" style="background: white; padding: 40px; border-radius: 32px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-                <div style="font-size: 50px; color: #10b981; margin-bottom: 20px;"><i class="fas fa-shield-alt"></i></div>
-                <h2 style="margin-bottom: 15px; color: #0f172a;">Secure Your Account</h2>
-                <p style="color: #64748b; margin-bottom: 30px; line-height: 1.6;">Welcome! Since you signed in with Google, please create a password for your NutriDeq account to ensure you can always access it.</p>
-                
-                <form id="googlePasswordForm">
-                    <div style="margin-bottom: 15px; text-align: left;">
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #334155;">New Password</label>
-                        <input type="password" id="new_password" required style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem;">
-                    </div>
-                    <div style="margin-bottom: 25px; text-align: left;">
-                        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #334155;">Confirm Password</label>
-                        <input type="password" id="confirm_password" required style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem;">
-                    </div>
-                    <div id="passwordError" style="color: #ef4444; font-size: 0.9rem; margin-bottom: 15px; display: none;"></div>
-                    <button type="submit" style="width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 16px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s;">Create Password</button>
-                </form>
-            </div>
-        </div>
-        <script>
-            document.getElementById('googlePasswordForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const password = document.getElementById('new_password').value;
-                const confirm_password = document.getElementById('confirm_password').value;
-                const errorDiv = document.getElementById('passwordError');
-                
-                errorDiv.style.display = 'none';
-                
-                try {
-                    const response = await fetch('login-logout/set-google-password.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password, confirm_password })
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById('googlePasswordModal').style.display = 'none';
-                        alert('Password created successfully! You can now use it to log in as well.');
-                    } else {
-                        errorDiv.textContent = data.message;
-                        errorDiv.style.display = 'block';
-                    }
-                } catch (err) {
-                    errorDiv.textContent = 'An error occurred. Please try again.';
-                    errorDiv.style.display = 'block';
-                }
-            });
-        </script>
-        <?php endif; ?>
     </main>
 </div> <!-- Close .main-layout -->
 </body>

@@ -32,7 +32,7 @@ try {
         exit();
     }
 
-    // Check if user account already exists for this email
+    // Check if user already exists
     $user_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $user_stmt->execute([$client['email']]);
     if ($user_stmt->fetch()) {
@@ -40,19 +40,13 @@ try {
         exit();
     }
 
-    // GMAIL ONLY RESTRICTION
-    if (!preg_match('/@gmail\.com$/i', $client['email'])) {
-        echo json_encode(['success' => false, 'message' => 'Only Gmail accounts are allowed.']);
-        exit();
-    }
-
-    // Create user account - Mark as verified since added by staff
+    // Create user account
     $default_password = "nutrideq123";
     $hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
     
     $create_user_stmt = $conn->prepare("
-        INSERT INTO users (name, email, password, role, status, is_verified) 
-        VALUES (?, ?, ?, 'regular', 'active', 1)
+        INSERT INTO users (name, email, password, role, status) 
+        VALUES (?, ?, ?, 'regular', 'active')
     ");
     
     $create_user_stmt->execute([

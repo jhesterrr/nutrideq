@@ -1,108 +1,113 @@
 <?php
 session_start();
-require_once __DIR__ . '/../database.php';
-require_once __DIR__ . '/../includes/mail_helper.php';
+require_once '../database.php';
+
+// Load PHPMailer if available (Railway deployment)
+if (file_exists('../vendor/autoload.php')) {
+    require '../vendor/autoload.php';
+}
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $message = '';
 $error = '';
 $email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = strtolower(trim($_POST['email']));
+    $email = trim($_POST['email']);
     
-    // GMAIL ONLY RESTRICTION
-    if (!preg_match('/@gmail\.com$/i', $email)) {
-        $error = "Only Gmail accounts are supported for password reset.";
-    } else {
-        try {
-            $db = new Database();
-            $conn = $db->getConnection();
+    try {
+        $db = new Database();
+        $conn = $db->getConnection();
 
-            // Check if user exists and is active
-            $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ? AND status = 'active'");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Check if user exists
+        $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user) {
+            // Generate secure token
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            // Delete any existing tokens for this email
+            $delStmt = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
+            $delStmt->execute([$email]);
+
+            // Insert new token
+            $insStmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
+            $insStmt->execute([$email, $token, $expires]);
+
+            // Determine environment and reset link
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+            $host = $_SERVER['HTTP_HOST'];
+            $resetLink = $protocol . "://" . $host . "/login-logout/reset-password.php?token=" . $token;
+
+            // Try sending real email if PHPMailer is loaded and SMTP is configured
+            $mailSent = false;
             
-            if ($user) {
-                // Generate secure token
-                $token = bin2hex(random_bytes(32));
-                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+            // SMTP variables
+            $smtpHost = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? null);
+            $smtpUser = getenv('SMTP_USER') ?: ($_ENV['SMTP_USER'] ?? null);
+            $smtpPass = getenv('SMTP_PASS') ?: ($_ENV['SMTP_PASS'] ?? null);
+            $smtpPort = getenv('SMTP_PORT') ?: ($_ENV['SMTP_PORT'] ?? 587);
 
-                // Fail-safe: Create table if not exists
-                $conn->exec("CREATE TABLE IF NOT EXISTS password_resets (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    email VARCHAR(255) NOT NULL,
-                    token VARCHAR(255) NOT NULL,
-                    expires_at DATETIME NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    INDEX (email),
-                    INDEX (token)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            if ($smtpHost && $smtpUser && $smtpPass) {
+                try {
+                    $mail = new PHPMailer(true);
+                    
+                    // Server settings
+                    $mail->isSMTP();
+                    $mail->Host       = $smtpHost;
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = $smtpUser;
+                    $mail->Password   = $smtpPass;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = $smtpPort;
+                    $mail->Timeout    = 10;
 
-                // Delete any existing tokens for this email
-                $delStmt = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
-                $delStmt->execute([$email]);
-
-                // Insert new token
-                $insStmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
-                $insStmt->execute([$email, $token, $expires]);
-
-                // Determine reset link
-                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-                $host = $_SERVER['HTTP_HOST'];
-                $resetLink = $protocol . "://" . $host . "/login-logout/reset-password.php?token=" . $token;
-
-                // Send email
-                $subject = "NutriDeq - Password Reset Request";
-                $body = "
-                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
-                        <h2 style='color: #10b981; text-align: center;'>NutriDeq Password Reset</h2>
-                        <p>Hello <strong>{$user['name']}</strong>,</p>
-                        <p>We received a request to reset your password. Click the button below to set a new one. This link will expire in 1 hour.</p>
-                        <div style='text-align: center; margin: 30px 0;'>
-                            <a href='$resetLink' style='background-color: #10b981; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Reset Password Now</a>
+                    // Recipients
+                    $mail->setFrom($smtpUser, 'NutriDeq Support');
+                    $mail->addAddress($email, $user['name']);
+                    
+                    // Content
+                    $mail->isHTML(true);
+                    $mail->Subject = 'NutriDeq - Password Reset Request';
+                    $mail->Body    = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
+                            <h2 style='color: #10b981; text-align: center;'>NutriDeq Password Reset</h2>
+                            <p>Hello <strong>{$user['name']}</strong>,</p>
+                            <p>We received a request to reset your password. Click the button below to set a new one. This link will expire in 1 hour.</p>
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='$resetLink' style='background-color: #10b981; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Reset Password Now</a>
+                            </div>
+                            <p style='color: #666; font-size: 0.9rem;'>If you didn't request this, you can safely ignore this email.</p>
+                            <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                            <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
                         </div>
-                        <p style='color: #666; font-size: 0.9rem;'>If you didn't request this, you can safely ignore this email.</p>
-                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
-                        <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
-                    </div>
-                ";
-                
-                // Determine if we should attempt to send or show fallback immediately
-                $smtpConfigured = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? null);
-                $isDevelopment = getenv('APP_ENV') === 'development';
-                
-                $mailSent = false;
-                if ($smtpConfigured && !$isDevelopment) {
-                    $mailSent = sendEmail($email, $subject, $body);
-                }
-
-                if ($mailSent) {
-                    $message = "A secure reset link has been sent to your Gmail address. Please check your inbox.";
-                } else {
-                    // For development or missing SMTP, show the link directly
-                    if (!$smtpConfigured || $isDevelopment) {
-                        $message = "A reset link has been generated. <br><br>
-                                    <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
-                                        <strong>DEVELOPMENT SIMULATION:</strong><br>
-                                        Click here to reset: <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
-                                    </div>";
-                    } else {
-                        // SMTP was configured but failed (likely due to timeout or bad credentials)
-                        $error = "Failed to send email. The connection timed out. Please check your SMTP settings in Railway.";
-                        $message = "<strong>Wait!</strong> If your SMTP is not working yet, you can use this simulation link for now: <br><br>
-                                    <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
-                                        <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
-                                    </div>";
+                    ";
+                    
+                    if($mail->send()) {
+                        $mailSent = true;
                     }
+                } catch (Exception $e) {
+                    // Silently fail or log
                 }
-            } else {
-                // Security: Generic message to prevent email enumeration
-                $message = "If an account exists for that email address, a reset link has been sent.";
             }
-        } catch (Exception $e) {
-            $error = "Error processing request: " . $e->getMessage();
+
+            if ($mailSent) {
+                $message = "A secure reset link has been sent to your email address. Please check your inbox.";
+            } else {
+                // Simulation link if email fails
+                $message = "If an account exists for <strong>$email</strong>, a reset link has been generated.<br><br>
+                            <a href='$resetLink' style='color: #10b981; font-weight: bold;'>Reset Password Now (Manual Link)</a>";
+            }
+        } else {
+            $message = "If an account exists for that email address, a reset link has been generated.";
         }
+    } catch (Exception $e) {
+        $error = "Error processing request: " . $e->getMessage();
     }
 }
 ?>
@@ -113,12 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - NutriDeq</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/base.css">
     <style>
         :root {
             --primary: #10b981;
             --text-dark: #0f172a;
-            --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         body {
             margin: 0; padding: 0; min-height: 100vh;
@@ -160,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <img src="../assets/img/logo.png" alt="NutriDeq">
         </div>
         <h1>Forgot Password?</h1>
-        <p>No worries! Enter your registered Gmail address and we'll send you a link to reset your password.</p>
+        <p>Enter your registered email address and we'll send you a link to reset your password.</p>
 
         <?php if ($message): ?>
             <div class="alert alert-success"><?php echo $message; ?></div>
@@ -172,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form action="" method="POST">
             <div class="form-group">
-                <input type="email" name="email" class="form-control" placeholder="Enter your Gmail" required value="<?php echo htmlspecialchars($email); ?>">
+                <input type="email" name="email" class="form-control" placeholder="Enter your email" required value="<?php echo htmlspecialchars($email); ?>">
             </div>
             <button type="submit" class="btn-submit">Send Reset Link</button>
         </form>
