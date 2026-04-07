@@ -253,9 +253,21 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                             <!-- Height Chip -->
                             <div class="metric-card">
                                 <div class="metric-label"><i class="fas fa-ruler-vertical"></i> Vertical Stature</div>
-                                <div class="tac-input-group">
+                                <div class="tac-input-group" id="heightInputGroup">
                                     <input type="number" id="height" class="tac-input" placeholder="0">
-                                    <select id="heightUnit" class="tac-select"><option>cm</option><option>ft</option></select>
+                                    <select id="heightUnit" class="tac-select"><option value="cm">cm</option><option value="ft">ft</option></select>
+                                </div>
+                                <!-- Feet/Inches Container (Hidden by default) -->
+                                <div id="ftInContainer" style="display: none; align-items: center; gap: 8px;">
+                                    <div style="flex: 1; display: flex; align-items: baseline; gap: 4px;">
+                                        <input type="number" id="heightFt" class="tac-input" placeholder="0" style="text-align: right; width: 40px;">
+                                        <span style="font-weight: 800; color: var(--text-secondary);">'</span>
+                                    </div>
+                                    <div style="flex: 1; display: flex; align-items: baseline; gap: 4px;">
+                                        <input type="number" id="heightIn" class="tac-input" placeholder="0" style="text-align: right; width: 40px;">
+                                        <span style="font-weight: 800; color: var(--text-secondary);">"</span>
+                                    </div>
+                                    <select id="heightUnitFt" class="tac-select"><option value="cm">cm</option><option value="ft" selected>ft</option></select>
                                 </div>
                             </div>
 
@@ -409,6 +421,28 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 if(document.getElementById('bmiResult').textContent !== '--') calculateDiagnostics();
             });
 
+            // Height Unit Management
+            const heightUnit = document.getElementById('heightUnit');
+            const heightUnitFt = document.getElementById('heightUnitFt');
+            const heightInputGroup = document.getElementById('heightInputGroup');
+            const ftInContainer = document.getElementById('ftInContainer');
+
+            function toggleHeightUnit(unit) {
+                if (unit === 'ft') {
+                    heightInputGroup.style.display = 'none';
+                    ftInContainer.style.display = 'flex';
+                } else {
+                    heightInputGroup.style.display = 'flex';
+                    ftInContainer.style.display = 'none';
+                }
+            }
+
+            heightUnit.addEventListener('change', (e) => toggleHeightUnit(e.target.value));
+            heightUnitFt.addEventListener('change', (e) => {
+                heightUnit.value = e.target.value;
+                toggleHeightUnit(e.target.value);
+            });
+
             // SVG Ring Controller
             function updateRing(id, percentage, max = 100) {
                 const ring = document.getElementById(id);
@@ -432,22 +466,32 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
             function calculateDiagnostics() {
                 const weightVal = parseFloat(document.getElementById('weight').value) || 0;
                 const weightUnit = document.getElementById('weightUnit').value;
-                const heightVal = parseFloat(document.getElementById('height').value) || 0;
-                const heightUnit = document.getElementById('heightUnit').value;
-                const waistVal = parseFloat(document.getElementById('waist').value) || 0;
-                const waistUnit = document.getElementById('waistUnit').value;
-                const hipVal = parseFloat(document.getElementById('hip').value) || 0;
-                const hipUnit = document.getElementById('hipUnit').value;
                 const dob = document.getElementById('dob').value;
+                const currentHeightUnit = document.getElementById('heightUnit').value;
+                
+                let heightCm = 0;
+                if (currentHeightUnit === 'ft') {
+                    const feet = parseFloat(document.getElementById('heightFt').value) || 0;
+                    const inches = parseFloat(document.getElementById('heightIn').value) || 0;
+                    if (feet > 0 || inches > 0) {
+                        heightCm = (feet * 30.48) + (inches * 2.54);
+                    }
+                } else {
+                    heightCm = parseFloat(document.getElementById('height').value) || 0;
+                }
 
-                if (!weightVal || !heightVal) {
+                if (!weightVal || !heightCm) {
                     alert("PROTOCOL ERROR: Bio-metric metrics incomplete. Please provide Weight and Vertical Stature.");
                     return;
                 }
 
+                const waistVal = parseFloat(document.getElementById('waist').value) || 0;
+                const waistUnit = document.getElementById('waistUnit').value;
+                const hipVal = parseFloat(document.getElementById('hip').value) || 0;
+                const hipUnit = document.getElementById('hipUnit').value;
+
                 // Standardize Units
                 let weightKg = weightUnit === 'lbs' ? weightVal * 0.453592 : weightVal;
-                let heightCm = heightUnit === 'ft' ? heightVal * 30.48 : heightVal;
                 let waistCm = waistUnit === 'in' ? waistVal * 2.54 : waistVal;
                 let hipCm = hipUnit === 'in' ? hipVal * 2.54 : hipVal;
 
