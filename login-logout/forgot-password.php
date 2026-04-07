@@ -71,10 +71,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (sendEmail($email, $subject, $body)) {
                     $message = "A secure reset link has been sent to your Gmail address. Please check your inbox.";
                 } else {
-                    $error = "Failed to send email. Please try again later or contact support.";
-                    // For development, provide the link if mail fails
-                    if (getenv('APP_ENV') === 'development' || !getenv('SMTP_HOST')) {
-                        $message = "<strong>[Dev Mode]</strong> Reset Link: <a href='$resetLink'>$resetLink</a>";
+                    // For development, provide the link if mail fails or SMTP is not configured
+                    if (!getenv('SMTP_HOST') || getenv('APP_ENV') === 'development') {
+                        $message = "A reset link has been generated. <br><br>
+                                    <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
+                                        <strong>DEVELOPMENT SIMULATION:</strong><br>
+                                        Click here to reset: <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
+                                    </div>";
+                    } else {
+                        $error = "Failed to send email. Please check your SMTP configuration in Railway settings.";
                     }
                 }
             } else {
