@@ -10,14 +10,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
 
-    $email = trim($_POST['email']);
+    $email = strtolower(trim($_POST['email']));
     $input_password = $_POST['password'];
+
+    // GMAIL ONLY RESTRICTION
+    if (!preg_match('/@gmail\.com$/i', $email)) {
+        $_SESSION['error'] = "Only Gmail accounts are allowed to log in.";
+        $_SESSION['login_email'] = $email;
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
     
     try {
         $database = new Database();
         $pdo = $database->getConnection();
         
-        $stmt = $pdo->prepare("SELECT id, name, email, password, role, status FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, name, email, password, role, status, is_verified FROM users WHERE email = ?");
         $stmt->execute([$email]);
         
         if ($stmt->rowCount() == 1) {
@@ -29,8 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             }
-            
-            if (password_verify($input_password, $user['password'])) {
+
+            if ($user['is_verified'] != 1) {
+                 $_SESSION['error'] = "Please verify your email address before logging in. Check your inbox for the verification link.";
+                 $_SESSION['login_email'] = $email;
+                 header("Location: " . $_SERVER['PHP_SELF']);
+                 exit();
+             }
+             
+             if (password_verify($input_password, $user['password'])) {
                 if ($user['role'] === 'regular') {
                     $user['role'] = 'user';
                 }

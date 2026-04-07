@@ -10,7 +10,15 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
+    $email = strtolower(trim($_POST['email']));
+
+    // GMAIL ONLY RESTRICTION
+    if (!preg_match('/@gmail\.com$/i', $email)) {
+        $_SESSION['add_user_errors'] = ["Only Gmail accounts are allowed."];
+        header("Location: " . (isset($_POST['origin']) ? $_POST['origin'] : 'admin-user-management.php'));
+        exit();
+    }
+
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $role = $_POST['role'];
@@ -49,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Hash password
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                // Insert new user
-                $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'active', NOW(), NOW())";
+                // Insert new user - Mark as verified since added by admin
+                $insert_sql = "INSERT INTO users (name, email, password, role, status, is_verified, created_at, updated_at) VALUES (?, ?, ?, ?, 'active', 1, NOW(), NOW())";
                 $insert_stmt = $conn->prepare($insert_sql);
                 
                 if ($insert_stmt->execute([$name, $email, $hashed_password, $role])) {

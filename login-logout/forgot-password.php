@@ -1,145 +1,89 @@
 <?php
 session_start();
-require_once '../database.php';
-
-// Load PHPMailer if available (Railway deployment)
-if (file_exists('../vendor/autoload.php')) {
-    require '../vendor/autoload.php';
-}
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once __DIR__ . '/../database.php';
+require_once __DIR__ . '/../includes/mail_helper.php';
 
 $message = '';
 $error = '';
 $email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
+    $email = strtolower(trim($_POST['email']));
     
-    try {
-        $db = new Database();
-        $conn = $db->getConnection();
+    // GMAIL ONLY RESTRICTION
+    if (!preg_match('/@gmail\.com$/i', $email)) {
+        $error = "Only Gmail accounts are supported for password reset.";
+    } else {
+        try {
+            $db = new Database();
+            $conn = $db->getConnection();
 
-        // Fail-safe: Create table if not exists
-        $conn->exec("CREATE TABLE IF NOT EXISTS password_resets (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) NOT NULL,
-            token VARCHAR(255) NOT NULL,
-            expires_at DATETIME NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX (email),
-            INDEX (token)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
-        // Check if user exists
-        $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($user) {
-            // Generate secure token
-            $token = bin2hex(random_bytes(32));
-            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-
-            // Delete any existing tokens for this email
-            $delStmt = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
-            $delStmt->execute([$email]);
-
-            // Insert new token
-            $insStmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
-            $insStmt->execute([$email, $token, $expires]);
-
-            // Determine environment and reset link
-            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-            $host = $_SERVER['HTTP_HOST'];
-            $resetLink = $protocol . "://" . $host . "/login-logout/reset-password.php?token=" . $token;
-
-            // Try sending real email if PHPMailer is loaded and SMTP is configured
-            $mailSent = false;
+            // Check if user exists and is active
+            $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ? AND status = 'active'");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Debug variables (internal)
-            $hasPHPMailer = class_exists('PHPMailer\PHPMailer\PHPMailer');
-            $smtpHost = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? null);
-            $smtpUser = getenv('SMTP_USER') ?: ($_ENV['SMTP_USER'] ?? null);
-            $smtpPass = getenv('SMTP_PASS') ?: ($_ENV['SMTP_PASS'] ?? null);
-            $smtpPort = getenv('SMTP_PORT') ?: ($_ENV['SMTP_PORT'] ?? 587);
+            if ($user) {
+                // Generate secure token
+                $token = bin2hex(random_bytes(32));
+                $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-            if ($hasPHPMailer && $smtpHost) {
-                try {
-                    $mail = new PHPMailer(true);
-                    
-                    // Server settings
-                    $mail->isSMTP();
-                    $mail->Host       = $smtpHost;
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = $smtpUser;
-                    $mail->Password   = $smtpPass;
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = $smtpPort;
-                    
-                    // Technical Debugging
-                    $mail->SMTPDebug = 3; // ALWAYS ON FOR NOW TO FIND THE ERROR
-                    $mail->Debugoutput = function($str, $level) {
-                        file_put_contents(__DIR__ . '/../smtp_debug.log', $str . PHP_EOL, FILE_APPEND);
-                    };
+                // Fail-safe: Create table if not exists
+                $conn->exec("CREATE TABLE IF NOT EXISTS password_resets (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    email VARCHAR(255) NOT NULL,
+                    token VARCHAR(255) NOT NULL,
+                    expires_at DATETIME NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX (email),
+                    INDEX (token)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-                    // Recipients - CRITICAL: From address MUST match Gmail Username
-                    $mail->setFrom($smtpUser, 'NutriDeq Support');
-                    $mail->addAddress($email, $user['name']);
-                    $mail->addReplyTo($smtpUser, 'NutriDeq Support');
-                    
-                    // Content
-                    $mail->isHTML(true);
-                    $mail->Subject = 'NutriDeq - Password Reset Request';
-                    $mail->Body    = "
-                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
-                            <h2 style='color: #10b981; text-align: center;'>NutriDeq Password Reset</h2>
-                            <p>Hello <strong>{$user['name']}</strong>,</p>
-                            <p>We received a request to reset your password. Click the button below to set a new one. This link will expire in 1 hour.</p>
-                            <div style='text-align: center; margin: 30px 0;'>
-                                <a href='$resetLink' style='background-color: #10b981; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Reset Password Now</a>
-                            </div>
-                            <p style='color: #666; font-size: 0.9rem;'>If you didn't request this, you can safely ignore this email.</p>
-                            <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
-                            <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
+                // Delete any existing tokens for this email
+                $delStmt = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
+                $delStmt->execute([$email]);
+
+                // Insert new token
+                $insStmt = $conn->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
+                $insStmt->execute([$email, $token, $expires]);
+
+                // Determine reset link
+                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                $host = $_SERVER['HTTP_HOST'];
+                $resetLink = $protocol . "://" . $host . "/login-logout/reset-password.php?token=" . $token;
+
+                // Send email
+                $subject = "NutriDeq - Password Reset Request";
+                $body = "
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
+                        <h2 style='color: #10b981; text-align: center;'>NutriDeq Password Reset</h2>
+                        <p>Hello <strong>{$user['name']}</strong>,</p>
+                        <p>We received a request to reset your password. Click the button below to set a new one. This link will expire in 1 hour.</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='$resetLink' style='background-color: #10b981; color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;'>Reset Password Now</a>
                         </div>
-                    ";
-                    
-                    if($mail->send()) {
-                        $mailSent = true;
-                    }
-                } catch (Exception $e) {
-                    $error = "<strong>Mail Error:</strong> " . $mail->ErrorInfo;
-                    if (isset($_GET['debug'])) {
-                        $error .= "<br>Detail: " . $e->getMessage();
+                        <p style='color: #666; font-size: 0.9rem;'>If you didn't request this, you can safely ignore this email.</p>
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                        <p style='font-size: 0.8rem; color: #999; text-align: center;'>NutriDeq Clinical Platform &copy; " . date('Y') . "</p>
+                    </div>
+                ";
+                
+                if (sendEmail($email, $subject, $body)) {
+                    $message = "A secure reset link has been sent to your Gmail address. Please check your inbox.";
+                } else {
+                    $error = "Failed to send email. Please try again later or contact support.";
+                    // For development, provide the link if mail fails
+                    if (getenv('APP_ENV') === 'development' || !getenv('SMTP_HOST')) {
+                        $message = "<strong>[Dev Mode]</strong> Reset Link: <a href='$resetLink'>$resetLink</a>";
                     }
                 }
-            }
-
-            if ($mailSent) {
-                $message = "A secure reset link has been sent to your Gmail address. Please check your inbox (and spam folder).";
-            } elseif ($hasPHPMailer && !$smtpHost) {
-                // SMTP not configured on Railway yet
-                $message = "If an account exists for <strong>$email</strong>, a reset link has been generated.<br><br>
-                            <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
-                                <strong>DEVELOPMENT SIMULATION:</strong><br>
-                                Click here to reset: <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
-                            </div>";
             } else {
-                // PHPMailer missing or other fatal error
-                $message = "A reset link has been generated. [Note: Email service not initialized]";
-                $message .= "<br><br><a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>";
+                // Security: Generic message to prevent email enumeration
+                $message = "If an account exists for that email address, a reset link has been sent.";
             }
-        } else {
-            // Security: Generic message
-            $message = "If an account exists for that email address, a reset link has been generated.";
-            if (isset($_GET['debug'])) {
-                $error = "<strong>DEBUG:</strong> No user found with the email: $email. Please check your database.";
-            }
+        } catch (Exception $e) {
+            $error = "Error processing request: " . $e->getMessage();
         }
-    } catch (Exception $e) {
-        $error = "Error processing request: " . $e->getMessage();
     }
 }
 ?>
@@ -150,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - NutriDeq</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/base.css">
     <style>
         :root {
             --primary: #10b981;
@@ -161,160 +106,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: flex; align-items: center; justify-content: center;
             font-family: 'Inter', sans-serif;
             background: #f8fafc;
-            overflow: hidden;
-        }
-        .gradient-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 40%),
-                        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
         }
         .auth-card {
             width: 100%; max-width: 450px; padding: 40px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px); border: 1px solid white;
-            border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            animation: popIn 0.6s var(--bounce);
+            background: white; border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         .logo { text-align: center; margin-bottom: 30px; }
         .logo img { height: 50px; border-radius: 12px; }
-        
         h1 { font-size: 1.8rem; color: var(--text-dark); text-align: center; margin-bottom: 10px; }
         p { color: #64748b; text-align: center; margin-bottom: 30px; line-height: 1.6; }
-        
+        .alert { padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
         .form-group { margin-bottom: 20px; }
         .form-control {
             width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0;
             border-radius: 16px; box-sizing: border-box; font-size: 1rem;
-            transition: all 0.3s; background: white;
+            transition: all 0.3s;
         }
-        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
-        
+        .form-control:focus { outline: none; border-color: var(--primary); }
         .btn-submit {
             width: 100%; padding: 16px; background: var(--primary); color: white;
             border: none; border-radius: 16px; font-weight: 700; font-size: 1rem;
-            cursor: pointer; transition: all 0.3s var(--bounce);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+            cursor: pointer; transition: 0.3s;
         }
-        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3); }
-        
-        .resend-container {
-            text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #cbd5e1;
-        }
-        .resend-text {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-        .btn-resend {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-resend:hover {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-resend:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            border-color: #94a3b8;
-            color: #94a3b8;
-        }
-        
-        .alert { padding: 20px; border-radius: 16px; margin-bottom: 25px; font-size: 0.95rem; line-height: 1.5; }
-        .alert-success { background: #ecfdf5; border: 1px solid #10b981; color: #065f46; }
-        .alert-error { background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; }
-        
-        .back-link { display: block; text-align: center; margin-top: 25px; color: var(--primary); text-decoration: none; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: var(--primary); text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="gradient-bg"></div>
     <div class="auth-card">
         <div class="logo">
             <img src="../assets/img/logo.png" alt="NutriDeq">
         </div>
-        <h1>Reset Password</h1>
-        
+        <h1>Forgot Password?</h1>
+        <p>No worries! Enter your registered Gmail address and we'll send you a link to reset your password.</p>
+
         <?php if ($message): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
-                <?php echo $message; ?>
-            </div>
-
-            <div class="resend-container">
-                <span class="resend-text">Didn't receive the email? Check your spam folder or try again.</span>
-                <form method="POST" id="resendForm">
-                    <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
-                    <button type="submit" class="btn-resend" id="resendBtn">
-                        <i class="fas fa-paper-plane"></i> Resend Reset Link
-                    </button>
-                </form>
-            </div>
-
-            <a href="NutriDeqN-Login.php" class="back-link"><i class="fas fa-arrow-left"></i> Back to Login</a>
-
-            <script>
-                const resendBtn = document.getElementById('resendBtn');
-                let countdown = 60;
-                
-                function updateResendButton() {
-                    if (countdown > 0) {
-                        resendBtn.disabled = true;
-                        resendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Wait ${countdown}s`;
-                        countdown--;
-                        setTimeout(updateResendButton, 1000);
-                    } else {
-                        resendBtn.disabled = false;
-                        resendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Resend Reset Link`;
-                    }
-                }
-                
-                // Start countdown on page load after successful send
-                updateResendButton();
-            </script>
-        <?php else: ?>
-            <p>Enter your email address and we'll send you a secure link to reset your password.</p>
-
-            <div class="resend-container" style="border-top: none; margin-bottom: 25px; padding-top: 0;">
-                <span class="resend-text" style="font-weight: 600;">Forgot your password?</span>
-                <a href="google-callback.php" class="btn-google">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-                    Recover with Google
-                </a>
-                <div class="google-auth-separator">OR USE EMAIL</div>
-            </div>
-            
-            <?php if ($error): ?>
-                <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
-                    <?php echo $error; ?>
-                </div>
-            <?php endif; ?>
-
-            <form method="POST">
-                <div class="form-group">
-                    <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
-                </div>
-                <button type="submit" class="btn-submit">Send Reset Link</button>
-            </form>
-            <a href="NutriDeqN-Login.php" class="back-link">Return to Login</a>
+            <div class="alert alert-success"><?php echo $message; ?></div>
         <?php endif; ?>
+
+        <?php if ($error): ?>
+            <div class="alert alert-error"><?php echo $error; ?></div>
+        <?php endif; ?>
+
+        <form action="" method="POST">
+            <div class="form-group">
+                <input type="email" name="email" class="form-control" placeholder="Enter your Gmail" required value="<?php echo htmlspecialchars($email); ?>">
+            </div>
+            <button type="submit" class="btn-submit">Send Reset Link</button>
+        </form>
+        
+        <a href="NutriDeqN-Login.php" class="back-link">Back to Login</a>
     </div>
 </body>
 </html>

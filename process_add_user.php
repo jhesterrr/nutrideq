@@ -9,7 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once 'database.php';
     
     $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
+    $email = strtolower(trim($_POST['email']));
+
+    // GMAIL ONLY RESTRICTION
+    if (!preg_match('/@gmail\.com$/i', $email)) {
+        $_SESSION['error'] = "Only Gmail accounts are allowed.";
+        header("Location: admin-user-management.php");
+        exit();
+    }
+
     $password = $_POST['password'];
     $role = $_POST['role'];
     
@@ -31,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Hash password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
-            // Insert new user
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, status) VALUES (?, ?, ?, ?, 'active')");
+            // Insert new user - Mark as verified since added by admin
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, status, is_verified) VALUES (?, ?, ?, ?, 'active', 1)");
             $stmt->execute([$name, $email, $hashed_password, $role]);
             
             // If the user is a client (regular user), also add to clients table with waist/hip measurements

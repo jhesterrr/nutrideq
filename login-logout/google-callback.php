@@ -42,16 +42,23 @@ if (isset($_GET['code'])) {
         $google_oauth = new GoogleServiceOauth2($client);
         $google_account_info = $google_oauth->userinfo->get();
         
-        $email = $google_account_info->email;
+        $email = strtolower($google_account_info->email);
         $name = $google_account_info->name;
         $google_id = $google_account_info->id;
         $picture = $google_account_info->picture;
+
+        // GMAIL ONLY RESTRICTION
+        if (!preg_match('/@gmail\.com$/i', $email)) {
+            $_SESSION['error'] = "Only Gmail accounts are allowed to sign in.";
+            header("Location: NutriDeqN-Login.php");
+            exit();
+        }
 
         $database = new Database();
         $conn = $database->getConnection();
 
         // Check if user already exists
-        $stmt = $conn->prepare("SELECT id, name, email, role, status FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, name, email, role, status, has_password FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -65,6 +72,7 @@ if (isset($_GET['code'])) {
 
             $user_id = $user['id'];
             $role = ($user['role'] === 'regular') ? 'user' : $user['role'];
+            $has_password = $user['has_password'];
             
             // Update last login
             $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
@@ -74,9 +82,10 @@ if (isset($_GET['code'])) {
             // New user, create account
             // We use a random password since they login via Google
             $random_password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+            $has_password = 0; // NEW GOOGLE USER MUST CREATE A PASSWORD
             
             // Fix: Use 'regular' role instead of 'user' to match DB ENUM
-            $insert_sql = "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, 'regular', 'active', NOW(), NOW())";
+            $insert_sql = "INSERT INTO users (name, email, password, role, status, is_verified, has_password, created_at, updated_at) VALUES (?, ?, ?, 'regular', 'active', 1, 0, NOW(), NOW())";
             $insert_stmt = $conn->prepare($insert_sql);
             $insert_stmt->execute([$name, $email, $random_password]);
             
@@ -106,6 +115,7 @@ if (isset($_GET['code'])) {
         $_SESSION['role'] = $role;
         $_SESSION['logged_in'] = true;
         $_SESSION['google_login'] = true;
+        $_SESSION['has_password'] = (int)$has_password;
 
         header("Location: ../dashboard.php");
         exit();
