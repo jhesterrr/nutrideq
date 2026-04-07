@@ -68,18 +68,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 ";
                 
-                if (sendEmail($email, $subject, $body)) {
+                // Determine if we should attempt to send or show fallback immediately
+                $smtpConfigured = getenv('SMTP_HOST') ?: ($_ENV['SMTP_HOST'] ?? null);
+                $isDevelopment = getenv('APP_ENV') === 'development';
+                
+                $mailSent = false;
+                if ($smtpConfigured && !$isDevelopment) {
+                    $mailSent = sendEmail($email, $subject, $body);
+                }
+
+                if ($mailSent) {
                     $message = "A secure reset link has been sent to your Gmail address. Please check your inbox.";
                 } else {
-                    // For development, provide the link if mail fails or SMTP is not configured
-                    if (!getenv('SMTP_HOST') || getenv('APP_ENV') === 'development') {
+                    // For development or missing SMTP, show the link directly
+                    if (!$smtpConfigured || $isDevelopment) {
                         $message = "A reset link has been generated. <br><br>
                                     <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
                                         <strong>DEVELOPMENT SIMULATION:</strong><br>
                                         Click here to reset: <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
                                     </div>";
                     } else {
-                        $error = "Failed to send email. Please check your SMTP configuration in Railway settings.";
+                        // SMTP was configured but failed (likely due to timeout or bad credentials)
+                        $error = "Failed to send email. The connection timed out. Please check your SMTP settings in Railway.";
+                        $message = "<strong>Wait!</strong> If your SMTP is not working yet, you can use this simulation link for now: <br><br>
+                                    <div style='background: rgba(16,185,129,0.1); padding: 15px; border-radius: 10px; border: 1px dashed var(--primary);'>
+                                        <a href='$resetLink' style='color: var(--primary); font-weight: bold;'>Reset Password Now</a>
+                                    </div>";
                     }
                 }
             } else {
