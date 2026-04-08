@@ -545,10 +545,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();document.getElementById('logoutModal')?.classList.add('active');});
     document.getElementById('cancelLogout')?.addEventListener('click',()=>document.getElementById('logoutModal')?.classList.remove('active'));
-    document.getElementById('confirmLogout')?.addEventListener('click',()=>window.location.href='logout.php');
+    document.getElementById('confirmLogout')?.addEventListener('click',()=>window.location.href='login-logout/logout.php');
     window.addEventListener('click',e=>{if(e.target===document.getElementById('logoutModal'))document.getElementById('logoutModal').classList.remove('active');});
 });
 </script>
+<!-- Global Logout Modal -->
+<div class="logout-modal" id="logoutModal" style="z-index: 10001;">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Are you sure?</h3>
+        <p>You will be logged out and redirected to the login page.</p>
+        <div class="logout-modal-actions">
+            <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
+            <button class="btn btn-primary" id="confirmLogout">Yes, Logout</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 
