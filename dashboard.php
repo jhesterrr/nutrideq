@@ -1936,12 +1936,13 @@ $pdo = $database->getConnection();
             // Initialize Chart.js for User BMI History (if applicable)
             const userBmiHistoryData = <?php echo json_encode($bmi_history_data ?? []); ?>;
             const userBmiCtx = document.getElementById('bmiHistoryChart');
+            window.userBmiChart = null;
             
             if (userBmiCtx && userBmiHistoryData.length > 0) {
                 const labels = userBmiHistoryData.map(item => item.date_label);
                 const data = userBmiHistoryData.map(item => parseFloat(item.bmi));
                 
-                new Chart(userBmiCtx.getContext('2d'), {
+                window.userBmiChart = new Chart(userBmiCtx.getContext('2d'), {
                     type: 'line',
                     data: {
                         labels: labels,

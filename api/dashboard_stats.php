@@ -67,6 +67,57 @@ try {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND read_at IS NULL");
         $stmt->execute([$user_id]);
         $data['unread_messages'] = (int)$stmt->fetchColumn();
+
+        // Recommended Plans
+        $stmt = $pdo->prepare("
+            SELECT mp.*, s.name as staff_name 
+            FROM meal_plans mp 
+            LEFT JOIN staff s ON mp.staff_id = s.id 
+            WHERE mp.client_id = (SELECT id FROM clients WHERE user_id = ? LIMIT 1) AND mp.status = 'active'
+            ORDER BY mp.created_at DESC 
+            LIMIT 3
+        ");
+        $stmt->execute([$user_id]);
+        $data['recommended_plans'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Recent Interactions (Wellness Messages)
+        $stmt = $pdo->prepare("
+            SELECT m.id, m.content as message, m.sender_type, m.created_at, m.read_at, s.name as staff_name
+            FROM wellness_messages m
+            JOIN conversations c ON m.conversation_id = c.id
+            LEFT JOIN staff s ON c.dietitian_id = s.id
+            WHERE c.client_id = (SELECT id FROM clients WHERE user_id = ? LIMIT 1)
+            ORDER BY m.created_at DESC
+            LIMIT 3
+        ");
+        $stmt->execute([$user_id]);
+        $data['recent_interactions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Body Composition Insight (BMI & History)
+        $stmt = $pdo->prepare("SELECT weight, height FROM clients WHERE user_id = ? LIMIT 1");
+        $stmt->execute([$user_id]);
+        $client = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $bmi = 0;
+        $bmi_status = 'Unknown';
+        if ($client && $client['height'] > 0 && $client['weight'] > 0) {
+            $height_m = $client['height'] / 100;
+            $bmi = round($client['weight'] / ($height_m * $height_m), 1);
+            if ($bmi < 18.5) $bmi_status = 'Underweight';
+            elseif ($bmi < 25) $bmi_status = 'Normal';
+            elseif ($bmi < 30) $bmi_status = 'Overweight';
+            else $bmi_status = 'Obese';
+        }
+        $data['bmi'] = [
+            'value' => $bmi,
+            'status' => $bmi_status,
+            'weight' => (float)($client['weight'] ?? 0),
+            'height' => (float)($client['height'] ?? 0)
+        ];
+
+        $stmt = $pdo->prepare("SELECT bmi, DATE_FORMAT(recorded_at, '%b %d') as date_label FROM client_bmi_history WHERE user_id = ? ORDER BY recorded_at ASC LIMIT 15");
+        $stmt->execute([$user_id]);
+        $data['bmi_history'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     echo json_encode($data);
