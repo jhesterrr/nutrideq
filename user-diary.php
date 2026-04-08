@@ -525,6 +525,9 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                                 <i class="fas fa-file-medical"></i> View Clinical Report
                             </button>
                         <?php endif; ?>
+                        <button class="btn-primary" onclick="openCustomMealModal('Breakfast')" style="background: #4a90e2; color: white; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-edit"></i> Custom Meal
+                        </button>
                         <button class="btn-primary" onclick="openFctModal('Breakfast')" style="background: var(--primary); color: white; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-plus"></i> Add Log
                         </button>
@@ -559,6 +562,12 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                         <div class="meal-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <h3><?php echo $meal; ?></h3>
+                                <button type="button" class="add-meal-btn" 
+                                    style="color: #4a90e2; font-size: 1.3rem; background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.2s;"
+                                    onclick="openCustomMealModal('<?php echo $meal; ?>')" title="Add custom meal to <?php echo $meal; ?>"
+                                    onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                    <i class="fas fa-edit"></i>
+                                </button>
                                 <button type="button" class="add-meal-btn" 
                                     style="color: #2D8A56; font-size: 1.3rem; background: none; border: none; padding: 0; cursor: pointer; transition: transform 0.2s;"
                                     onclick="openFctModal('<?php echo $meal; ?>')" title="Add food to <?php echo $meal; ?>"
@@ -773,6 +782,57 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
         </div>
     </div>
 
+    <!-- Custom Meal Modal -->
+    <div id="customMealModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001; overflow-y: auto;">
+        <div class="modal-container" style="background: white; width: 90%; max-width: 500px; margin: 50px auto; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #f8f9fa; padding: 20px 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="customMealTitle" style="margin: 0; color: #4a90e2;">Add Custom Meal</h2>
+                <button type="button" onclick="closeCustomMealModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            <form id="customMealForm" style="padding: 25px;">
+                <input type="hidden" name="meal_type" id="customMealType">
+                <input type="hidden" name="log_date" value="<?php echo $selected_date; ?>">
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Meal Name</label>
+                    <input type="text" name="food_name" class="form-control" placeholder="e.g. Homemade Adobo" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Servings (grams)</label>
+                    <input type="number" name="serving_size" class="form-control" placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Calories (kcal)</label>
+                        <input type="number" step="0.1" name="calories" class="form-control" placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Protein (g)</label>
+                        <input type="number" step="0.1" name="protein" class="form-control" placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Carbs (g)</label>
+                        <input type="number" step="0.1" name="carbs" class="form-control" placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Fat (g)</label>
+                        <input type="number" step="0.1" name="fat" class="form-control" placeholder="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="button" onclick="closeCustomMealModal()" style="flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: white; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="flex: 2; padding: 12px; border-radius: 10px; border: none; background: #4a90e2; color: white; font-weight: 600; cursor: pointer;">Save Meal</button>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center; font-style: italic;">
+                    Tip: You can leave nutrition blanks empty if you're unsure; your dietician can help fill them in!
+                </p>
+            </form>
+        </div>
+    </div>
+
     <!-- FCT Library Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
@@ -942,6 +1002,51 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
             document.getElementById('fctModal').style.display = 'none';
             document.body.style.overflow = 'auto';
         }
+
+        // Custom Meal Modal Logic
+        function openCustomMealModal(mealType) {
+            currentMealType = mealType;
+            document.getElementById('customMealType').value = mealType;
+            document.getElementById('customMealTitle').innerText = 'Add Custom ' + mealType;
+            document.getElementById('customMealModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCustomMealModal() {
+            document.getElementById('customMealModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('customMealForm').reset();
+        }
+
+        document.getElementById('customMealForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Saving...';
+
+                const response = await fetch('api/save_custom_meal.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Error saving custom meal');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+            }
+        });
 
         function renderFctTable(filter = '') {
             const tbody = document.getElementById('fctTableBody');

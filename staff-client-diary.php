@@ -694,15 +694,40 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                                         </div>
                                         <div style="flex: 1;">
                                             <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; color: #1e293b; margin-bottom: 4px;"><?php echo $meal; ?></h4>
-                                            <div class="food-summary" style="color: #64748b; font-weight: 500;">
-                                                <?php 
-                                                if (empty($items)) {
-                                                    echo '<span style="opacity: 0.4;">No patient logs recorded</span>';
-                                                } else {
-                                                    $names = array_column($items, 'food_name');
-                                                    echo htmlspecialchars(implode(', ', $names));
-                                                }
-                                                ?>
+                                            <div class="food-list" style="margin-top: 10px;">
+                                                <?php if (empty($items)): ?>
+                                                    <span style="opacity: 0.4; font-size: 0.9rem;">No patient logs recorded</span>
+                                                <?php else: ?>
+                                                    <?php foreach ($items as $item): ?>
+                                                        <div class="food-entry-row" style="display: flex; align-items: center; gap: 15px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.03);">
+                                                            <div style="flex: 1;">
+                                                                <span style="font-weight: 600; color: #334155;"><?php echo htmlspecialchars($item['food_name']); ?></span>
+                                                                <span style="font-size: 0.75rem; color: #94a3b8; margin-left: 8px;">(<?php echo number_format($item['serving_size'], 0); ?>g)</span>
+                                                            </div>
+                                                            <div class="entry-macros" style="display: flex; gap: 10px; align-items: center;">
+                                                                <div style="text-align: center; min-width: 50px;">
+                                                                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Cals</div>
+                                                                    <input type="number" step="0.1" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="calories" value="<?php echo $item['calories']; ?>" style="width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; text-align: center;">
+                                                                </div>
+                                                                <div style="text-align: center; min-width: 50px;">
+                                                                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Prot</div>
+                                                                    <input type="number" step="0.1" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="protein" value="<?php echo $item['protein']; ?>" style="width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; text-align: center;">
+                                                                </div>
+                                                                <div style="text-align: center; min-width: 50px;">
+                                                                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Carb</div>
+                                                                    <input type="number" step="0.1" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="carbs" value="<?php echo $item['carbs']; ?>" style="width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; text-align: center;">
+                                                                </div>
+                                                                <div style="text-align: center; min-width: 50px;">
+                                                                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Fat</div>
+                                                                    <input type="number" step="0.1" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="fat" value="<?php echo $item['fat']; ?>" style="width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; text-align: center;">
+                                                                </div>
+                                                                <button class="btn-save-macro" onclick="saveMacro(this, <?php echo $item['id']; ?>)" style="background: #10b981; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem; margin-left: 5px;">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                         <div style="text-align: right;">
@@ -867,6 +892,51 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
 
                                 fetchFeedback();
                             });
+
+                            async function saveMacro(btn, logId) {
+                                const row = btn.closest('.entry-macros');
+                                const inputs = row.querySelectorAll('.macro-edit-input');
+                                const data = { log_id: logId };
+                                
+                                inputs.forEach(input => {
+                                    data[input.dataset.field] = input.value;
+                                });
+
+                                const originalBtn = btn.innerHTML;
+                                try {
+                                    btn.disabled = true;
+                                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                                    const response = await fetch('api/update_log_macros.php', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(data)
+                                    });
+
+                                    const result = await response.json();
+                                    if (result.success) {
+                                        // Show success state briefly
+                                        btn.innerHTML = '<i class="fas fa-check-double"></i>';
+                                        btn.style.background = '#059669';
+                                        setTimeout(() => {
+                                            btn.innerHTML = originalBtn;
+                                            btn.style.background = '#10b981';
+                                            btn.disabled = false;
+                                            // Optional: reload to update total cards
+                                            // location.reload(); 
+                                        }, 2000);
+                                    } else {
+                                        alert(result.message || 'Error updating values');
+                                        btn.innerHTML = originalBtn;
+                                        btn.disabled = false;
+                                    }
+                                } catch (err) {
+                                    console.error(err);
+                                    alert('Connection error');
+                                    btn.innerHTML = originalBtn;
+                                    btn.disabled = false;
+                                }
+                            }
                         </script>
 
                     <?php else: ?>
