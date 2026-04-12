@@ -31,7 +31,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Macronutrient Diagnostic Engine | NutriDeq</title>
+    <title>Nutrition Calculator | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/base.css">
@@ -212,8 +212,8 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
             <div class="page-container" style="position: relative; z-index: 10; padding: 20px 32px;">
                 <div class="header">
                     <div class="page-title">
-                        <h1 style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2.1rem; letter-spacing: -0.02em; color: #1e293b; margin: 0;">Macronutrient Diagnostic Engine</h1>
-                        <p style="font-weight: 600; color: #64748b; font-size: 0.95rem; margin-top: 4px;">Premium Bio-Metric Energy Synthesis Framework</p>
+                        <h1 style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2.1rem; letter-spacing: -0.02em; color: #1e293b; margin: 0;">Nutrition Calculator</h1>
+                        <p style="font-weight: 600; color: #64748b; font-size: 0.95rem; margin-top: 4px;">Calculate your daily calories and ideal weight</p>
                     </div>
                 </div>
 
@@ -223,12 +223,12 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         <div class="scan-line"></div>
                         <div style="border:none; padding:0; margin-bottom:20px; display: flex; align-items: center; justify-content: space-between;">
                             <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; margin: 0; color: #1e293b;">
-                                <i class="fas fa-fingerprint" style="color:var(--primary); margin-right:12px;"></i> Bio-Metric Input
+                                <i class="fas fa-fingerprint" style="color:var(--primary); margin-right:12px;"></i> Your Details
                             </h2>
                         </div>
 
                         <!-- Sex Segmented Control -->
-                        <div class="metric-label"><i class="fas fa-venus-mars"></i> Assigned Sex</div>
+                        <div class="metric-label"><i class="fas fa-venus-mars"></i> Sex</div>
                         <div class="pill-nav" id="sexToggle">
                             <div class="pill-item active" data-val="male">Male</div>
                             <div class="pill-item" data-val="female">Female</div>
@@ -237,13 +237,13 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         <div class="bento-input-grid">
                             <!-- Date Chip -->
                             <div class="metric-card">
-                                <div class="metric-label"><i class="fas fa-calendar-alt"></i> Date of Birth</div>
+                                <div class="metric-label"><i class="fas fa-calendar-alt"></i> Birth Date</div>
                                 <input type="date" id="dob" class="tac-input" style="font-size: 1rem;">
                             </div>
 
                             <!-- Weight Chip -->
                             <div class="metric-card">
-                                <div class="metric-label"><i class="fas fa-weight"></i> Body Weight</div>
+                                <div class="metric-label"><i class="fas fa-weight"></i> Weight</div>
                                 <div class="tac-input-group">
                                     <input type="number" id="weight" class="tac-input" placeholder="0">
                                     <select id="weightUnit" class="tac-select"><option>kg</option><option>lbs</option></select>
@@ -252,7 +252,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                             <!-- Height Chip -->
                             <div class="metric-card">
-                                <div class="metric-label"><i class="fas fa-ruler-vertical"></i> Vertical Stature</div>
+                                <div class="metric-label"><i class="fas fa-ruler-vertical"></i> Height</div>
                                 <div class="tac-input-group" id="heightInputGroup">
                                     <input type="number" id="height" class="tac-input" placeholder="0">
                                     <select id="heightUnit" class="tac-select"><option value="cm">cm</option><option value="ft">ft</option></select>
@@ -273,7 +273,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                             <!-- Waist Chip -->
                             <div class="metric-card">
-                                <div class="metric-label"><i class="fas fa-arrows-alt-h"></i> Waist Girth</div>
+                                <div class="metric-label"><i class="fas fa-arrows-alt-h"></i> Waist Size</div>
                                 <div class="tac-input-group">
                                     <input type="number" id="waist" class="tac-input" placeholder="0">
                                     <select id="waistUnit" class="tac-select"><option>cm</option><option>in</option></select>
@@ -282,7 +282,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                             <!-- Hip Chip -->
                             <div class="metric-card">
-                                <div class="metric-label"><i class="fas fa-vector-square"></i> Hip Girth</div>
+                                <div class="metric-label"><i class="fas fa-vector-square"></i> Hip Size</div>
                                 <div class="tac-input-group">
                                     <input type="number" id="hip" class="tac-input" placeholder="0">
                                     <select id="hipUnit" class="tac-select"><option>cm</option><option>in</option></select>
@@ -291,7 +291,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         </div>
 
                         <!-- Activity Segmented Control -->
-                        <div class="metric-label" style="margin-top: 24px;"><i class="fas fa-walking"></i> Activity Coefficient</div>
+                        <div class="metric-label" style="margin-top: 24px;"><i class="fas fa-walking"></i> Daily Activity Level</div>
                         <div class="pill-nav" id="activityToggle" style="margin-bottom: 0;">
                             <div class="pill-item active" data-val="sedentary">Sedentary</div>
                             <div class="pill-item" data-val="light">Light</div>
@@ -301,7 +301,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         </div>
 
                         <button class="btn-bio-scan" id="calculateBtn">
-                            <i class="fas fa-microscope" style="margin-right: 12px;"></i> Initiate Bio-Scan
+                            <i class="fas fa-microscope" style="margin-right: 12px;"></i> Calculate My Results
                         </button>
                     </div>
 
@@ -318,7 +318,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                                         </svg>
                                         <div class="ring-val" id="bmiResult">--</div>
                                     </div>
-                                    <div class="hud-lbl" style="text-align: center; margin-top: 12px;">BMI Diagnostic</div>
+                                    <div class="hud-lbl" style="text-align: center; margin-top: 12px;">Body Mass Index (BMI)</div>
                                     <div id="bmiStatus" class="clinical-status" style="float:none; text-align:center; display:block;">Awaiting Scan</div>
                                 </div>
                                 <div class="ring-diagnostic">
@@ -329,7 +329,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                                         </svg>
                                         <div class="ring-val" id="tdeeResult" style="font-size: 1.2rem;">--</div>
                                     </div>
-                                    <div class="hud-lbl" style="text-align: center; margin-top: 12px;">TDEE Capacity</div>
+                                    <div class="hud-lbl" style="text-align: center; margin-top: 12px;">Maintain Weight Calories</div>
                                     <div id="tdeeUnit" class="clinical-status status-healthy" style="float:none; text-align:center; display:block;">kcal/day</div>
                                 </div>
                             </div>
@@ -339,7 +339,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         <div class="terminal-panel" style="gap: 16px; padding: 24px;">
                             <div class="hud-row">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                                    <div class="hud-lbl">Waist-Hip Synthesis</div>
+                                    <div class="hud-lbl">Waist-to-Hip Ratio</div>
                                     <div class="hud-val-main" style="font-size: 1.4rem;" id="whrResult">--</div>
                                 </div>
                                 <div class="progress-hud"><div class="progress-hud-bar" id="whrBar"></div></div>
@@ -348,7 +348,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                             <div class="hud-row">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                                    <div class="hud-lbl">Waist-Height Index</div>
+                                    <div class="hud-lbl">Waist-to-Height Ratio</div>
                                     <div class="hud-val-main" style="font-size: 1.4rem;" id="whtrResult">--</div>
                                 </div>
                                 <div class="progress-hud"><div class="progress-hud-bar" id="whtrBar" style="background: linear-gradient(90deg, #3b82f6, #60a5fa);"></div></div>
@@ -358,7 +358,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                         <!-- DBW Terminal -->
                         <div class="terminal-panel" style="padding: 24px; border: 1px solid var(--primary-light) !important;">
-                             <div class="hud-lbl" style="margin-bottom: 12px; color: var(--primary);">Desirable Body Weight Method</div>
+                             <div class="hud-lbl" style="margin-bottom: 12px; color: var(--primary);">Ideal Weight Formula</div>
                              <div class="pill-nav" id="methodToggle">
                                  <div class="pill-item active" data-val="tannhauser">Tan</div>
                                  <div class="pill-item" data-val="hamwi">Hamwi</div>
@@ -367,7 +367,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                                 <div class="hud-val-main" id="dbwResult" style="color: var(--primary); font-size: 3rem;">--</div>
                                 <div class="hud-lbl" style="font-size: 1.2rem;">kg</div>
                              </div>
-                             <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 8px 0 0; font-weight: 600;">*Estimated target weight for optimal metabolic performance.</p>
+                             <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 8px 0 0; font-weight: 600;">*Estimated healthy target weight.</p>
                         </div>
                     </div>
                 </div>
@@ -377,9 +377,9 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <i class="fas fa-biohazard fa-2x" style="color: #ef4444; opacity: 0.8;"></i>
                         <div>
-                            <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; color: #ef4444; font-size: 1rem;">CLINICAL SURVEILLANCE NOTICE</h4>
+                            <h4 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; color: #ef4444; font-size: 1rem;">IMPORTANT MEDICAL NOTE</h4>
                             <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
-                                Bio-metric results are synthesized estimates. For clinical diagnosis, consult a Registered Nutritionist-Dietitian.
+                                These results are estimates. For professional medical advice, consult a Registered Nutritionist-Dietitian.
                             </p>
                         </div>
                         <?php if ($user_role === 'regular'): ?>
@@ -479,7 +479,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 }
 
                 if (!weightVal || !heightCm) {
-                    alert("PROTOCOL ERROR: Bio-metric metrics incomplete. Please provide Weight and Vertical Stature.");
+                    alert("Please provide both Weight and Height to calculate your results.");
                     return;
                 }
 
