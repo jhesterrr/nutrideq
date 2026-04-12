@@ -292,12 +292,14 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                         <!-- Activity Segmented Control -->
                         <div class="metric-label" style="margin-top: 24px;"><i class="fas fa-walking"></i> Daily Activity Level</div>
-                        <div class="pill-nav" id="activityToggle" style="margin-bottom: 0;">
+                        <div class="pill-nav" id="activityToggle" style="margin-bottom: 12px;">
                             <div class="pill-item active" data-val="sedentary">Sedentary</div>
                             <div class="pill-item" data-val="light">Light</div>
-                            <div class="pill-item" data-val="moderate">Mod</div>
-                            <div class="pill-item" data-val="very">Active</div>
-                            <div class="pill-item" data-val="extra">Elite</div>
+                            <div class="pill-item" data-val="moderate">Moderate</div>
+                            <div class="pill-item" data-val="very">Very Active</div>
+                        </div>
+                        <div id="activityDesc" style="background: rgba(0,0,0,0.03); border-radius: 12px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 24px;">
+                            Mostly resting with little or no activity.
                         </div>
 
                         <button class="btn-bio-scan" id="calculateBtn">
@@ -408,12 +410,18 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 });
             }
 
-            let currentSex = 'male';
-            let currentActivity = 'sedentary';
-            let currentMethod = 'tannhauser';
+            const activityDescriptions = {
+                sedentary: "Mostly resting with little or no activity.",
+                light: "Mostly sitting/desk work (clerical, professional) or light housework (dishwashing, preparing food) with occasional walking.",
+                moderate: "Extended walking, pushing, pulling, or lifting/carrying heavy objects (cleaning, waiting tables, farming).",
+                very: "Extensive running, rapid movement, or tasks requiring strenuous effort and heavy body movement (firefighting, construction, masonry)."
+            };
 
             initToggle('sexToggle', (val) => currentSex = val);
-            initToggle('activityToggle', (val) => currentActivity = val);
+            initToggle('activityToggle', (val) => {
+                currentActivity = val;
+                document.getElementById('activityDesc').textContent = activityDescriptions[val];
+            });
             initToggle('methodToggle', (val) => {
                 currentMethod = val;
                 if(document.getElementById('bmiResult').textContent !== '--') calculateDiagnostics();
@@ -517,8 +525,8 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 
                 updateRing('bmiRing', bmi, 40);
 
-                // TDEE Capacity
-                const activityMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725, extra: 1.9 };
+                // TDEE Capacity (Standard PAL Multipliers)
+                const activityMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725 };
                 const multiplier = activityMap[currentActivity];
                 let bmr = currentSex === 'male' ? 
                     (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5 : 
