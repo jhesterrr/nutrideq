@@ -360,10 +360,8 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                         <div class="terminal-panel" style="padding: 24px; border: 1px solid var(--primary-light) !important;">
                              <div class="hud-lbl" style="margin-bottom: 12px; color: var(--primary);">Desirable Body Weight Method</div>
                              <div class="pill-nav" id="methodToggle">
-                                <div class="pill-item active" data-val="tannhauser">Tan</div>
-                                <div class="pill-item" data-val="hamwi">Hamwi</div>
-                                <div class="pill-item" data-val="bmi">BMI</div>
-                                <div class="pill-item" data-val="kg">Kg</div>
+                                 <div class="pill-item active" data-val="tannhauser">Tan</div>
+                                 <div class="pill-item" data-val="hamwi">Hamwi</div>
                              </div>
                              <div style="display: flex; align-items: baseline; gap: 12px; margin-top: 12px;">
                                 <div class="hud-val-main" id="dbwResult" style="color: var(--primary); font-size: 3rem;">--</div>
@@ -559,11 +557,6 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                     dbw = (heightCm - 100) - ((heightCm - 100) * 0.1);
                 } else if (currentMethod === 'hamwi') {
                     dbw = currentSex === 'male' ? 48 + (2.7 * inchesOver5ft) : 45 + (2.2 * inchesOver5ft);
-                } else if (currentMethod === 'bmi') {
-                    dbw = 22 * (heightM * heightM);
-                } else {
-                    dbw = (heightCm - 100);
-                    if (age < 40) dbw *= 0.9;
                 }
                 document.getElementById('dbwResult').textContent = Math.round(dbw);
             }
