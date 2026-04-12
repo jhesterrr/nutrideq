@@ -645,7 +645,7 @@ endforeach; ?>
                     searchEnabled: false,
                     itemSelectText: '',
                     shouldSort: false,
-                    position: 'bottom',
+                    position: 'auto',
                     allowHTML: false
                 });
 
@@ -690,7 +690,7 @@ endforeach; ?>
                     searchEnabled: true,
                     itemSelectText: '',
                     shouldSort: false,
-                    position: 'bottom',
+                    position: 'auto',
                     allowHTML: true
                 });
             }

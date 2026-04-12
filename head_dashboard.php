@@ -77,7 +77,7 @@ $pdo = $database->getConnection();
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NutriDeq - <?php echo getDashboardTitle($user_role); ?></title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
@@ -113,21 +113,61 @@ $pdo = $database->getConnection();
         /* Dashboard-specific refined mobile metrics */
         @media screen and (max-width: 768px) {
             .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: 1fr !important;
                 gap: 12px !important;
             }
-            .stat-card {
+            .dash-row {
+                grid-template-columns: 1fr !important;
+            }
+            .dash-panel, .stat-card, .chart-container {
                 padding: 15px !important;
                 margin-bottom: 0 !important;
             }
             .charts-section {
                 grid-template-columns: 1fr !important;
             }
+            /* Nutritional Snap scaling */
+            .macro-rings-container {
+                gap: 8px !important;
+                justify-content: center !important;
+            }
+            .macro-ring {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            .macro-ring svg {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            /* Touch Target Optimization */
+            button, .btn, .nav-link, .action-btn {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+            .hydration-controls button {
+                width: 48px !important;
+                height: 48px !important;
+                font-size: 1.2rem !important;
+            }
         }
-    </style>
     </style>
     <script>
         const BASE_URL = '<?= rtrim(dirname($_SERVER['PHP_SELF']), '/') ?>/';
+        
+        // Ghost Scrolling Preventer Framework
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class' || mutation.attributeName === 'style') {
+                        const hasActiveModal = document.querySelectorAll('.active, .modal-open, [style*="display: flex"].modal-overlay, [style*="display: flex"].info-modal-overlay').length > 0;
+                        document.body.style.overflow = hasActiveModal ? 'hidden' : '';
+                    }
+                });
+            });
+            // Monitor common modal overlays dynamically
+            const config = { attributes: true, attributeFilter: ['class', 'style'], subtree: true };
+            observer.observe(document.body, config);
+        });
     </script>
 </head>
 

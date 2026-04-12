@@ -48,7 +48,7 @@ try {
     } elseif ($role === 'regular') {
         // CLIENT DATA
         // Macros Today
-        $stmt = $pdo->prepare("SELECT SUM(calories) as cal, SUM(protein) as prot, SUM(carbs) as carb, SUM(fats) as fat FROM food_tracking WHERE user_id = ? AND tracking_date = CURDATE()");
+        $stmt = $pdo->prepare("SELECT SUM(calories) as cal, SUM(protein) as prot, SUM(carbs) as carb, SUM(fat) as fat FROM food_logs WHERE user_id = ? AND log_date = CURDATE()");
         $stmt->execute([$user_id]);
         $totals = $stmt->fetch();
         $data['macros'] = [
@@ -93,11 +93,20 @@ try {
         $stmt->execute([$user_id]);
         $data['recent_interactions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Body Composition Insight (BMI & History)
-        $stmt = $pdo->prepare("SELECT weight, height FROM clients WHERE user_id = ? LIMIT 1");
+        // Body Composition Insight, Macro Goals & Dietitian Status
+        $stmt = $pdo->prepare("SELECT weight, height, staff_id, goal_calories, goal_protein, goal_carbs, goal_fats FROM clients WHERE user_id = ? LIMIT 1");
         $stmt->execute([$user_id]);
         $client = $stmt->fetch(PDO::FETCH_ASSOC);
         
+        $data['has_dietitian'] = !empty($client['staff_id']);
+        
+        $data['macro_goals'] = [
+            'calories' => (int)($client['goal_calories'] ?? 2000),
+            'protein' => (int)($client['goal_protein'] ?? 150),
+            'carbs' => (int)($client['goal_carbs'] ?? 200),
+            'fats' => (int)($client['goal_fats'] ?? 65)
+        ];
+
         $bmi = 0;
         $bmi_status = 'Unknown';
         if ($client && $client['height'] > 0 && $client['weight'] > 0) {

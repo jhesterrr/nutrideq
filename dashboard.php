@@ -105,8 +105,9 @@ $pdo = $database->getConnection();
     <link rel="stylesheet" href="css/hydration-premium.css">
     <link rel="stylesheet" href="css/dashboard-premium.css">
     <link rel="stylesheet" href="css/info-modal.css">
-    <script src="scripts/info-system.js" defer></script>
+    <script src="scripts/info-component.js" defer></script>
     <script src="scripts/premium-effects.js" defer></script>
+    <script src="scripts/dashboard-store.js" defer></script>
     <style>
         .recovery-key-banner {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -433,8 +434,8 @@ $pdo = $database->getConnection();
                         
                         <div class="charts-section" style="grid-template-columns: 1fr 1.2fr; gap: 25px;">
                             <div class="chart-container nutri-glass" id="staffInfluenceContainer" style="box-shadow: none; border: none; background: rgba(0,0,0,0.01); padding: 20px;">
-                                <div class="chart-header" style="margin-bottom: 20px;">
-                                    <h3 style="font-family: 'Outfit'; margin: 0; font-size: 1.1rem;"><i class="fas fa-users-cog"></i> Performance Influence</h3>
+                                <div class="chart-header" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-family: 'Outfit'; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fas fa-users-cog"></i> Performance Influence <info-button feature="staff_performance" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h3>
                                     <span id="deltaSelectedBadge" style="display: none; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">--</span>
                                 </div>
                                 <div id="staffInfluenceList" style="display: flex; flex-direction: column; gap: 12px;">
@@ -473,7 +474,7 @@ $pdo = $database->getConnection();
 
                     <div class="dash-panel nutri-glass">
                         <div class="dash-panel-header">
-                            <h2 class="dash-panel-title"><i class="fas fa-bolt"></i> System Feed</h2>
+                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-bolt"></i> System Feed <info-button feature="recent_activity" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                             <button class="btn btn-outline" id="refreshSystemActivity" style="border-radius: 12px; font-size: 0.75rem; padding: 4px 8px;">Refresh</button>
                         </div>
                         <div class="activity-feed" id="recentActivityList" style="max-height: 280px; overflow-y: auto;">
@@ -920,7 +921,7 @@ $pdo = $database->getConnection();
 
                     <div class="dash-panel" style="min-height: auto;">
                         <div class="dash-panel-header">
-                            <h2 class="dash-panel-title"><i class="fas fa-paper-plane"></i> Interactions</h2>
+                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-paper-plane"></i> Interactions <info-button feature="interactions" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                             <button class="btn btn-primary" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 10px;" onclick="location.href='staff-messages.php'">View All</button>
                         </div>
                         <div class="activity-feed" style="max-height: 260px; overflow-y: auto;">
@@ -950,7 +951,7 @@ $pdo = $database->getConnection();
                 <div class="dash-row stagger d-3" style="grid-template-columns: 1fr; margin-top: 30px;">
                     <div class="dash-panel nutri-glass" style="padding: 30px;">
                         <div class="dash-panel-header" style="margin-bottom: 25px;">
-                            <h2 class="dash-panel-title"><i class="fas fa-child-reaching" style="color: #10b981;"></i> Body Composition Insight</h2>
+                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-child-reaching" style="color: #10b981;"></i> Body Composition Insight <info-button feature="body_composition" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                             <div style="display: flex; gap: 20px; align-items: center;">
                                 <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Based on your latest anthropometrics</div>
                                 <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.03); padding: 5px 15px; border-radius: 50px; border: 1px solid rgba(0,0,0,0.05);">
@@ -1103,7 +1104,7 @@ $pdo = $database->getConnection();
                     
                     title.innerHTML = '<i class="fas fa-bolt" style="color:#10b981; margin-right:10px;"></i>Quick Body Update';
                     content.innerHTML = `
-                        <form method="POST" id="quickUpdateForm">
+                        <form method="POST" id="quickUpdateForm" onsubmit="window.quickBodyUpdate(event)">
                             <input type="hidden" name="action" value="quick_body_update">
                             <div style="margin-bottom: 20px;">
                                 <label style="display:block; margin-bottom:8px; font-weight:600; color:#475569;">Current Weight (kg)</label>
@@ -1388,14 +1389,32 @@ $pdo = $database->getConnection();
                 // FETCH REAL-TIME CLIENT DATA
                 $calories_today = 0; $protein_today = 0; $carbs_today = 0; $fats_today = 0;
                 try {
-                    $stmt = $pdo->prepare("SELECT SUM(calories) as cal, SUM(protein) as prot, SUM(carbs) as carb, SUM(fats) as fat FROM food_tracking WHERE user_id = ? AND tracking_date = CURDATE()");
+                    $stmt = $pdo->prepare("SELECT SUM(calories) as cal, SUM(protein) as prot, SUM(carbs) as carb, SUM(fat) as fat FROM food_logs WHERE user_id = ? AND log_date = CURDATE()");
                     $stmt->execute([$user_id]);
                     $totals = $stmt->fetch();
                     $calories_today = (int)($totals['cal'] ?? 0);
                     $protein_today = (int)($totals['prot'] ?? 0);
                     $carbs_today = (int)($totals['carb'] ?? 0);
                     $fats_today = (int)($totals['fat'] ?? 0);
-                } catch (Exception $e) {}
+                    
+                    $stmt = $pdo->prepare("SELECT goal_protein, goal_carbs, goal_fats FROM clients WHERE user_id = ? LIMIT 1");
+                    $stmt->execute([$user_id]);
+                    $cGoals = $stmt->fetch();
+                    $gProt = (int)($cGoals['goal_protein'] ?? 150);
+                    $gCarb = (int)($cGoals['goal_carbs'] ?? 200);
+                    $gFat  = (int)($cGoals['goal_fats'] ?? 65);
+                    
+                    $getRO = function($val, $goal) {
+                        $g = $goal > 0 ? $goal : 100;
+                        return max(0, 213.6 - (min($val / $g, 1) * 213.6));
+                    };
+                    $p_off = $getRO($protein_today, $gProt);
+                    $c_off = $getRO($carbs_today, $gCarb);
+                    $f_off = $getRO($fats_today, $gFat);
+                    
+                } catch (Exception $e) {
+                    $p_off = 213.6; $c_off = 213.6; $f_off = 213.6;
+                }
 
                 $water_today = 0;
                 try {
@@ -1421,14 +1440,13 @@ $pdo = $database->getConnection();
                 <?php endif; ?>
                 <div class="dash-hero-content">
                     <h1>Welcome back, <?php echo htmlspecialchars($user_name); ?>!</h1>
-                    <p>You have consumed <b><?php echo $calories_today; ?> kcal</b> today. Keep tracking!</p>
+                    <p>You have consumed <b id="caloriesConsumedDisplay"><?php echo $calories_today; ?></b><b> kcal</b> today. Keep tracking!</p>
                 </div>
                 <div class="dash-hero-badge nutri-glass">
                     <i class="fas fa-heartbeat"></i>
-                    <span>Score: 92</span>
+                    <span id="healthScoreDisplay">Score: 92</span>
                 </div>
             </div>
-
             <!-- ── Management Section (Quick Actions) ── -->
             <div class="management-section stagger d-2" style="margin-top: 30px; margin-bottom: 30px;">
                 <div class="command-tiles">
@@ -1457,7 +1475,7 @@ $pdo = $database->getConnection();
                         <div class="command-tile-icon" style="background: rgba(225, 29, 72, 0.1); color: #e11d48;"><i class="fas fa-comment-dots"></i></div>
                         <div class="command-tile-info">
                             <h3 style="color: #1e293b; font-weight: 700;">Messages</h3>
-                            <p style="color: #64748b;"><?php echo $unread_count; ?> unread</p>
+                            <p id="unreadMsgCount" style="color: #64748b;"><?php echo $unread_count; ?> unread</p>
                         </div>
                     </a>
                 </div>
@@ -1467,42 +1485,59 @@ $pdo = $database->getConnection();
             <div class="dash-row stagger d-3" style="grid-template-columns: 1fr 1fr; margin-bottom: 30px;">
                 <div class="dash-panel nutri-glass" style="min-height: auto; padding: 25px;">
                     <div class="dash-panel-header" style="margin-bottom: 20px;">
-                        <h2 class="dash-panel-title"><i class="fas fa-bullseye" style="color: var(--primary);"></i> Nutritional Snap</h2>
-                        <i class="fas fa-info-circle pulse-info" onclick="showFeatureInfo('nutritional_snap')" style="cursor: pointer; color: var(--primary); font-size: 0.96rem;"></i>
+                        <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-bullseye" style="color: var(--primary);"></i> Nutritional Snap <info-button feature="nutritional_snap" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                     </div>
                     <div class="macro-rings-container" style="display: flex; justify-content: space-around; align-items: center; gap: 15px;">
                         <!-- Protein Ring -->
                         <div class="macro-ring-group" style="text-align: center;">
-                            <div class="macro-ring" style="width: 70px; height: 70px;">
-                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg);">
-                                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="6"></circle>
-                                    <circle id="p_bar" cx="40" cy="40" r="34" fill="none" stroke="#4facfe" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease;"></circle>
+                            <div class="macro-ring" style="width: 70px; height: 70px; position: relative;">
+                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg); filter: drop-shadow(0px 8px 12px rgba(79, 172, 254, 0.2));">
+                                    <defs>
+                                        <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#00f2fe" />
+                                            <stop offset="100%" stop-color="#4facfe" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="40" cy="40" r="34" fill="none" stroke="#f1f5f9" stroke-width="6"></circle>
+                                    <circle id="p_bar" cx="40" cy="40" r="34" fill="none" stroke="url(#pGrad)" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="<?php echo $p_off; ?>" stroke-linecap="round" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></circle>
                                 </svg>
                             </div>
-                            <div style="margin-top: 8px; font-weight: 700; font-size: 0.8rem; color: #1e293b;">Protein</div>
-                            <div id="p_val" style="font-size: 0.75rem; color: #64748b;"><?php echo $protein_today; ?>g</div>
+                            <div style="margin-top: 8px; font-weight: 800; font-size: 0.8rem; color: #1e293b;">Protein</div>
+                            <div id="p_val" style="font-size: 0.85rem; font-weight: 600; color: #64748b; transition: all 0.3s;"><?php echo $protein_today; ?>g</div>
                         </div>
                         <!-- Carbs Ring -->
                         <div class="macro-ring-group" style="text-align: center;">
-                            <div class="macro-ring" style="width: 70px; height: 70px;">
-                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg);">
-                                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="6"></circle>
-                                    <circle id="c_bar" cx="40" cy="40" r="34" fill="none" stroke="#43e97b" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease;"></circle>
+                            <div class="macro-ring" style="width: 70px; height: 70px; position: relative;">
+                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg); filter: drop-shadow(0px 8px 12px rgba(67, 233, 123, 0.2));">
+                                    <defs>
+                                        <linearGradient id="cGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#38f9d7" />
+                                            <stop offset="100%" stop-color="#43e97b" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="40" cy="40" r="34" fill="none" stroke="#f1f5f9" stroke-width="6"></circle>
+                                    <circle id="c_bar" cx="40" cy="40" r="34" fill="none" stroke="url(#cGrad)" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="<?php echo $c_off; ?>" stroke-linecap="round" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></circle>
                                 </svg>
                             </div>
-                            <div style="margin-top: 8px; font-weight: 700; font-size: 0.8rem; color: #1e293b;">Carbs</div>
-                            <div id="c_val" style="font-size: 0.75rem; color: #64748b;"><?php echo $carbs_today; ?>g</div>
+                            <div style="margin-top: 8px; font-weight: 800; font-size: 0.8rem; color: #1e293b;">Carbs</div>
+                            <div id="c_val" style="font-size: 0.85rem; font-weight: 600; color: #64748b; transition: all 0.3s;"><?php echo $carbs_today; ?>g</div>
                         </div>
                         <!-- Fats Ring -->
                         <div class="macro-ring-group" style="text-align: center;">
-                            <div class="macro-ring" style="width: 70px; height: 70px;">
-                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg);">
-                                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="6"></circle>
-                                    <circle id="f_bar" cx="40" cy="40" r="34" fill="none" stroke="#f5576c" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease;"></circle>
+                            <div class="macro-ring" style="width: 70px; height: 70px; position: relative;">
+                                <svg viewBox="0 0 80 80" style="transform: rotate(-90deg); filter: drop-shadow(0px 8px 12px rgba(245, 87, 108, 0.2));">
+                                    <defs>
+                                        <linearGradient id="fGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f093fb" />
+                                            <stop offset="100%" stop-color="#f5576c" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="40" cy="40" r="34" fill="none" stroke="#f1f5f9" stroke-width="6"></circle>
+                                    <circle id="f_bar" cx="40" cy="40" r="34" fill="none" stroke="url(#fGrad)" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="<?php echo $f_off; ?>" stroke-linecap="round" style="transition: stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);"></circle>
                                 </svg>
                             </div>
-                            <div style="margin-top: 8px; font-weight: 700; font-size: 0.8rem; color: #1e293b;">Fats</div>
-                            <div id="f_val" style="font-size: 0.75rem; color: #64748b;"><?php echo $fats_today; ?>g</div>
+                            <div style="margin-top: 8px; font-weight: 800; font-size: 0.8rem; color: #1e293b;">Fats</div>
+                            <div id="f_val" style="font-size: 0.85rem; font-weight: 600; color: #64748b; transition: all 0.3s;"><?php echo $fats_today; ?>g</div>
                         </div>
                     </div>
                 </div>
@@ -1510,8 +1545,7 @@ $pdo = $database->getConnection();
                 <div class="dash-panel nutri-glass" style="min-height: auto; padding: 25px; position: relative; overflow: hidden;">
                     <div class="hydration-wave-bg" id="waterWave" style="position: absolute; bottom: 0; left: 0; width: 100%; height: <?php echo min($water_today * 12.5, 100); ?>%; background: rgba(79, 172, 254, 0.1); transition: height 0.5s ease; z-index: 0;"></div>
                     <div class="dash-panel-header" style="position: relative; z-index: 1;">
-                        <h2 class="dash-panel-title"><i class="fas fa-tint" style="color: #4facfe;"></i> Hydration Flow</h2>
-                        <i class="fas fa-info-circle pulse-info" onclick="showFeatureInfo('hydration_flow')" style="cursor: pointer; color: #4facfe; font-size: 0.96rem;"></i>
+                        <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-tint" style="color: #4facfe;"></i> Hydration Flow <info-button feature="hydration_flow" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                     </div>
                     <div style="position: relative; z-index: 1; text-align: center; margin-top: 15px;">
                         <div id="waterCount" style="font-size: 2.5rem; font-weight: 800; font-family: 'Outfit'; color: #0f172a;"><?php echo $water_today; ?></div>
@@ -1528,7 +1562,7 @@ $pdo = $database->getConnection();
             <div class="dash-row stagger d-4" style="grid-template-columns: 1fr; margin-bottom: 30px;">
                 <div class="dash-panel nutri-glass" style="padding: 30px;">
                         <div class="dash-panel-header">
-                            <h2 class="dash-panel-title"><i class="fas fa-child-reaching" style="color: #10b981;"></i> Body Composition Insight</h2>
+                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-child-reaching" style="color: #10b981;"></i> Body Composition Insight <info-button feature="body_composition" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                             <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Based on your latest anthropometrics</div>
                         </div>
                     
@@ -1584,10 +1618,10 @@ $pdo = $database->getConnection();
             <div class="dash-row stagger d-4" style="grid-template-columns: 2fr 1fr;">
                 <div class="dash-panel nutri-glass">
                     <div class="dash-panel-header">
-                        <h2 class="dash-panel-title"><i class="fas fa-utensils"></i> Recommended Plan</h2>
+                        <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-utensils"></i> Recommended Plan <info-button feature="recommended_plan" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                         <button class="btn btn-primary" onclick="location.href='user-health-tracker.php'" style="font-size: 0.8rem; border-radius: 10px;">Track Food</button>
                     </div>
-                    <div class="meal-plans-list">
+                    <div class="meal-plans-list" id="recommendedPlansList">
                         <?php if (count($recommended_plans) > 0): ?>
                             <?php foreach ($recommended_plans as $plan): ?>
                                 <div class="meal-plan-card" style="padding: 20px; border: none; margin-bottom: 15px; background: rgba(0,0,0,0.02); border-radius: 15px;">
@@ -1614,10 +1648,10 @@ $pdo = $database->getConnection();
 
                 <div class="dash-panel nutri-glass">
                     <div class="dash-panel-header">
-                        <h2 class="dash-panel-title"><i class="fas fa-comment-dots"></i> Interactions</h2>
+                        <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-comment-dots"></i> Interactions <info-button feature="interactions" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
                         <button class="btn btn-outline" style="font-size: 0.8rem; border-radius: 10px;" onclick="location.href='user-messages.php'">Chat</button>
                     </div>
-                    <div class="activity-feed">
+                    <div class="activity-feed" id="messagesFeedContainer">
                         <?php if (count($messages) > 0): ?>
                             <?php foreach ($messages as $message): ?>
                                 <div class="activity-item nutri-glass" style="margin-bottom: 12px; border: none; padding: 15px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.015);" onclick="location.href='user-messages.php'">

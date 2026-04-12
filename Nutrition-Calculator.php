@@ -534,6 +534,19 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 const tdee = Math.round(bmr * multiplier);
                 document.getElementById('tdeeResult').textContent = tdee;
                 updateRing('tdeeRing', tdee, 4000);
+                
+                // Add reactive persist sync for dashboard
+                const macroGoals = {
+                    calories: tdee,
+                    protein: Math.round((tdee * 0.30) / 4),
+                    carbs: Math.round((tdee * 0.40) / 4),
+                    fats: Math.round((tdee * 0.30) / 9)
+                };
+                fetch('api/save_macro_goals.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(macroGoals)
+                }).catch(e => console.warn('Sync failed:', e));
 
                 // Ratio Synthesis
                 if (waistCm && hipCm) {

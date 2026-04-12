@@ -1471,7 +1471,8 @@ if (isset($_GET['tab'])) {
                             searchEnabled: true,
                             itemSelectText: '',
                             shouldSort: false,
-                            placeholder: true
+                            placeholder: true,
+                            position: 'auto'
                         });
                     }
                 }
