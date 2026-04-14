@@ -295,14 +295,16 @@ if ($selected_client_id) {
             background: rgba(255,255,255,0.06) !important;
             padding: 24px !important;
         }
-        .message-wrapper.sent .message-bubble {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-        }
         .message-wrapper.received .message-bubble {
-            background: rgba(255,255,255,1) !important;
-            border: 1px solid rgba(0,0,0,0.05) !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-            color: #334155 !important;
+            background: #f1f5f9 !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+            color: #1e293b !important;
+        }
+        .message-wrapper.sent .message-bubble {
+            background: #059669 !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2) !important;
         }
 
         /* ── Input area ── */
