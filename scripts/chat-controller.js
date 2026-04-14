@@ -47,7 +47,13 @@ class ChatController {
     }
 
     startPolling() {
-        this.pollingInterval = setInterval(() => this.fetchMessages(), 3000);
+        // Change to a safer setTimeout to avoid stacking requests if the server is slow
+        this.pollingTimeout = setTimeout(() => this.poll(), 3000);
+    }
+
+    async poll() {
+        await this.fetchMessages();
+        this.pollingTimeout = setTimeout(() => this.poll(), 3000);
     }
 
     async fetchMessages() {
@@ -55,20 +61,23 @@ class ChatController {
         try {
             const res = await fetch(`${BASE_URL}handlers/get_messages.php?contact_id=${this.contactId}`);
             const data = await res.json();
+            
+            // ALWAYS clear the loading spinner on the first successful or empty response
+            const loadingElt = this.chatMessages.querySelector('.fa-spinner');
+            if (loadingElt && loadingElt.parentElement) {
+                loadingElt.parentElement.remove();
+            }
+
             if (data.success) {
                 this.renderMessages(data.messages);
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error("Chat Error:", e);
+        }
     }
 
     renderMessages(messages) {
         if (!this.chatMessages) return;
-
-        // Clear loading spinner once we have incoming messages
-        const loadingElt = this.chatMessages.querySelector('.fa-spinner');
-        if (loadingElt && loadingElt.parentElement) {
-            loadingElt.parentElement.remove();
-        }
 
         let addedNew = false;
         messages.forEach(msg => {
