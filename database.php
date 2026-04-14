@@ -9,11 +9,11 @@ class Database
     private $username;
     private $password;
     private $port;
-    public $conn;
+    private static $connection = null;
 
     public function __construct()
     {
-        // Try to get the connection string first (Railway standard)
+        // Try to get the connection string first (Railway/Render standard)
         $urlString = getenv('MYSQL_URL') ?: getenv('DATABASE_URL') ?: getenv('MYSQLURL');
         
         if ($urlString) {
@@ -24,7 +24,7 @@ class Database
             $this->password = $url['pass'] ?? '';
             $this->port = $url['port'] ?? '3306';
         } else {
-            // Fallback to individual Railway MySQL environment variables, then local settings
+            // Fallback to individual environment variables
             $this->host = getenv('MYSQLHOST') ?: 'localhost';
             $this->dbname = getenv('MYSQLDATABASE') ?: 'nutrideq';
             $this->username = getenv('MYSQLUSER') ?: 'root';
@@ -35,38 +35,22 @@ class Database
 
     public function getConnection()
     {
-        $this->conn = null;
+        // Use existing connection if available to save time
+        if (self::$connection !== null) {
+            return self::$connection;
+        }
 
         try {
             $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->dbname . ";charset=utf8mb4";
-            $this->conn = new PDO($dsn, $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            self::$connection = new PDO($dsn, $this->username, $this->password, [
+                PDO::ATTR_PERSISTENT => true, // Keep connection open
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            ]);
 
-            // Ensure columns and tables for recovery system exist
-            $this->ensureRecoverySystemExists();
+            return self::$connection;
         } catch (PDOException $exception) {
-            // Re-throw as a standard exception so API callers can return clean JSON.
-            // Connection debug info is available in XAMPP error logs.
             throw new Exception('Database connection failed: ' . $exception->getMessage());
-        }
-
-        return $this->conn;
-    }
-
-    private function ensureRecoverySystemExists()
-    {
-        try {
-            // Check for recovery_key column in users table
-            $stmt = $this->conn->query("DESCRIBE users");
-            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            
-            if (!in_array('recovery_key', $columns)) {
-                $this->conn->exec("ALTER TABLE users ADD COLUMN recovery_key VARCHAR(12) DEFAULT NULL");
-                $this->conn->exec("CREATE INDEX idx_recovery_key ON users(recovery_key)");
-            }
-        } catch (PDOException $e) {
-            // Silently fail or log in development
         }
     }
 }
