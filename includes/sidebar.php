@@ -23,7 +23,7 @@ $sidebar_user_name = $_SESSION['user_name'] ?? 'User';
 $sidebar_user_initials = getSidebarInitials($sidebar_user_name);
 
 // Get navigation links from standardized navigation file
-require_once 'navigation.php';
+require_once __DIR__ . '/../navigation.php';
 $sidebar_nav_links = getNavigationLinks($sidebar_user_role, $current_page);
 
 // Update last activity for real-time monitoring
@@ -31,7 +31,7 @@ if (isset($_SESSION['user_id'])) {
     try {
         // Find PDO if not already available in parent scope
         if (!isset($pdo)) {
-            require_once 'database.php';
+            require_once __DIR__ . '/../database.php';
             $sidebar_db = new Database();
             $pdo = $sidebar_db->getConnection();
         }

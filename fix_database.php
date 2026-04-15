@@ -25,6 +25,8 @@ try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS internal_threads (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, created_by INT NOT NULL, participants JSON NOT NULL, status ENUM('open', 'closed', 'archived') DEFAULT 'open', last_message_at DATETIME NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB;");
     $pdo->exec("CREATE TABLE IF NOT EXISTS internal_thread_messages (id INT AUTO_INCREMENT PRIMARY KEY, thread_id INT NOT NULL, sender_id INT NOT NULL, sender_role VARCHAR(50) NOT NULL, message TEXT, attachment_path VARCHAR(255) NULL, message_type ENUM('text', 'image', 'file') DEFAULT 'text', read_by JSON NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB;");
     $pdo->exec("CREATE TABLE IF NOT EXISTS conversations (id INT AUTO_INCREMENT PRIMARY KEY, client_id INT NOT NULL, dietitian_id INT NOT NULL, status ENUM('open', 'closed', 'archived') DEFAULT 'open', last_message_at DATETIME NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB;");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS password_reset_requests (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, token VARCHAR(255) NOT NULL, status ENUM('pending', 'cancelled', 'used') DEFAULT 'pending', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX idx_user_id (user_id), INDEX idx_token (token)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    echo "✅ <b>password_reset_requests</b> table ensured.<br>";
     
     // 2. Ensure critical columns exist
     addColumn($pdo, 'internal_threads', 'updated_at', 'DATETIME NULL AFTER last_message_at');
