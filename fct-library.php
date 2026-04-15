@@ -1,6 +1,6 @@
 <?php
 session_start();
-echo '<script>console.log("Current Role: ' . ($_SESSION['role'] ?? 'none') . '");</script>';
+echo '<script>console.log("Current Role: ' . ($_SESSION['user_role'] ?? 'none') . '");</script>';
 require_once 'api/fct_helper.php';
 
 // Check login (Assuming standard auth)
@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$user_role = strtolower($_SESSION['role'] ?? $_SESSION['user_role'] ?? 'guest');
+$user_role = strtolower($_SESSION['user_role'] ?? 'guest');
 $fct = new FCTHelper();
 ?>
 <script> 
