@@ -182,11 +182,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'reject_reset':
-                $request_id = $_POST['request_id'];
-                $stmt = $conn->prepare("UPDATE password_reset_requests SET status = 'cancelled' WHERE id = ?");
-                $stmt->execute([$request_id]);
-                $_SESSION['success'] = "Reset request cancelled.";
-                header("Location: admin-user-management.php?tab=reset_requests");
+                try {
+                    $request_id = $_POST['request_id'];
+                    $stmt = $conn->prepare("UPDATE password_reset_requests SET status = 'cancelled' WHERE id = ?");
+                    $stmt->execute([$request_id]);
+                    $_SESSION['success'] = "Reset request cancelled.";
+                } catch (PDOException $e) {
+                    $_SESSION['error'] = "Could not process reset request: " . $e->getMessage();
+                }
+                header("Location: admin-user-management.php");
                 exit();
                 break;
 
