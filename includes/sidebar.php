@@ -73,16 +73,24 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <ul class="nav-links">
-        <?php foreach ($sidebar_nav_links as $link): ?>
-            <?php if (isset($link['type']) && $link['type'] === 'header'): ?>
+        <?php foreach ($sidebar_nav_links as $nav_item): 
+            $item_text = $nav_item['text'] ?? 'Untitled';
+            $item_icon = $nav_item['icon'] ?? 'fas fa-circle';
+            $item_href = $nav_item['href'] ?? '#';
+            $is_header = isset($nav_item['type']) && $nav_item['type'] === 'header';
+        ?>
+            <?php if ($is_header): ?>
                 <li class="nav-header">
-                    <?php echo htmlspecialchars($link['text']); ?>
+                    <?php echo htmlspecialchars($item_text); ?>
                 </li>
             <?php else: ?>
                 <li>
-                    <a href="<?php echo $link['href']; ?>" class="<?php echo !empty($link['active']) ? 'active' : ''; ?>" title="<?php echo $link['text']; ?>">
-                        <i class="<?php echo $link['icon']; ?>"></i>
-                        <span class="nav-text"><?php echo $link['text']; ?></span>
+                    <a href="<?php echo htmlspecialchars($item_href); ?>" 
+                       class="<?php echo !empty($nav_item['active']) ? 'active' : ''; ?>" 
+                       title="<?php echo htmlspecialchars($item_text); ?>"
+                       style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+                        <i class="<?php echo htmlspecialchars($item_icon); ?>" style="visibility: visible !important; opacity: 1 !important;"></i>
+                        <span class="nav-text" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important;"><?php echo htmlspecialchars($item_text); ?></span>
                     </a>
                 </li>
             <?php endif; ?>
@@ -306,6 +314,26 @@ if (isset($_SESSION['user_id'])) {
         color: #ef4444;
         background: rgba(239, 68, 68, 0.1);
         transform: rotate(90deg);
+    }
+    
+    /* NUCLEAR FIX: Ensure sidebar links are always visible regardless of clashing global CSS */
+    .nav-links li {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        min-height: 48px !important;
+    }
+    .nav-links a {
+        color: #4b5563 !important;
+        width: 100% !important;
+        text-decoration: none !important;
+    }
+    .nav-links a:hover, .nav-links a.active {
+        color: #2D8A56 !important;
+    }
+    .nav-links .nav-text {
+        color: inherit !important;
     }
 </style>
 
