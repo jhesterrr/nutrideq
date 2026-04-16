@@ -341,8 +341,9 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             position: sticky;
             top: 0;
             z-index: 10;
-            background: rgba(6, 78, 59, 0.95) !important;
-            backdrop-filter: blur(8px);
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%) !important;
+            backdrop-filter: blur(12px);
+            color: #fff !important;
         }
 
         .food-exchange-table th:first-child,
@@ -359,6 +360,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         .food-exchange-table thead th:first-child {
             z-index: 15;
             background: #064e3b !important;
+            color: #fff !important;
         }
 
         .food-exchange-table th {
