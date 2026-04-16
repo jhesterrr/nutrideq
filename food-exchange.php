@@ -330,16 +330,19 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         /* ── Glass Tables ── */
         .table-container {
             overflow-x: auto;
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
             position: relative;
             background: #fff;
+            box-shadow: var(--shadow-sm);
         }
 
         .food-exchange-table thead th {
             position: sticky;
             top: 0;
             z-index: 10;
+            background: rgba(6, 78, 59, 0.95) !important;
+            backdrop-filter: blur(8px);
         }
 
         .food-exchange-table th:first-child,
@@ -347,14 +350,15 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             position: sticky;
             left: 0;
             z-index: 5;
-            background: #f8fafc;
-            border-right: 2px solid rgba(5, 150, 105, 0.1);
-            min-width: 140px;
+            background: #fff !important;
+            border-right: 1px solid var(--border-color);
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .food-exchange-table thead th:first-child {
             z-index: 15;
-            background: #064e3b;
+            background: #064e3b !important;
         }
 
         .food-exchange-table th {
@@ -391,17 +395,12 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .food-exchange-table tbody tr {
-            transition: all 0.3s;
-        }
-
         .food-exchange-table tbody tr:nth-child(even) {
-            background: rgba(5, 150, 105, 0.015);
+            background: rgba(0, 0, 0, 0.01);
         }
 
         .food-exchange-table tbody tr:hover td {
-            background: rgba(5, 150, 105, 0.06) !important;
-            color: var(--primary);
+            background: rgba(5, 150, 105, 0.04) !important;
         }
 
         .food-exchange-table tbody tr:last-child td {
@@ -409,18 +408,19 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-group-header {
-            background: linear-gradient(90deg, #ede9fe 0%, transparent 100%) !important;
+            background: #f8fafc !important;
             font-weight: 800;
-            color: #6d28d9 !important;
-            font-size: 0.85rem;
+            color: var(--primary) !important;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 14px 20px !important;
-            border-left: 4px solid #6d28d9;
+            letter-spacing: 0.15em;
+            padding: 10px 20px !important;
+            border-bottom: 2px solid rgba(5, 150, 105, 0.1);
         }
 
         .food-subgroup {
-            color: var(--text-primary);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
             font-weight: 600;
             font-family: 'Outfit', sans-serif;
         }
