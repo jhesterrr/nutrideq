@@ -373,11 +373,12 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-exchange-table th.active {
-            background: rgba(5, 150, 105, 0.95) !important;
+            background: var(--gradient) !important;
             color: #fff;
             position: relative;
             border-radius: 12px 12px 0 0;
-            box-shadow: 0 -4px 15px rgba(5, 150, 105, 0.2);
+            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3);
+            border: none;
         }
 
         .food-exchange-table th.active::after {
@@ -386,26 +387,28 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 40%;
-            height: 3px;
-            background: #fff;
+            width: 30%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
-            box-shadow: 0 0 10px #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
         }
 
         .food-exchange-table td {
-            padding: 12px 16px;
+            padding: 14px 16px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             font-variant-numeric: tabular-nums;
-            letter-spacing: -0.02em;
+            font-weight: 500;
+            color: var(--text-secondary);
         }
 
         .food-exchange-table td.active-cell {
-            background: rgba(5, 150, 105, 0.03) !important;
-            border-left: 1px solid rgba(5, 150, 105, 0.1);
-            border-right: 1px solid rgba(5, 150, 105, 0.1);
+            background: linear-gradient(180deg, rgba(5, 150, 105, 0.06) 0%, rgba(5, 150, 105, 0.02) 100%) !important;
+            border-left: 1px solid rgba(5, 150, 105, 0.15);
+            border-right: 1px solid rgba(5, 150, 105, 0.15);
             font-weight: 700;
+            color: var(--primary);
         }
 
         .food-exchange-table tbody tr:nth-child(even) {
@@ -461,39 +464,25 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .exchange-value.highlight {
-            background: var(--gradient) !important;
-            color: white !important;
-            border-radius: 8px;
-            padding: 4px 12px;
+            background: rgba(5, 150, 105, 0.1) !important;
+            color: var(--primary) !important;
+            border-radius: 50px;
+            padding: 4px 14px;
             font-weight: 800;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 32px;
-            animation: highlightPulse 2s infinite;
+            min-width: 36px;
+            border: 1.5px solid rgba(5, 150, 105, 0.2);
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.05);
+            transition: all 0.3s;
         }
 
-        @keyframes highlightPulse {
-            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
-        }
-
-        .active-cell {
-            background: rgba(5, 150, 105, 0.08) !important;
-            position: relative;
-        }
-
-        .active-cell::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(5, 150, 105, 0.05), transparent);
-            pointer-events: none;
+        .active-cell .exchange-value.highlight {
+            background: var(--gradient) !important;
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+            transform: scale(1.05);
         }
 
         /* ── Calorie Selector ── */
