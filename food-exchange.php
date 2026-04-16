@@ -1642,7 +1642,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">2</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Low Fat</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#94a3b8;"></span> Low Fat</td>
                                                     <td><span class="exchange-value">1</span></td>
                                                     <td><span class="exchange-value">1</span></td>
                                                     <td><span class="exchange-value">-</span></td>
