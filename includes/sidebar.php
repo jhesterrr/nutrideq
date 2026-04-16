@@ -49,9 +49,14 @@ if (isset($_SESSION['user_id'])) {
         <img src="assets/img/logo.png" alt="NutriDeq" style="height: 32px; width: auto;">
         <span>NutriDeq</span>
     </div>
-    <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Menu">
-        <i class="fas fa-bars"></i>
-    </button>
+    <div class="mobile-header-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button class="mobile-header-logout" id="mobileLogoutTrigger" title="Logout" style="background: rgba(255, 107, 107, 0.1); border: none; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #ff6b6b; cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
 </div>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -106,7 +111,7 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <div class="logout-section">
-        <a href="login-logout/logout.php" class="logout-btn" id="logoutBtn">
+        <a href="login-logout/logout.php" class="logout-btn" id="logoutTrigger">
             <i class="fas fa-sign-out-alt"></i>
             <span class="nav-text">Logout</span>
         </a>
@@ -165,6 +170,7 @@ if (isset($_SESSION['user_id'])) {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const logoutTrigger = document.getElementById('logoutTrigger');
+        const mobileLogoutTrigger = document.getElementById('mobileLogoutTrigger');
         const logoutModal = document.getElementById('logoutModal');
         const cancelLogout = document.getElementById('cancelLogout');
         
@@ -194,6 +200,13 @@ if (isset($_SESSION['user_id'])) {
 
         if (logoutTrigger && logoutModal) {
             logoutTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                logoutModal.classList.add('active');
+            });
+        }
+
+        if (mobileLogoutTrigger && logoutModal) {
+            mobileLogoutTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
                 logoutModal.classList.add('active');
             });

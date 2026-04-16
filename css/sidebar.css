@@ -46,6 +46,15 @@
     background: rgba(5, 150, 105, 0.2);
 }
 
+.mobile-header-logout {
+    transition: all 0.3s ease;
+}
+
+.mobile-header-logout:hover {
+    background: rgba(255, 107, 107, 0.2) !important;
+    transform: scale(1.05);
+}
+
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -81,6 +90,7 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--glass-border);
+    padding-bottom: 100px; /* Space for bottom bar and safe area */
 }
 
 /* Scrollbar adjustment for sleek sidebar */
