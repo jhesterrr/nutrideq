@@ -2323,12 +2323,15 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                         <!-- Meal Distribution Strategy Summary Table -->
                         <div class="meal-distribution-strategy-table" style="margin-top: 40px; overflow-x: auto;">
-                            <h3 style="color: var(--primary-color); margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                            <h3
+                                style="color: var(--primary-color); margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
                                 <i class="fas fa-table"></i> Meal Distribution Strategy Summary
                             </h3>
-                            <table class="food-exchange-table" style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                            <table class="food-exchange-table"
+                                style="width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;">
                                 <thead>
-                                    <tr style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
+                                    <tr
+                                        style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white;">
                                         <th style="padding: 15px; text-align: left;">Meal Time</th>
                                         <th style="padding: 15px; text-align: center;">CHO (g)</th>
                                         <th style="padding: 15px; text-align: center;">PRO (g)</th>
@@ -2374,7 +2377,8 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </tr>
                                 </tbody>
                                 <tfoot>
-                                    <tr style="background: rgba(10, 191, 188, 0.05); font-weight: 700; color: var(--primary-color); border-top: 2px solid var(--primary-color);">
+                                    <tr
+                                        style="background: rgba(10, 191, 188, 0.05); font-weight: 700; color: var(--primary-color); border-top: 2px solid var(--primary-color);">
                                         <td style="padding: 15px; text-align: left;">GRAND TOTAL</td>
                                         <td style="padding: 15px; text-align: center;">339g</td>
                                         <td style="padding: 15px; text-align: center;">65g</td>
