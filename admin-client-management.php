@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Handle GET parameters for tabs
-$current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_users';
+$current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_clients';
 
 try {
     // Get client statistics
@@ -291,8 +291,19 @@ try {
     $deleted_stats = $deleted_stats_stmt->fetch();
     $stats['deleted_clients'] = $deleted_stats['deleted_count'] ?? 0;
 
+    // Get all staff members for the dropdown
+    $staff_sql = "SELECT id, name FROM users WHERE role = 'staff' AND status = 'active' ORDER BY name ASC";
+    $staff_stmt = $conn->prepare($staff_sql);
+    $staff_stmt->execute();
+    $available_staff = $staff_stmt->fetchAll();
+
     // Get all active clients
-    $users_sql = "SELECT * FROM users WHERE role = 'regular' ORDER BY created_at DESC";
+    $users_sql = "SELECT u.*, c.staff_id, s.name as staff_name 
+                  FROM users u 
+                  LEFT JOIN clients c ON u.id = c.user_id 
+                  LEFT JOIN users s ON c.staff_id = s.id 
+                  WHERE u.role = 'regular' 
+                  ORDER BY u.created_at DESC";
     $users_stmt = $conn->prepare($users_sql);
     $users_stmt->execute();
     $clients = $users_stmt->fetchAll();
@@ -397,9 +408,18 @@ try {
                             <span class="profile-badge badge-role-regular"><i class="fas fa-user"></i> Client</span>
                             <span class="profile-badge badge-<?php echo $client['status']??'active'; ?>"><i class="fas fa-circle"></i> <?php echo ucfirst($client['status']??'active'); ?></span>
                         </div>
-                        <?php if(!empty($client['staff_name'])): ?>
-                        <div class="profile-meta" style="color:#0369a1;"><i class="fas fa-user-shield" style="color:#0369a1;"></i> <?php echo htmlspecialchars($client['staff_name']); ?></div>
-                        <?php endif; ?>
+                        <div class="profile-meta staff-assignment-wrapper" style="margin-top: 8px;">
+                            <i class="fas fa-user-shield" style="color:#0369a1;"></i>
+                            <select class="staff-assignment-dropdown" data-client-id="<?php echo $client['id']; ?>" style="width: calc(100% - 25px); padding: 4px 6px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg, transparent); color: var(--text-color); font-size: 0.8rem; cursor: pointer; display: inline-block;">
+                                <option value="">-- Unassigned --</option>
+                                <?php foreach($available_staff as $staff): ?>
+                                    <option value="<?php echo $staff['id']; ?>" <?php echo (isset($client['staff_id']) && $client['staff_id'] == $staff['id']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($staff['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="assign-feedback" id="feedback-<?php echo $client['id']; ?>" style="font-size: 0.75rem; margin-top: 4px; padding-left: 20px; display: none;"></div>
+                        </div>
                         <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($client['created_at']??'now')); ?></div>
                     </div>
                     <div class="profile-card-footer">
@@ -444,6 +464,42 @@ try {
 <script>
 function filterCards(term,gridId){term=term.toLowerCase();document.querySelectorAll('#'+gridId+' .profile-card').forEach(c=>{c.style.display=(c.dataset.search||'').includes(term)?'':'none';});}
 document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.staff-assignment-dropdown').forEach(dropdown => {
+        dropdown.addEventListener('change', function() {
+            const clientId = this.dataset.clientId;
+            const staffId = this.value;
+            const feedbackEl = document.getElementById('feedback-' + clientId);
+            
+            feedbackEl.style.display = 'block';
+            feedbackEl.style.color = 'var(--text-color)';
+            feedbackEl.textContent = 'Saving...';
+            
+            fetch('handlers/assign_staff.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    client_user_id: clientId,
+                    staff_id: staffId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    feedbackEl.style.color = '#10b981';
+                    feedbackEl.textContent = 'Saved!';
+                    setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
+                } else {
+                    feedbackEl.style.color = '#ef4444';
+                    feedbackEl.textContent = data.message || 'Error saving';
+                }
+            })
+            .catch(err => {
+                feedbackEl.style.color = '#ef4444';
+                feedbackEl.textContent = 'Network error';
+            });
+        });
+    });
+
     function fmt(s){const d=Math.floor(s/86400);s-=d*86400;const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);const sec=Math.floor(s-m*60);return d+'d '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
     document.querySelectorAll('.perm-delete-btn').forEach(btn=>{const dMs=Date.parse((btn.dataset.deletedAt||'').replace(' ','T'));const min=parseInt(btn.dataset.minDays||'10',10);const chip=btn.closest('.deleted-actions')?.querySelector('.perm-countdown');function upd(){const l=Math.max(0,min*86400000-(Date.now()-dMs));if(l<=0){btn.removeAttribute('disabled');if(chip)chip.textContent='';return true;}btn.setAttribute('disabled','disabled');if(chip)chip.textContent='Available in '+fmt(Math.floor(l/1000));return false;}upd();const iv=setInterval(()=>{if(upd())clearInterval(iv);},1000);});
     document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();document.getElementById('logoutModal')?.classList.add('active');});
