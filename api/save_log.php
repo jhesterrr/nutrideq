@@ -6,14 +6,12 @@ require_once 'fct_helper.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized: Session missing. Please refresh and log in again.']);
     exit();
 }
 
-$user_role = $_SESSION['role'] ?? $_SESSION['user_role'] ?? '';
-if ($user_role !== 'user') {
-    http_response_code(403);
+$user_role = strtolower($_SESSION['role'] ?? $_SESSION['user_role'] ?? '');
+if ($user_role !== 'user' && $user_role !== 'regular') {
     echo json_encode(['success' => false, 'message' => 'Forbidden: Only users can log food to the diary. Detected role: ' . $user_role]);
     exit();
 }
