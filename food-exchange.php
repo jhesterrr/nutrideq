@@ -941,62 +941,88 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             text-transform: uppercase;
         }
 
-        /* ── Meal Cards ── */
+        /* ── Meal Cards Premium Overhaul ── */
         .menu-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
 
         .meal-card {
-            background: var(--bg-surface);
-            border-radius: 20px;
-            padding: 22px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            cursor: pointer;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meal-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient);
+            opacity: 0.6;
         }
 
         .meal-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
-            border-color: rgba(5, 150, 105, 0.2);
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 25px 50px -12px rgba(5, 150, 105, 0.15),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.8);
+            border-color: rgba(5, 150, 105, 0.15);
         }
 
         .meal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid rgba(5, 150, 105, 0.08);
+            margin-bottom: 4px;
         }
 
         .meal-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
             color: var(--primary);
-            font-size: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.01em;
         }
 
-        .meal-exchange {
-            font-size: 0.78rem;
-            font-weight: 700;
-            background: rgba(5, 150, 105, 0.1);
+        .meal-title i {
+            font-size: 1rem;
             color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
+            opacity: 1;
+            filter: drop-shadow(0 2px 4px rgba(5, 150, 105, 0.2));
         }
 
         .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
-            font-size: 0.88rem;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            padding-left: 4px;
+            background: rgba(5, 150, 105, 0.02);
         }
 
         .menu-item:last-child {
@@ -1004,16 +1030,20 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .menu-food {
-            font-weight: 600;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
         }
 
         .menu-measure {
             color: var(--primary);
             font-weight: 700;
-            font-size: 0.82rem;
-            background: rgba(5, 150, 105, 0.07);
-            padding: 2px 8px;
-            border-radius: 20px;
+            font-size: 0.78rem;
+            background: rgba(5, 150, 105, 0.08);
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: lowercase;
+            border: 1px solid rgba(5, 150, 105, 0.1);
         }
 
         /* ── FEL Vertical Tabs ── */
@@ -2333,8 +2363,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- Breakfast Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title">BREAKFAST</div>
-                                    <div class="meal-exchange">7 Household Measurements</div>
+                                    <div class="meal-title"><i class="fas fa-coffee"></i> BREAKFAST</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Mango, ripe</div>
@@ -2373,8 +2402,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- AM Snack Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title">AM SNACK</div>
-                                    <div class="meal-exchange">2 Household Measurements</div>
+                                    <div class="meal-title"><i class="fas fa-apple-alt"></i> AM SNACK</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Purple yam</div>
@@ -2389,8 +2417,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- Lunch Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title">LUNCH</div>
-                                    <div class="meal-exchange">5.5 Household Measurements</div>
+                                    <div class="meal-title"><i class="fas fa-utensils"></i> LUNCH</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Chicken Thigh</div>
@@ -2417,8 +2444,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- PM Snack Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title">PM SNACK</div>
-                                    <div class="meal-exchange">3 Household Measurements</div>
+                                    <div class="meal-title"><i class="fas fa-cookie"></i> PM SNACK</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Sweet potato, boiled</div>
@@ -2433,8 +2459,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- Dinner Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title">DINNER</div>
-                                    <div class="meal-exchange">6 Household Measurements</div>
+                                    <div class="meal-title"><i class="fas fa-moon"></i> DINNER</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Bangus, sliced</div>
