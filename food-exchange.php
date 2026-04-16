@@ -78,8 +78,14 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             left: -10%;
             width: 60%;
             height: 200%;
-            background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.15) 0%, transparent 60%);
             pointer-events: none;
+            animation: heroPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroPulse {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+            100% { transform: scale(1.2) translate(5%, 5%); opacity: 0.8; }
         }
 
         .fet-hero-title {
@@ -169,17 +175,31 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         .tab:hover {
             color: var(--primary) !important;
             background: #fff !important;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.15);
         }
 
         .tab.active {
             color: white !important;
-            background: var(--primary) !important;
+            background: var(--gradient) !important;
             font-weight: 700;
-            border-color: var(--primary) !important;
-            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25) !important;
-            transform: translateY(-2px);
+            border-color: transparent !important;
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3) !important;
+            transform: translateY(-3px);
+            position: relative;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 10px;
+            box-shadow: 0 0 10px var(--primary);
         }
 
         .tab-icon {
@@ -188,24 +208,83 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
         .tab-content {
             display: none;
-            padding: 28px;
-            animation: fetFadeIn 0.4s ease;
+            padding: 24px;
+            animation: fetSlideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: transform, opacity;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        @keyframes fetFadeIn {
+        @keyframes fetSlideUpFade {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(20px) scale(0.98);
             }
-
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
+        }
+
+        /* ── Glass Reflections & Depth ── */
+        .distribution-card, .meal-card, .macronutrient-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(12px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            overflow: hidden;
+        }
+
+        .distribution-card::after, .meal-card::after, .macronutrient-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 45%,
+                rgba(255, 255, 255, 0.1) 48%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0.1) 52%,
+                transparent 55%
+            );
+            transform: rotate(-45deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .distribution-card:hover::after, .meal-card:hover::after, .macronutrient-card:hover::after {
+            opacity: 1;
+            animation: glassShine 1.5s ease-in-out infinite;
+        }
+
+        @keyframes glassShine {
+            0% { transform: translate(-30%, -30%) rotate(-45deg); }
+            100% { transform: translate(30%, 30%) rotate(-45deg); }
+        }
+
+        /* ── Modern Themed Scrollbars ── */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(5, 150, 105, 0.2);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(5, 150, 105, 0.4);
         }
 
         /* ── Section Headers ── */
@@ -226,23 +305,26 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .info-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            backdrop-filter: blur(4px);
         }
 
         .info-btn:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
         }
 
         /* ── Glass Tables ── */
@@ -882,8 +964,16 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 0;
-            border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+            padding: 6px 10px;
+            margin: 0 -10px;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .distribution-item:hover {
+            background: rgba(5, 150, 105, 0.05);
+            padding-left: 14px;
         }
 
         .distribution-item:last-child {
@@ -995,9 +1085,19 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+            padding: 8px 10px;
+            margin: 0 -10px;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
             font-size: 0.88rem;
+            transition: all 0.2s ease;
+            cursor: default;
+            border-radius: 8px;
+        }
+
+        .menu-item:hover {
+            background: rgba(5, 150, 105, 0.05);
+            padding-left: 14px;
+            padding-right: 6px;
         }
 
         .menu-item:last-child {
