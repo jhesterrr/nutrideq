@@ -30,11 +30,14 @@ try {
     $conn = $db->getConnection();
     $fct = new FCTHelper();
     
-    // Auto-migration: Ensure columns exist
-    try {
-        $conn->exec("ALTER TABLE food_logs ADD COLUMN IF NOT EXISTS serving_unit VARCHAR(50) DEFAULT 'g' AFTER serving_size");
-        $conn->exec("ALTER TABLE food_logs ADD COLUMN IF NOT EXISTS display_size VARCHAR(100) AFTER serving_unit");
-    } catch (Exception $e) { /* Ignore if exists or error */ }
+    // Robust Auto-migration: Check for columns manually
+    $columns = $conn->query("SHOW COLUMNS FROM food_logs")->fetchAll(PDO::FETCH_COLUMN);
+    if (!in_array('serving_unit', $columns)) {
+        $conn->exec("ALTER TABLE food_logs ADD COLUMN serving_unit VARCHAR(50) DEFAULT 'g' AFTER serving_size");
+    }
+    if (!in_array('display_size', $columns)) {
+        $conn->exec("ALTER TABLE food_logs ADD COLUMN display_size VARCHAR(100) AFTER serving_unit");
+    }
 
     $conn->beginTransaction();
 
