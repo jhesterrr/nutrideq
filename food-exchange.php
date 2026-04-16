@@ -2103,7 +2103,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
-                                    <span>7:00 AM</span>
+                                    <span>07:00 AM - 08:30 AM</span>
                                 </div>
                                 <div class="distribution-items">
                                     <div class="distribution-item">
@@ -2129,7 +2129,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </div>
                                     <div class="distribution-item">
                                         <div class="distribution-item-icon">
-                                            <i class="fas fa-wine-bottle"></i>
+                                            <i class="fas fa-glass-whiskey"></i>
                                         </div>
                                         <div class="distribution-item-name">Whole Milk</div>
                                         <div class="distribution-item-amount">1 Household Measurement</div>
@@ -2162,8 +2162,8 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                         <div class="distribution-summary-label">Total Household Measurements</div>
                                     </div>
                                     <div class="distribution-summary-item">
-                                        <div class="distribution-summary-value">473</div>
-                                        <div class="distribution-summary-label">Calories</div>
+                                        <div class="distribution-summary-value">481</div>
+                                        <div class="distribution-summary-label">Total Kcal</div>
                                     </div>
                                 </div>
                             </div>
@@ -2176,7 +2176,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
-                                    <span>10:00 AM</span>
+                                    <span>10:00 AM - 10:30 AM</span>
                                 </div>
                                 <div class="distribution-items">
                                     <div class="distribution-item">
@@ -2201,7 +2201,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </div>
                                     <div class="distribution-summary-item">
                                         <div class="distribution-summary-value">240</div>
-                                        <div class="distribution-summary-label">Calories</div>
+                                        <div class="distribution-summary-label">Total Kcal</div>
                                     </div>
                                 </div>
                             </div>
@@ -2214,7 +2214,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
-                                    <span>1:00 PM</span>
+                                    <span>12:00 PM - 01:30 PM</span>
                                 </div>
                                 <div class="distribution-items">
                                     <div class="distribution-item">
@@ -2260,7 +2260,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </div>
                                     <div class="distribution-summary-item">
                                         <div class="distribution-summary-value">579</div>
-                                        <div class="distribution-summary-label">Calories</div>
+                                        <div class="distribution-summary-label">Total Kcal</div>
                                     </div>
                                 </div>
                             </div>
@@ -2273,7 +2273,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
-                                    <span>4:00 PM</span>
+                                    <span>03:30 PM - 04:00 PM</span>
                                 </div>
                                 <div class="distribution-items">
                                     <div class="distribution-item">
@@ -2298,7 +2298,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </div>
                                     <div class="distribution-summary-item">
                                         <div class="distribution-summary-value">132</div>
-                                        <div class="distribution-summary-label">Calories</div>
+                                        <div class="distribution-summary-label">Total Kcal</div>
                                     </div>
                                 </div>
                             </div>
@@ -2311,7 +2311,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
-                                    <span>7:00 PM</span>
+                                    <span>06:30 PM - 08:00 PM</span>
                                 </div>
                                 <div class="distribution-items">
                                     <div class="distribution-item">
@@ -2350,7 +2350,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                     </div>
                                     <div class="distribution-summary-item">
                                         <div class="distribution-summary-value">445</div>
-                                        <div class="distribution-summary-label">Calories</div>
+                                        <div class="distribution-summary-label">Total Kcal</div>
                                     </div>
                                 </div>
                             </div>
@@ -2380,7 +2380,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Egg</div>
-                                    <div class="menu-measure">1 pc</div>
+                                    <div class="menu-measure">2 pcs</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Bell pepper, Onion</div>
@@ -2411,7 +2411,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Purple yam</div>
-                                    <div class="menu-measure">1 slice</div>
+                                    <div class="menu-measure">2 slices</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Coconut water</div>
@@ -2438,7 +2438,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Boiled Rice</div>
-                                    <div class="menu-measure">1 cup</div>
+                                    <div class="menu-measure">2 cups</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Papaya</div>
@@ -2480,7 +2480,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Boiled Rice</div>
-                                    <div class="menu-measure">1 cup</div>
+                                    <div class="menu-measure">1 1/2 cups</div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Banana, Lacatan</div>
