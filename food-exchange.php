@@ -332,21 +332,29 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             overflow-x: auto;
             border-radius: 16px;
             border: 1px solid var(--border-color);
+            position: relative;
+            background: #fff;
         }
 
-        .mobile-scroll-wrapper {
-            min-width: 100%;
+        .food-exchange-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
-        .food-exchange-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.88rem;
+        .food-exchange-table th:first-child,
+        .food-exchange-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #f8fafc;
+            border-right: 2px solid rgba(5, 150, 105, 0.1);
+            min-width: 140px;
         }
 
-        .food-exchange-table thead tr {
-            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        .food-exchange-table thead th:first-child {
+            z-index: 15;
+            background: #064e3b;
         }
 
         .food-exchange-table th {
@@ -361,18 +369,39 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-exchange-table th.active {
-            background: rgba(52, 211, 153, 0.25);
+            background: rgba(52, 211, 153, 0.35);
             color: #fff;
+            position: relative;
+        }
+
+        .food-exchange-table th.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
         }
 
         .food-exchange-table td {
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-            transition: all 0.2s;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .food-exchange-table tbody tr {
+            transition: all 0.3s;
+        }
+
+        .food-exchange-table tbody tr:nth-child(even) {
+            background: rgba(5, 150, 105, 0.015);
         }
 
         .food-exchange-table tbody tr:hover td {
-            background: rgba(5, 150, 105, 0.04);
+            background: rgba(5, 150, 105, 0.06) !important;
+            color: var(--primary);
         }
 
         .food-exchange-table tbody tr:last-child td {
@@ -380,17 +409,20 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-group-header {
-            background: linear-gradient(90deg, rgba(5, 150, 105, 0.08), transparent);
+            background: linear-gradient(90deg, #ede9fe 0%, transparent 100%) !important;
             font-weight: 800;
-            color: var(--primary);
-            font-size: 0.8rem;
+            color: #6d28d9 !important;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.1em;
+            padding: 14px 20px !important;
+            border-left: 4px solid #6d28d9;
         }
 
         .food-subgroup {
             color: var(--text-primary);
             font-weight: 600;
+            font-family: 'Outfit', sans-serif;
         }
 
         .exchange-value {
@@ -400,15 +432,39 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .exchange-value.highlight {
-            background: rgba(5, 150, 105, 0.12);
-            color: var(--primary);
-            border-radius: 20px;
-            padding: 2px 10px;
+            background: var(--gradient) !important;
+            color: white !important;
+            border-radius: 8px;
+            padding: 4px 12px;
             font-weight: 800;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            animation: highlightPulse 2s infinite;
+        }
+
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
         }
 
         .active-cell {
-            background: rgba(5, 150, 105, 0.05);
+            background: rgba(5, 150, 105, 0.08) !important;
+            position: relative;
+        }
+
+        .active-cell::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(5, 150, 105, 0.05), transparent);
+            pointer-events: none;
         }
 
         /* ── Calorie Selector ── */
