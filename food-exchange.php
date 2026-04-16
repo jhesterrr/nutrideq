@@ -2099,7 +2099,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <div class="distribution-card">
                                 <div class="distribution-header">
                                     <div class="distribution-title">Breakfast</div>
-                                    <div class="distribution-exchange">8.5 exchanges</div>
+                                    <div class="distribution-exchange">8 exchanges</div>
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
@@ -2139,7 +2139,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                             <i class="fas fa-drumstick-bite"></i>
                                         </div>
                                         <div class="distribution-item-name">Low Fat Meat</div>
-                                        <div class="distribution-item-amount">2½ exchanges</div>
+                                        <div class="distribution-item-amount">2 exchanges</div>
                                     </div>
                                     <div class="distribution-item">
                                         <div class="distribution-item-icon">
@@ -2158,17 +2158,12 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-summary">
                                     <div class="distribution-summary-item">
-                                        <div class="distribution-summary-value">8.5</div>
+                                        <div class="distribution-summary-value">8</div>
                                         <div class="distribution-summary-label">Total exchanges</div>
                                     </div>
                                     <div class="distribution-summary-item">
-<<<<<<< HEAD
                                         <div class="distribution-summary-value">481</div>
                                         <div class="distribution-summary-label">Total Kcal</div>
-=======
-                                        <div class="distribution-summary-value">502</div>
-                                        <div class="distribution-summary-label">Calories</div>
->>>>>>> c995f5375d3424aaa000e6abda9ab2429ce07c0d
                                     </div>
                                 </div>
                             </div>
@@ -2312,7 +2307,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <div class="distribution-card">
                                 <div class="distribution-header">
                                     <div class="distribution-title">Supper</div>
-                                    <div class="distribution-exchange">7 exchanges</div>
+                                    <div class="distribution-exchange">7.5 exchanges</div>
                                 </div>
                                 <div class="distribution-time">
                                     <i class="fas fa-clock"></i>
@@ -2350,135 +2345,15 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                 </div>
                                 <div class="distribution-summary">
                                     <div class="distribution-summary-item">
-                                        <div class="distribution-summary-value">7</div>
+                                        <div class="distribution-summary-value">7.5</div>
                                         <div class="distribution-summary-label">Total Exchanges</div>
                                     </div>
                                     <div class="distribution-summary-item">
-<<<<<<< HEAD
                                         <div class="distribution-summary-value">445</div>
                                         <div class="distribution-summary-label">Total Kcal</div>
-=======
-                                        <div class="distribution-summary-value">425</div>
-                                        <div class="distribution-summary-label">Calories</div>
->>>>>>> c995f5375d3424aaa000e6abda9ab2429ce07c0d
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Meal Distribution Summary Table -->
-                        <div class="distribution-strategy-table-container">
-                            <style>
-                                .distribution-strategy-table-container {
-                                    margin-top: 40px;
-                                    padding: 24px;
-                                    background: rgba(255, 255, 255, 0.03);
-                                    border-radius: 20px;
-                                    border: 1px solid rgba(255, 255, 255, 0.1);
-                                    overflow-x: auto;
-                                }
-
-                                .distribution-strategy-table {
-                                    width: 100%;
-                                    border-collapse: separate;
-                                    border-spacing: 0;
-                                    color: #fff;
-                                }
-
-                                .distribution-strategy-table th {
-                                    background: rgba(4, 120, 87, 0.2);
-                                    padding: 15px;
-                                    text-align: center;
-                                    font-family: 'Outfit', sans-serif;
-                                    font-weight: 600;
-                                    font-size: 0.9rem;
-                                    border-bottom: 2px solid rgba(4, 120, 87, 0.4);
-                                }
-
-                                .distribution-strategy-table td {
-                                    padding: 12px 15px;
-                                    text-align: center;
-                                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                                    font-family: 'Poppins', sans-serif;
-                                    font-size: 0.95rem;
-                                }
-
-                                .distribution-strategy-table .meal-col {
-                                    text-align: left;
-                                    font-weight: 600;
-                                    color: #34d399;
-                                }
-
-                                .distribution-strategy-table .footer-row {
-                                    background: rgba(4, 120, 87, 0.3);
-                                    font-weight: 700;
-                                    color: #fff;
-                                }
-
-                                .distribution-strategy-table .footer-row td {
-                                    border-bottom: none;
-                                    border-top: 2px solid #34d399;
-                                    font-size: 1.05rem;
-                                }
-                            </style>
-                            <h3 style="margin-bottom: 20px; color: #34d399; font-family: 'Outfit', sans-serif;">MEAL DISTRIBUTION STRATEGY SUMMARY</h3>
-                            <table class="distribution-strategy-table">
-                                <thead>
-                                    <tr>
-                                        <th class="meal-col">Meal</th>
-                                        <th>CHO (g)</th>
-                                        <th>PRO (g)</th>
-                                        <th>FAT (g)</th>
-                                        <th>KCAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="meal-col">Breakfast</td>
-                                        <td>53</td>
-                                        <td>33</td>
-                                        <td>17.5</td>
-                                        <td>502</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="meal-col">Morning Snack</td>
-                                        <td>56</td>
-                                        <td>4</td>
-                                        <td>0</td>
-                                        <td>240</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="meal-col">Lunch</td>
-                                        <td>103.5</td>
-                                        <td>16.5</td>
-                                        <td>11</td>
-                                        <td>579</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="meal-col">Afternoon Snack</td>
-                                        <td>33</td>
-                                        <td>0</td>
-                                        <td>0</td>
-                                        <td>132</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="meal-col">Supper</td>
-                                        <td>93.5</td>
-                                        <td>11.5</td>
-                                        <td>0.5</td>
-                                        <td>425</td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr class="footer-row">
-                                        <td class="meal-col">TOTALS</td>
-                                        <td>339g</td>
-                                        <td>65g</td>
-                                        <td>29g</td>
-                                        <td>1869 kcal</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
                     </div>
 
@@ -2532,7 +2407,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- AM Snack Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title"><i class="fas fa-apple-alt"></i> AM SNACK <small class="meal-subtitle">Exchanges</small></div>
+                                    <div class="meal-title"><i class="fas fa-apple-alt"></i> AM SNACK <small class="meal-subtitle">Household Measurements</small></div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Purple yam</div>
@@ -2547,7 +2422,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- Lunch Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title"><i class="fas fa-utensils"></i> LUNCH <small class="meal-subtitle">Exchanges</small></div>
+                                    <div class="meal-title"><i class="fas fa-utensils"></i> LUNCH <small class="meal-subtitle">Household Measurements</small></div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Chicken Thigh</div>
@@ -2574,7 +2449,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- PM Snack Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title"><i class="fas fa-cookie"></i> PM SNACK <small class="meal-subtitle">Exchanges</small></div>
+                                    <div class="meal-title"><i class="fas fa-cookie"></i> PM SNACK <small class="meal-subtitle">Household Measurements</small></div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Sweet potato, boiled</div>
@@ -2589,7 +2464,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                             <!-- Dinner Card -->
                             <div class="meal-card">
                                 <div class="meal-header">
-                                    <div class="meal-title"><i class="fas fa-moon"></i> DINNER <small class="meal-subtitle">Exchanges</small></div>
+                                    <div class="meal-title"><i class="fas fa-moon"></i> DINNER <small class="meal-subtitle">Household Measurements</small></div>
                                 </div>
                                 <div class="menu-item">
                                     <div class="menu-food">Bangus, sliced</div>
