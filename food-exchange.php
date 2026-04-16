@@ -373,26 +373,39 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-exchange-table th.active {
-            background: rgba(52, 211, 153, 0.35);
+            background: rgba(5, 150, 105, 0.95) !important;
             color: #fff;
             position: relative;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -4px 15px rgba(5, 150, 105, 0.2);
         }
 
         .food-exchange-table th.active::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 3px;
             background: #fff;
-            box-shadow: 0 0 15px #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #fff;
         }
 
         .food-exchange-table td {
             padding: 12px 16px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.03);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+        }
+
+        .food-exchange-table td.active-cell {
+            background: rgba(5, 150, 105, 0.03) !important;
+            border-left: 1px solid rgba(5, 150, 105, 0.1);
+            border-right: 1px solid rgba(5, 150, 105, 0.1);
+            font-weight: 700;
         }
 
         .food-exchange-table tbody tr:nth-child(even) {
@@ -408,14 +421,20 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-group-header {
-            background: #f8fafc !important;
+            background: linear-gradient(90deg, #f8fafc 0%, transparent 100%) !important;
             font-weight: 800;
-            color: var(--primary) !important;
+            color: var(--text-primary) !important;
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            padding: 10px 20px !important;
-            border-bottom: 2px solid rgba(5, 150, 105, 0.1);
+            letter-spacing: 0.2em;
+            padding: 12px 20px !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .food-group-header i {
+            margin-right: 10px;
+            opacity: 0.5;
+            font-size: 0.9rem;
         }
 
         .food-subgroup {
@@ -423,6 +442,16 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             font-size: 0.82rem;
             font-weight: 600;
             font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+        }
+
+        .subgroup-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
         }
 
         .exchange-value {
@@ -1563,7 +1592,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                             <tbody>
                                                 <!-- Vegetable++ -->
                                                 <tr>
-                                                    <td class="food-group-header">Vegetable++</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-carrot"></i> Vegetable</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#4ade80;"></span> Vegetable++</td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">3</span></td>
@@ -1581,7 +1613,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Fruit -->
                                                 <tr>
-                                                    <td class="food-group-header">Fruit</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-apple-whole"></i> Fruit</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#fde047;"></span> Fruit</td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">4</span></td>
                                                     <td><span class="exchange-value">4</span></td>
@@ -1599,10 +1634,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Milk -->
                                                 <tr>
-                                                    <td class="food-group-header" colspan="14">Milk</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-glass-water"></i> Milk</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Whole Milk</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#94a3b8;"></span> Whole Milk</td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">1</span></td>
@@ -1634,7 +1669,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">-</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Non-Fat Milk</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#94a3b8;"></span> Non-Fat Milk</td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
@@ -1652,10 +1687,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Rice -->
                                                 <tr>
-                                                    <td class="food-group-header" colspan="14">Rice</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-bowl-rice"></i> Rice</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Low Protein</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#c0a13e;"></span> Low Protein</td>
                                                     <td><span class="exchange-value">2</span></td>
                                                     <td><span class="exchange-value">2</span></td>
                                                     <td><span class="exchange-value">1</span></td>
@@ -1671,7 +1706,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">2</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Medium Protein</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#c0a13e;"></span> Medium Protein</td>
                                                     <td><span class="exchange-value">3.5</span></td>
                                                     <td><span class="exchange-value">4</span></td>
                                                     <td><span class="exchange-value">4.5</span></td>
@@ -1687,7 +1722,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">8</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">High Protein</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#c0a13e;"></span> High Protein</td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">1</span></td>
@@ -1705,10 +1740,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Meat -->
                                                 <tr>
-                                                    <td class="food-group-header" colspan="14">Meat</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-drumstick-bite"></i> Meat</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Low Fat</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#f87171;"></span> Low Fat</td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">2</span></td>
                                                     <td><span class="exchange-value">2</span></td>
@@ -1724,7 +1759,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">5</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">Medium Fat</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#f87171;"></span> Medium Fat</td>
                                                     <td><span class="exchange-value">1</span></td>
                                                     <td><span class="exchange-value">2</span></td>
                                                     <td><span class="exchange-value">2</span></td>
@@ -1740,7 +1775,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                                                     <td><span class="exchange-value">1</span></td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="food-subgroup">High Fat</td>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#f87171;"></span> High Fat</td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
                                                     <td><span class="exchange-value">-</span></td>
@@ -1758,7 +1793,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Fat -->
                                                 <tr>
-                                                    <td class="food-group-header">Fat</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-droplet"></i> Fat</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#fb923c;"></span> Fat</td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">2</span></td>
                                                     <td><span class="exchange-value">2</span></td>
@@ -1776,7 +1814,10 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
                                                 <!-- Sugar -->
                                                 <tr>
-                                                    <td class="food-group-header">Sugar</td>
+                                                    <td class="food-group-header" colspan="14" style="text-align:left;"><i class="fas fa-cubes-stacked"></i> Sugar</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="food-subgroup"><span class="subgroup-dot" style="background:#60a5fa;"></span> Sugar</td>
                                                     <td><span class="exchange-value">4</span></td>
                                                     <td><span class="exchange-value">3</span></td>
                                                     <td><span class="exchange-value">3</span></td>
