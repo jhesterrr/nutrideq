@@ -60,31 +60,31 @@ function getNavigationLinks($user_role, $current_page = '')
             'anthropometric-information.php' => [
                 'href'   => 'anthropometric-information.php',
                 'icon'   => 'fas fa-stethoscope',
-                'text'   => 'Client Health Tracker',
+                'text'   => 'Client Health Progress',
                 'active' => ($current_page === 'anthropometric-information.php' ? true : null)
             ],
             'dietary-information.php' => [
                 'href'   => 'dietary-information.php',
                 'icon'   => 'fas fa-file-medical-alt',
-                'text'   => 'Dietary Information',
+                'text'   => 'Nutrient Breakdown',
                 'active' => ($current_page === 'dietary-information.php' ? true : null)
             ],
             'Nutrition-Calculator.php' => [
                 'href'   => 'Nutrition-Calculator.php',
                 'icon'   => 'fas fa-calculator',
-                'text'   => 'Nutrition Calculator',
+                'text'   => 'Calories & Weight',
                 'active' => ($current_page === 'Nutrition-Calculator.php' ? true : null)
             ],
             'food-exchange.php' => [
                 'href'   => 'food-exchange.php',
                 'icon'   => 'fas fa-exchange-alt',
-                'text'   => 'Food Exchange List',
+                'text'   => 'Food Exchanges',
                 'active' => ($current_page === 'food-exchange.php' ? true : null)
             ],
             'fct-library.php' => [
                 'href'   => 'fct-library.php',
                 'icon'   => 'fas fa-book-medical',
-                'text'   => 'FCT Library',
+                'text'   => 'Food Database',
                 'active' => ($current_page === 'fct-library.php' ? true : null)
             ]
         ];
@@ -126,35 +126,35 @@ function getNavigationLinks($user_role, $current_page = '')
                 'active' => ($current_page === 'user-management-staff.php' ? true : null)
             ],
 
-            'header_med_tools' => ['type' => 'header', 'text' => 'Medical / Tools'],
+            'header_med_tools' => ['type' => 'header', 'text' => 'Nutrition Tools'],
             'anthropometric-information.php' => [
                 'href'   => 'anthropometric-information.php',
                 'icon'   => 'fas fa-stethoscope',
-                'text'   => 'Client Health Tracker',
+                'text'   => 'Client Health Progress',
                 'active' => ($current_page === 'anthropometric-information.php' ? true : null)
             ],
             'dietary-information.php' => [
                 'href'   => 'dietary-information.php',
                 'icon'   => 'fas fa-file-medical-alt',
-                'text'   => 'Dietary Information',
+                'text'   => 'Nutrient Breakdown',
                 'active' => ($current_page === 'dietary-information.php' ? true : null)
             ],
             'Nutrition-Calculator.php' => [
                 'href'   => 'Nutrition-Calculator.php',
                 'icon'   => 'fas fa-calculator',
-                'text'   => 'Nutrition Calculator',
+                'text'   => 'Calories & Weight',
                 'active' => ($current_page === 'Nutrition-Calculator.php' ? true : null)
             ],
             'food-exchange.php' => [
                 'href'   => 'food-exchange.php',
                 'icon'   => 'fas fa-exchange-alt',
-                'text'   => 'Food Exchange List',
+                'text'   => 'Food Exchanges',
                 'active' => ($current_page === 'food-exchange.php' ? true : null)
             ],
             'fct-library.php' => [
                 'href'   => 'fct-library.php',
                 'icon'   => 'fas fa-book-medical',
-                'text'   => 'FCT Library',
+                'text'   => 'Food Database',
                 'active' => ($current_page === 'fct-library.php' ? true : null)
             ]
         ];
@@ -173,7 +173,7 @@ function getNavigationLinks($user_role, $current_page = '')
             'user-health-tracker.php' => [
                 'href' => 'user-health-tracker.php',
                 'icon' => 'fas fa-heartbeat',
-                'text' => 'My Health Tracker',
+                'text' => 'My Health Tracking',
                 'active' => ($current_page === 'user-health-tracker.php' ? true : null)
             ],
             'user-diary.php' => [
@@ -195,19 +195,19 @@ function getNavigationLinks($user_role, $current_page = '')
             'Nutrition-Calculator.php' => [
                 'href' => 'Nutrition-Calculator.php',
                 'icon' => 'fas fa-calculator',
-                'text' => 'Nutrition Calculator',
+                'text' => 'Calories & Weight',
                 'active' => ($current_page === 'Nutrition-Calculator.php' ? true : null)
             ],
             'food-exchange.php' => [
                 'href' => 'food-exchange.php',
                 'icon' => 'fas fa-exchange-alt',
-                'text' => 'Food Exchange List',
+                'text' => 'Food Exchanges',
                 'active' => ($current_page === 'food-exchange.php' ? true : null)
             ],
             'dietary-information.php' => [
                 'href' => 'dietary-information.php',
                 'icon' => 'fas fa-file-medical-alt',
-                'text' => 'Dietary Information',
+                'text' => 'Nutrient Breakdown',
                 'active' => ($current_page === 'dietary-information.php' ? true : null)
             ]
         ];

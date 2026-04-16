@@ -34,7 +34,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>Food Exchange Terminal | NutriDeq</title>
+    <title>Food Exchange Lists | NutriDeq</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -50,7 +50,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
     <link rel="stylesheet" href="css/mobile-style.css" media="all and (max-width: 1024px)">
     <!-- dashboard.js included via sidebar.php -->
     <style>
-        /* ═══════════ FOOD EXCHANGE TERMINAL · PREMIUM SHELL ═══════════ */
+        /* ═══════════ FOOD EXCHANGE LISTS · PREMIUM SHELL ═══════════ */
         .main-content {
             position: relative;
             overflow-x: hidden;
@@ -1278,8 +1278,8 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                 <div class="fet-hero">
                     <div>
                         <h1 class="fet-hero-title"><i class="fas fa-exchange-alt"
-                                style="margin-right:14px;opacity:0.8;"></i>Food Exchange Terminal</h1>
-                        <p class="fet-hero-sub">Clinical Meal Planning & Dietary Exchange Reference System</p>
+                                style="margin-right:14px;opacity:0.8;"></i>Healthy Exchanges</h1>
+                        <p class="fet-hero-sub">Philippine Food Exchange Lists & Nutritional Guide</p>
                     </div>
                     <div class="fet-hero-badge"><i class="fas fa-leaf"></i> NutriDeq FEL v2.0</div>
                 </div>
